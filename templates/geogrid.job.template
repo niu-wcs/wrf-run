@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -l nodes=[num_geogrid_nodes]:ppn=[num_geogrid_processors]
+#PBS -N WRF_GEOGRID
+#PBS -l walltime=[geogrid_walltime]
+#PBS -A climlab
+
+cd [run_dir]
+
+module add [wrf_module]
+
+mpirun -np [mpi_geogrid_total] geogrid.exe

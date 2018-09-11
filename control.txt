@@ -1,0 +1,58 @@
+# control.txt
+# Parameter file for the wrf-gaea-run script
+#  Information:
+#   Lines that begin with a '#' are comment lines and are ignored
+#   All other lines will store a variable under the name of the first word, with the value of the second
+#    EX: myVariable 12
+#    Would store the parameter myVariable as 12
+#   All remaining information following the second block is ignored, allowing for comments to be used
+#    EX: myVariable 12 This is a sample variable
+#    This is also an acceptable format for this file
+#
+# General Parameters
+starttime 2018061000 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
+rundays 1
+runhours 0
+geogdir /data1/climlab/wrf_geog
+tabledir /data1/climlab/shared_tables
+datadir /data1/climlab/model_data
+wrfdir /data1/climlab/runs
+wrfmodule wrf/wrf-3.9.1
+modeldata CFSv2
+debugmode 0
+# Job Step Parameters
+run_prerunsteps 1
+run_geogrid 0
+run_ungrib 1
+run_metgrid 1
+run_real 1
+run_wrf 1
+# Geogrid Parameters
+
+num_geogrid_nodes 2
+num_geogrid_processors 5
+geogrid_walltime 06:00:00
+# Ungrib Parameters
+
+# Metgrid Parameters
+num_metgrid_nodes 2
+num_metgrid_processors 5
+metgrid_walltime 06:00:00
+# Real Parameters
+num_real_nodes 10
+num_real_processors 1
+real_walltime 02:00:00
+# WRF Parameters
+num_wrf_nodes 8
+num_wrf_processors 12
+wrf_walltime 48:00:00
+# Post-Processing Parameters
+run_postprocessing 1
+# - If using UPP (Unipost) with GRADS, use the below
+post_run_unipost 1
+unipost_out grib2
+num_upp_nodes 4
+num_upp_processors 8
+upp_walltime 06:00:00
+# - If using Python, use the below
+post_run_python 0

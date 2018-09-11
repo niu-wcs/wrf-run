@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -l nodes=[num_real_nodes]:ppn=[num_real_processors]
+#PBS -N WRF_REAL
+#PBD -A climlab
+#PBS -l walltime=[real_walltime]
+
+cd [run_output_dir]
+
+module add [wrf_module]
+
+mpirun -np [mpi_real_total] real.exe

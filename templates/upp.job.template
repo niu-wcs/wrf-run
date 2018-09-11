@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -l nodes=[num_upp_nodes]:ppn=[num_upp_processors]
+#PBS -N WRF_UPP
+#PBS -l walltime=[upp_walltime]
+#PBS -A climlab
+
+cd [run_postprd_dir]
+
+module add [wrf_module]
+
+ulimit -s unlimited
+
+[upp_job_contents]

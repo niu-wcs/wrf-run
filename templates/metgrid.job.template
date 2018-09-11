@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -l nodes=[num_metgrid_nodes]:ppn=[num_metgrid_processors]
+#PBS -N WRF_METGRID
+#PBS -l walltime=[metgrid_walltime]
+#PBS -A climlab
+
+cd [run_dir]
+
+module add [wrf_module]
+
+mpirun -np [mpi_metgrid_total] metgrid.exe

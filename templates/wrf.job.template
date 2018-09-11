@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -l nodes=[num_wrf_nodes]:ppn=[num_wrf_processors]
+#PBS -N WRF_MODEL
+#PBS -l walltime=[wrf_walltime]
+#PBS -A climlab
+
+cd [run_output_dir]
+
+module add [wrf_module]
+
+ulimit -s unlimited
+mpirun -np [mpi_wrf_total] wrf.exe
