@@ -57,7 +57,7 @@ class JobSteps:
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
 			with open("ungrib.csh", 'w') as target_file:
-				target_file.write("module add " + self.aSet.fetch("wrfmodule") + '\n')
+				#target_file.write("module add " + self.aSet.fetch("wrfmodule") + '\n')
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '\n')
 				target_file.write("link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
 				i = 0

@@ -13,11 +13,11 @@
 starttime 2018061000 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
 rundays 1
 runhours 0
-geogdir /data1/climlab/wrf_geog
-tabledir /data1/climlab/shared_tables
-datadir /data1/climlab/model_data
-wrfdir /data1/climlab/runs
-wrfmodule wrf/wrf-3.9.1
+geogdir /projects/climate_severe/WRF/WPS_GEOG
+tabledir /projects/climate_severe/wrf-run/tables
+datadir /projects/climate_severe/model_data
+wrfdir /projects/climate_severe/runs
+wpsexecutables /projects/climate_severe/WRF/WPS/
 modeldata CFSv2
 debugmode 0
 # Job Step Parameters
