@@ -43,9 +43,11 @@ class JobSteps:
 		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
 	
 	def run_geogrid(self):
-		#
+		Tools.Process.instance().Lock()
 		self.logger.write("run_geogrid(): Enter")
+		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
 		self.logger.write("run_geogrid(): Exit")
+		Tools.Process.instance().Unlock()
 		return None
 	
 	def run_ungrib(self):	

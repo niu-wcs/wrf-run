@@ -50,7 +50,11 @@ class Application():
 		logger.write(" 3. Generating run files from templates")
 		tWrite = Template.Template_Writer(settings)
 		if(settings.fetch("run_prerunsteps") == '1'):
+			i = 0
 			for ext in mParms["FileExtentions"]:
+				if(i == 0):
+					tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.wps.template", "namelist.wps.geogrid", extraKeys = {"[ungrib_prefix]": ext, "[fg_name]": mParms["FGExt"]})
+				i += 1
 				tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.wps.template", "namelist.wps." + ext, extraKeys = {"[ungrib_prefix]": ext, "[fg_name]": mParms["FGExt"]})
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/geogrid.job.template", "geogrid.job")
@@ -62,14 +66,24 @@ class Application():
 		logger.write(" 3. Done")
 		#Step 4: Run the WRF steps
 		logger.write(" 4. Run WRF Steps")
+		logger.write("  4. Adding Modules")
+		Tools.popen(settings, "module add cmake/3.11.4")
+		Tools.popen(settings, "module add gcc/7.3.0")
+		Tools.popen(settings, "module add cray-netcdf/4.6.1.2")
+		Tools.popen(settings, "module add cray-mpich/7.7.2")
+		Tools.popen(settings, "module add cray-hdf5/1.10.2.0")
+		Tools.popen(settings, "export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/intel/16.0/")
+		Tools.popen(settings, "export ZLIB=/projects/climate_severe/WRF/Libs/zlib-1.2.11/")
+		Tools.popen(settings, "export JASPERLIB=/projects/climate_severe/WRF/Libs/jasper-1.900.1/lib")
+		Tools.popen(settings, "export JASPERINC=/projects/climate_severe/WRF/Libs/jasper-1.900.1/include")
+		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/zlib-1.2.11/lib")
+		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/libpng-1.6.35/lib")
 		jobs = Jobs.JobSteps(settings, modelParms)
 		logger.write("  4.a. Checking for geogrid flag...")
 		if(settings.fetch("run_geogrid") == '1'):
 			logger.write("  4.a. Geogrid flag is set, preparing geogrid job.")
-			#Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-			#Tools.Process.instance().Lock()			
+			Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 			jobs.run_geogrid()
-			#Tools.Process.instance().Unlock()
 			logger.write("  4.a. Geogrid job Done")
 		else:
 			logger.write("  4.a. Geogrid flag is not set, skipping step")
