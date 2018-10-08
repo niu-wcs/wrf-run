@@ -33,22 +33,29 @@ class JobSteps:
 		self.dataDir = settings.fetch("datadir") + '/' + settings.fetch("modeldata")
 		self.wrfDir = settings.fetch("wrfdir")
 		self.startTime = settings.fetch("starttime")
-		#Copy important files to the directory
+		# Copy important files to the directory
 		Tools.popen(self.aSet, "cp " + settings.fetch("headdir") + "run_files/* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		#Move the generated files to the run directory		
+		# Move the generated files to the run directory		
 		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
 		Tools.popen(self.aSet, "mv geogrid.job " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv metgrid.job " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv real.job " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
+		# Copy executables to the correct path
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "real.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "wrf.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
 	
 	def run_geogrid(self):
 		Tools.Process.instance().Lock()
 		self.logger.write("run_geogrid(): Enter")
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
+		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
+			Tools.popen(self.aSet, "qsub geogrid.job")
 		self.logger.write("run_geogrid(): Exit")
 		Tools.Process.instance().Unlock()
-		return None
 	
 	def run_ungrib(self):	
 		#ungrib.exe needs to run in the data directory
@@ -59,7 +66,6 @@ class JobSteps:
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
 			with open("ungrib.csh", 'w') as target_file:
-				#target_file.write("module add " + self.aSet.fetch("wrfmodule") + '\n')
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '\n')
 				target_file.write("link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
 				i = 0
@@ -237,7 +243,7 @@ class Postprocessing_Steps:
 				self.logger.write("  5.a. Error: Neither GRIB or GRIB2 is defined for UPP output processing, please modify control.txt, aborting")
 				Tools.Process.instance().Unlock()
 				return False
-			
+			Tools.popen(self.aSet, "cp " + self.aSet.fetch("uppexecutables") + "unipost.exe " + self.postDir)
 			Tools.popen(self.aSet, "ln -sf " + uppDir + "scripts/cbar.gs " + self.postDir)
 			Tools.popen(self.aSet, "ln -fs " + uppDir + "parm/nam_micro_lookup.dat " + self.postDir)
 			Tools.popen(self.aSet, "ln -fs " + uppDir + "parm/hires_micro_lookup.dat " + self.postDir)
