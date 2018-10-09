@@ -95,10 +95,10 @@ class AppSettings():
 		self.replacementKeys["[upp_walltime]"] = self.fetch("upp_walltime")
 		self.replacementKeys["[mpi_upp_total]"] = str(int(self.fetch("num_upp_nodes")) * int(self.fetch("num_upp_processors")))	
 	 
-	def replace(self, str):
-		if not str:
-			return str
-		fStr = str
+	def replace(self, inStr):
+		if not inStr:
+			return inStr
+		fStr = inStr
 		for key, value in self.replacementKeys.items():
 			kStr = str(key)
 			vStr = str(value)
