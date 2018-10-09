@@ -314,8 +314,8 @@ class Postprocessing_Steps:
 				upp_job_contents += "\n" + aprun + '\n'
 				
 				aprun = ""
-				# Create the job file, then submit it.
-				tWrite.generateTemplatedFile(temDir + "upp.job.template", "upp.job", extraKeys = {"[upp_job_contents]": upp_job_contents})
+			# Create the job file, then submit it.
+			tWrite.generateTemplatedFile(temDir + "upp.job.template", "upp.job", extraKeys = {"[upp_job_contents]": upp_job_contents})
 			# Once the file has been written, submit the job.
 			Tools.popen(self.aSet, "qsub upp.job")
 			# Wait for all logs to flag as job complete
