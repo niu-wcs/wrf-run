@@ -52,10 +52,10 @@ class Application():
 		if(settings.fetch("run_prerunsteps") == '1'):
 			i = 0
 			for ext in mParms["FileExtentions"]:
-				if(i == 0):
-					tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.wps.template", "namelist.wps.geogrid", extraKeys = {"[ungrib_prefix]": ext, "[fg_name]": mParms["FGExt"]})
-				i += 1
 				tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.wps.template", "namelist.wps." + ext, extraKeys = {"[ungrib_prefix]": ext, "[fg_name]": mParms["FGExt"]})
+				if(i == 0):
+					Tools.popen("cp namelist.wps." + ext + " namelist.wps.geogrid")
+				i += 1
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/geogrid.job.template", "geogrid.job")
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/metgrid.job.template", "metgrid.job")
