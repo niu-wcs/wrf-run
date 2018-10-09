@@ -277,9 +277,6 @@ class Postprocessing_Steps:
 		curDir = os.path.dirname(os.path.abspath(__file__)) 
 		temDir = self.aSet.fetch("headdir") + "templates/"
 		uppDir = self.aSet.fetch("headdir") + "post/UPP/"
-		uppNodes = self.aSet.fetch("num_upp_nodes")
-		uppProcs = self.aSet.fetch("num_upp_processors")
-		total = int(uppNodes) * int(uppProcs)
 		fList = glob.glob(self.wrfDir + '/' + self.startTime[0:8] + "/output/wrfout*")
 		fileCount = len(fList)
 		fLogs = []
@@ -308,7 +305,15 @@ class Postprocessing_Steps:
 				upp_job_contents += '\n' + "rm fort.*"
 				if(self.aSet.fetch("unipost_out") == "grib"):
 					upp_job_contents += "\nln -sf " + uppDir + "parm/wrf_cntrl.parm fort.14"
-				upp_job_contents += "\n" + "mpirun -np " + str(total) + " unipost.exe > " + logName + '\n' + '\n'
+				
+				aprun = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \" + '\n'
+				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \" + '\n'
+				aprun += "-d $n_hyperthreads_skipped_between_ranks \" + '\n'
+				aprun += "-j $n_hyperthreads_per_core \" + '\n'
+				aprun += "unipost.exe > " + logName + '\n'
+				upp_job_contents += "\n" + aprun + '\n'
+				
+				aprun = ""
 				# Create the job file, then submit it.
 				tWrite.generateTemplatedFile(temDir + "upp.job.template", "upp.job", extraKeys = {"[upp_job_contents]": upp_job_contents})
 			# Once the file has been written, submit the job.
