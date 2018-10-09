@@ -100,7 +100,7 @@ class AppSettings():
 			return str
 		fStr = str
 		for key, value in self.replacementKeys.items():
-			fStr = fStr.replace(key, value)
+			fStr = fStr.replace(key, str(value))
 		return fStr
 		
 	def whoami(self):
