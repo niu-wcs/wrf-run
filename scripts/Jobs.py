@@ -53,7 +53,8 @@ class JobSteps:
 		self.logger.write("run_geogrid(): Enter")
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			Tools.popen(self.aSet, "qsub geogrid.job")
+			Tools.popen(self.aSet, "chmod +x geogrid.job")
+			Tools.popen(self.aSet, "qsub geogrid.job -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
 		self.logger.write("run_geogrid(): Exit")
 		Tools.Process.instance().Unlock()
 	
@@ -83,7 +84,8 @@ class JobSteps:
 		Tools.Process.instance().Lock()
 		self.logger.write("run_metgrid(): Enter")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):	
-			Tools.popen(self.aSet, "qsub metgrid.job")
+			Tools.popen(self.aSet, "chmod +x metgrid.job")
+			Tools.popen(self.aSet, "qsub metgrid.job -t " + str(self.aSet.fetch("metgrid_walltime")) + " -n " + str(self.aSet.fetch("num_metgrid_nodes")) + " --mode script")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -121,7 +123,8 @@ class JobSteps:
 		Tools.Process.instance().Lock()
 		self.logger.write("run_real(): Enter")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			Tools.popen(self.aSet, "qsub real.job")
+			Tools.popen(self.aSet, "chmod +x real.job")
+			Tools.popen(self.aSet, "qsub real.job -t " + str(self.aSet.fetch("real_walltime")) + " -n " + str(self.aSet.fetch("num_real_nodes")) + " --mode script")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -176,7 +179,8 @@ class JobSteps:
 			# Remove the old log files as these are no longer needed
 			Tools.popen(self.aSet, "rm output/rsl.out.*")
 			Tools.popen(self.aSet, "rm output/rsl.error.*")	
-			Tools.popen(self.aSet, "qsub wrf.job")
+			Tools.popen(self.aSet, "chmod +x wrf.job")
+			Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -317,7 +321,8 @@ class Postprocessing_Steps:
 			# Create the job file, then submit it.
 			tWrite.generateTemplatedFile(temDir + "upp.job.template", "upp.job", extraKeys = {"[upp_job_contents]": upp_job_contents})
 			# Once the file has been written, submit the job.
-			Tools.popen(self.aSet, "qsub upp.job")
+			Tools.popen(self.aSet, "chmod +x upp.job")
+			Tools.popen(self.aSet, "qsub upp.job -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
 			# Wait for all logs to flag as job complete
 			for iFile in fLogs:
 				try:
