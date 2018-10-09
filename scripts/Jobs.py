@@ -306,10 +306,10 @@ class Postprocessing_Steps:
 				if(self.aSet.fetch("unipost_out") == "grib"):
 					upp_job_contents += "\nln -sf " + uppDir + "parm/wrf_cntrl.parm fort.14"
 				
-				aprun = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \" + '\n'
-				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \" + '\n'
-				aprun += "-d $n_hyperthreads_skipped_between_ranks \" + '\n'
-				aprun += "-j $n_hyperthreads_per_core \" + '\n'
+				aprun = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
+				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
+				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
+				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
 				aprun += "unipost.exe > " + logName + '\n'
 				upp_job_contents += "\n" + aprun + '\n'
 				
