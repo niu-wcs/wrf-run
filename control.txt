@@ -29,31 +29,28 @@ run_ungrib 0
 run_metgrid 0
 run_real 0
 run_wrf 0
+# Argonne Specific Parameters
+mpi_ranks_per_node 32
 # Geogrid Parameters
-num_geogrid_nodes 2
-num_geogrid_processors 32
+num_geogrid_nodes 16
 geogrid_walltime 360
 # Ungrib Parameters
 
 # Metgrid Parameters
-num_metgrid_nodes 2
-num_metgrid_processors 32
+num_metgrid_nodes 16
 metgrid_walltime 360
 # Real Parameters
-num_real_nodes 4
-num_real_processors 32
+num_real_nodes 32
 real_walltime 120
 # WRF Parameters
-num_wrf_nodes 8
-num_wrf_processors 32
+num_wrf_nodes 64
 wrf_walltime 2880
 # Post-Processing Parameters
 run_postprocessing 0
 # - If using UPP (Unipost) with GRADS, use the below
 post_run_unipost 1
 unipost_out grib2
-num_upp_nodes 4
-num_upp_processors 32
+num_upp_nodes 16
 upp_walltime 360
 # - If using Python, use the below
 post_run_python 0
