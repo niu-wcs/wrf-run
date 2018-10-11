@@ -74,26 +74,17 @@ class AppSettings():
 		self.replacementKeys["[run_output_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/output"
 		self.replacementKeys["[run_postprd_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/postprd"
 		self.replacementKeys["[data_dir]"] = self.fetch("datadir") + '/' + self.fetch("modeldata") + '/' + self.fetch("starttime")
+		self.replacementKeys["[mpi_ranks_per_node]"] = self.fetch("mpi_ranks_per_node")
 		self.replacementKeys["[num_geogrid_nodes]"] = self.fetch("num_geogrid_nodes")
-		self.replacementKeys["[num_geogrid_processors]"] = self.fetch("num_geogrid_processors")
 		self.replacementKeys["[geogrid_walltime]"] = self.fetch("geogrid_walltime")
-		self.replacementKeys["[mpi_geogrid_total]"] = str(int(self.fetch("num_geogrid_nodes")) * int(self.fetch("num_geogrid_processors")))
 		self.replacementKeys["[num_metgrid_nodes]"] = self.fetch("num_metgrid_nodes")
-		self.replacementKeys["[num_metgrid_processors]"] = self.fetch("num_metgrid_processors")
 		self.replacementKeys["[metgrid_walltime]"] = self.fetch("metgrid_walltime")
-		self.replacementKeys["[mpi_metgrid_total]"] = str(int(self.fetch("num_metgrid_nodes")) * int(self.fetch("num_metgrid_processors")))
 		self.replacementKeys["[num_real_nodes]"] = self.fetch("num_real_nodes")
-		self.replacementKeys["[num_real_processors]"] = self.fetch("num_real_processors")
 		self.replacementKeys["[real_walltime]"] = self.fetch("real_walltime")
-		self.replacementKeys["[mpi_real_total]"] = str(int(self.fetch("num_real_nodes")) * int(self.fetch("num_real_processors")))	
 		self.replacementKeys["[num_wrf_nodes]"] = self.fetch("num_wrf_nodes")
-		self.replacementKeys["[num_wrf_processors]"] = self.fetch("num_wrf_processors")
 		self.replacementKeys["[wrf_walltime]"] = self.fetch("wrf_walltime")
-		self.replacementKeys["[mpi_wrf_total]"] = str(int(self.fetch("num_wrf_nodes")) * int(self.fetch("num_wrf_processors")))
 		self.replacementKeys["[num_upp_nodes]"] = self.fetch("num_upp_nodes")
-		self.replacementKeys["[num_upp_processors]"] = self.fetch("num_upp_processors")
 		self.replacementKeys["[upp_walltime]"] = self.fetch("upp_walltime")
-		self.replacementKeys["[mpi_upp_total]"] = str(int(self.fetch("num_upp_nodes")) * int(self.fetch("num_upp_processors")))	
 	 
 	def replace(self, inStr):
 		if not inStr:
