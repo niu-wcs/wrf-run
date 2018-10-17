@@ -314,7 +314,7 @@ class Postprocessing_Steps:
 				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
 				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
-				aprun += "unipost.exe > " + logName + '\n'
+				aprun += "./unipost.exe > " + logName + '\n'
 				aprun += "sleep 1\n"
 				upp_job_contents += "\n" + aprun + '\n'
 				
