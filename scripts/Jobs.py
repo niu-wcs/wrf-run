@@ -54,7 +54,10 @@ class JobSteps:
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
-			Tools.popen(self.aSet, "qsub geogrid.job -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
+			if(self.aSet.fetch("usedebugqueue") == '1'):
+				Tools.popen(self.aSet, "qsub geogrid.job -q debug-cache-quad -t 60 -n 2 --mode script")
+			else:
+				Tools.popen(self.aSet, "qsub geogrid.job -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
 		self.logger.write("run_geogrid(): Exit")
 		Tools.Process.instance().Unlock()
 	
@@ -73,7 +76,7 @@ class JobSteps:
 				for ext in mParms["FileExtentions"]:
 					target_file.write("cp " + mParms["VTable"][i] + " Vtable" + '\n')
 					target_file.write("cp namelist.wps." + ext + " namelist.wps" + '\n')
-					target_file.write("ungrib.exe" + '\n')
+					target_file.write("./ungrib.exe" + '\n')
 					i += 1
 			Tools.popen(self.aSet, "chmod +x ungrib.csh")
 			Tools.popen(self.aSet, "./ungrib.csh")
@@ -85,7 +88,10 @@ class JobSteps:
 		self.logger.write("run_metgrid(): Enter")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):	
 			Tools.popen(self.aSet, "chmod +x metgrid.job")
-			Tools.popen(self.aSet, "qsub metgrid.job -t " + str(self.aSet.fetch("metgrid_walltime")) + " -n " + str(self.aSet.fetch("num_metgrid_nodes")) + " --mode script")
+			if(self.aSet.fetch("usedebugqueue") == '1'):
+				Tools.popen(self.aSet, "qsub metgrid.job -q debug-cache-quad -t 60 -n 10 --mode script")
+			else:			
+				Tools.popen(self.aSet, "qsub metgrid.job -t " + str(self.aSet.fetch("metgrid_walltime")) + " -n " + str(self.aSet.fetch("num_metgrid_nodes")) + " --mode script")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -124,7 +130,10 @@ class JobSteps:
 		self.logger.write("run_real(): Enter")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
 			Tools.popen(self.aSet, "chmod +x real.job")
-			Tools.popen(self.aSet, "qsub real.job -t " + str(self.aSet.fetch("real_walltime")) + " -n " + str(self.aSet.fetch("num_real_nodes")) + " --mode script")
+			if(self.aSet.fetch("usedebugqueue") == '1'):
+				Tools.popen(self.aSet, "qsub metgrid.job -q debug-cache-quad -t 60 -n 14 --mode script")
+			else:			
+				Tools.popen(self.aSet, "qsub real.job -t " + str(self.aSet.fetch("real_walltime")) + " -n " + str(self.aSet.fetch("num_real_nodes")) + " --mode script")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -180,7 +189,10 @@ class JobSteps:
 			Tools.popen(self.aSet, "rm output/rsl.out.*")
 			Tools.popen(self.aSet, "rm output/rsl.error.*")	
 			Tools.popen(self.aSet, "chmod +x wrf.job")
-			Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
+			if(self.aSet.fetch("usedebugqueue") == '1'):
+				Tools.popen(self.aSet, "qsub metgrid.job -q debug-cache-quad -t 60 -n 14 --mode script")
+			else:			
+				Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()

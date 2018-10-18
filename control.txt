@@ -22,6 +22,7 @@ wrfexecutables /projects/climate_severe/WRF/WRF/main/
 uppexecutables /projects/climate_severe/WRF/UPPV3.2/bin/
 modeldata CFSv2
 debugmode 0
+usedebugqueue 1
 # Job Step Parameters
 run_prerunsteps 1
 run_geogrid 1
