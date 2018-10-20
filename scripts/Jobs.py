@@ -42,6 +42,7 @@ class JobSteps:
 		Tools.popen(self.aSet, "mv real.job " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
 		# Copy executables to the correct path
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
@@ -63,20 +64,37 @@ class JobSteps:
 		Tools.Process.instance().Lock()
 		self.logger.write("run_ungrib(): Enter")
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv namelist.wps* " + self.wrfDir + '/' + self.startTime[0:8])
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			with open("ungrib.csh", 'w') as target_file:
+			with open("ungrib.job", 'w') as target_file:
+				target_file.write("#!/bin/bash\n")
+				target_file.write("#COBALT -t " + self.aSet.fetch("ungrib_walltime") + '\n')
+				target_file.write("#COBALT -n " + self.aSet.fetch("num_ungrib_nodes") + '\n')
+				target_file.write("#COBALT -A climate_severe\n")
+				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("mpi_ranks_per_node") + '\n')
+				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '\n')
-				target_file.write("link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
+				target_file.write("./link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
 				i = 0
 				for ext in mParms["FileExtentions"]:
 					target_file.write("cp " + mParms["VTable"][i] + " Vtable" + '\n')
 					target_file.write("cp namelist.wps." + ext + " namelist.wps" + '\n')
+					
+					target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+					target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+					target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+					target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
 					target_file.write("./ungrib.exe" + '\n')
+					
 					i += 1
-			Tools.popen(self.aSet, "chmod +x ungrib.csh")
-			Tools.popen(self.aSet, "./ungrib.csh")
+			Tools.popen(self.aSet, "chmod +x ungrib.job")
+			Tools.popen(self.aSet, "qsub ungrib.job -q debug-cache-quad -t " + str(self.aSet.fetch("ungrib_walltime")) + " -n " + str(self.aSet.fetch("num_ungrib_nodes")) + " --mode script")
 		self.logger.write("run_ungrib(): Exit")
 		Tools.Process.instance().Unlock()
 		

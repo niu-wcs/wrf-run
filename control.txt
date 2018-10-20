@@ -35,7 +35,8 @@ mpi_ranks_per_node 32
 num_geogrid_nodes 4
 geogrid_walltime 15
 # Ungrib Parameters
-
+num_ungrib_nodes 4
+ungrib_walltime 20
 # Metgrid Parameters
 num_metgrid_nodes 4
 metgrid_walltime 20
