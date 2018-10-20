@@ -95,8 +95,34 @@ class JobSteps:
 					i += 1
 			Tools.popen(self.aSet, "chmod +x ungrib.job")
 			Tools.popen(self.aSet, "qsub ungrib.job -q debug-cache-quad -t " + str(self.aSet.fetch("ungrib_walltime")) + " -n " + str(self.aSet.fetch("num_ungrib_nodes")) + " --mode script")
-		self.logger.write("run_ungrib(): Exit")
+			# Now wait for the log file
+			try:
+				firstWait = [{"waitCommand": "(ls ungrib.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
+				wait1 = Wait.Wait(firstWait, timeDelay = 25)
+				wait1.hold()
+			except Wait.TimeExpiredException:
+				sys.exit("ungrib.exe job not completed, abort.")			
+			# Check for completion
+			try:
+				secondWait = [{"waitCommand": "tail -n 3 ungrib.log*", "contains": "Successful completion of program ungrib.exe", "retCode": 1},
+							  {"waitCommand": "tail -n 3 ungrib.log*", "contains": "fatal", "retCode": 2},
+							  {"waitCommand": "tail -n 3 ungrib.log*", "contains": "runtime", "retCode": 2},
+							  {"waitCommand": "tail -n 3 ungrib.log*", "contains": "error", "retCode": 2},]
+				wait2 = Wait.Wait(secondWait, timeDelay = 25)
+				wRC = wait2.hold()
+				if wRC == 1:
+					self.logger.write("run_ungrib(): Exit")
+					Tools.Process.instance().Unlock()
+					return True
+				elif wRC == 2:
+					self.logger.write("run_ungrib(): Exit (Failed, Code 2)")
+					Tools.Process.instance().Unlock()
+					return False
+			except Wait.TimeExpiredException:
+				sys.exit("ungrib.exe job not completed, abort.")			
+		self.logger.write("run_ungrib(): Failed to enter run directory")
 		Tools.Process.instance().Unlock()
+		return False
 		
 	def run_metgrid(self):
 		Tools.Process.instance().Lock()
