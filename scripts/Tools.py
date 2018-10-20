@@ -68,7 +68,7 @@ class loggedPrint:
 	def __init__(self):
 		curTime = datetime.date.today().strftime("%B%d%Y-%H%M%S")
 		curDir = os.path.dirname(os.path.abspath(__file__)) 	
-		logName = "wrf_gaea_run_" + str(curTime) + ".log"	
+		logName = "wrf_run_script_" + str(curTime) + ".log"	
 		logFile = curDir + '/' + logName
 		self.filePath = logFile
 	

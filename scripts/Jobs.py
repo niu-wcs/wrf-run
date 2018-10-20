@@ -72,6 +72,7 @@ class JobSteps:
 				target_file.write("#!/bin/bash\n")
 				target_file.write("#COBALT -t " + self.aSet.fetch("ungrib_walltime") + '\n')
 				target_file.write("#COBALT -n " + self.aSet.fetch("num_ungrib_nodes") + '\n')
+				target_file.write("#COBALT -q debug-cache-quad" + '\n')
 				target_file.write("#COBALT -A climate_severe\n")
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
 				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("mpi_ranks_per_node") + '\n')

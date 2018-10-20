@@ -1,6 +1,7 @@
 #!/bin/bash
 #COBALT -t [upp_walltime]
 #COBALT -n [num_upp_nodes]
+#COBALT -q debug-cache-quad
 #COBALT -A climate_severe
 
 cd [run_postprd_dir]

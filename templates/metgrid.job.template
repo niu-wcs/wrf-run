@@ -1,6 +1,7 @@
 #!/bin/bash
 #COBALT -t [metgrid_walltime]
 #COBALT -n [num_metgrid_nodes]
+#COBALT -q debug-cache-quad
 #COBALT -A climate_severe
 
 cd [run_dir]
