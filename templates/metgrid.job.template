@@ -2,7 +2,6 @@
 #COBALT -t [metgrid_walltime]
 #COBALT -n [num_metgrid_nodes]
 #COBALT -A climate_severe
-#COBALT --attrs mcdram=cache:numa=quad
 
 cd [run_dir]
 

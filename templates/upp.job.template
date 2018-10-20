@@ -2,7 +2,6 @@
 #COBALT -t [upp_walltime]
 #COBALT -n [num_upp_nodes]
 #COBALT -A climate_severe
-#COBALT --attrs mcdram=cache:numa=quad
 
 cd [run_postprd_dir]
 

@@ -2,7 +2,6 @@
 #COBALT -t [real_walltime]
 #COBALT -n [num_real_nodes]
 #COBALT -A climate_severe
-#COBALT --attrs mcdram=cache:numa=quad
 
 cd [run_output_dir]
 

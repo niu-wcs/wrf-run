@@ -22,27 +22,26 @@ wrfexecutables /projects/climate_severe/WRF/WRF/main/
 uppexecutables /projects/climate_severe/WRF/UPPV3.2/bin/
 modeldata CFSv2
 debugmode 0
-usedebugqueue 0
 # Job Step Parameters
 run_prerunsteps 1
-run_geogrid 1
-run_ungrib 0
-run_metgrid 0
-run_real 0
-run_wrf 0
+run_geogrid 0
+run_ungrib 1
+run_metgrid 1
+run_real 1
+run_wrf 1
 # Argonne Specific Parameters
 mpi_ranks_per_node 32
 # Geogrid Parameters
-num_geogrid_nodes 128
-geogrid_walltime 60
+num_geogrid_nodes 4
+geogrid_walltime 15
 # Ungrib Parameters
 
 # Metgrid Parameters
-num_metgrid_nodes 128
-metgrid_walltime 60
+num_metgrid_nodes 4
+metgrid_walltime 20
 # Real Parameters
-num_real_nodes 128
-real_walltime 60
+num_real_nodes 8
+real_walltime 30
 # WRF Parameters
 num_wrf_nodes 256
 wrf_walltime 360
@@ -51,7 +50,7 @@ run_postprocessing 0
 # - If using UPP (Unipost) with GRADS, use the below
 post_run_unipost 1
 unipost_out grib2
-num_upp_nodes 128
-upp_walltime 60
+num_upp_nodes 12
+upp_walltime 30
 # - If using Python, use the below
 post_run_python 0
