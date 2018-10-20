@@ -96,6 +96,7 @@ class JobSteps:
 					i += 1
 			Tools.popen(self.aSet, "chmod +x ungrib.job")
 			Tools.popen(self.aSet, "qsub ungrib.job -q debug-cache-quad -t " + str(self.aSet.fetch("ungrib_walltime")) + " -n " + str(self.aSet.fetch("num_ungrib_nodes")) + " --mode script")
+			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			# Now wait for the log file
 			try:
 				firstWait = [{"waitCommand": "(ls ungrib.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
@@ -104,6 +105,7 @@ class JobSteps:
 			except Wait.TimeExpiredException:
 				sys.exit("ungrib.exe job not completed, abort.")			
 			# Check for completion
+			self.logger.write("Log file detected, waiting for completion.")
 			try:
 				secondWait = [{"waitCommand": "tail -n 3 ungrib.log*", "contains": "Successful completion of program ungrib.exe", "retCode": 1},
 							  {"waitCommand": "tail -n 3 ungrib.log*", "contains": "fatal", "retCode": 2},
@@ -131,6 +133,7 @@ class JobSteps:
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):	
 			Tools.popen(self.aSet, "chmod +x metgrid.job")		
 			Tools.popen(self.aSet, "qsub metgrid.job -q debug-cache-quad -t " + str(self.aSet.fetch("metgrid_walltime")) + " -n " + str(self.aSet.fetch("num_metgrid_nodes")) + " --mode script")
+			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -142,6 +145,7 @@ class JobSteps:
 				wait1.hold()
 			except Wait.TimeExpiredException:
 				sys.exit("metgrid.exe job not completed, abort.")
+			self.logger.write("Log file detected, waiting for completion.")
 			#Now wait for the output file to be completed
 			try:
 				secondWait = [{"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "Successful completion of program metgrid.exe", "retCode": 1},
@@ -170,6 +174,7 @@ class JobSteps:
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
 			Tools.popen(self.aSet, "chmod +x real.job")		
 			Tools.popen(self.aSet, "qsub real.job -q debug-cache-quad -t " + str(self.aSet.fetch("real_walltime")) + " -n " + str(self.aSet.fetch("num_real_nodes")) + " --mode script")
+			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -181,6 +186,7 @@ class JobSteps:
 				wait1.hold()			
 			except Wait.TimeExpiredException:
 				sys.exit("real.exe job not completed, abort.")
+			self.logger.write("Log file detected, waiting for completion.")
 			#Now wait for the output file to be completed
 			try:
 				secondWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS", "retCode": 1},
@@ -226,6 +232,7 @@ class JobSteps:
 			Tools.popen(self.aSet, "rm output/rsl.error.*")	
 			Tools.popen(self.aSet, "chmod +x wrf.job")			
 			Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
+			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
 				Tools.Process.instance().Unlock()
@@ -237,6 +244,7 @@ class JobSteps:
 				wait1.hold()			
 			except Wait.TimeExpiredException:
 				sys.exit("wrf.exe job not completed, abort.")
+			self.logger.write("Log file detected, waiting for completion.")
 			#Now wait for the output file to be completed (Note: Allow 7 days from the output file first appearing to run)
 			try:
 				secondWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS COMPLETE WRF", "retCode": 1},

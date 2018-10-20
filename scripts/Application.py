@@ -22,7 +22,7 @@ class Application():
 	
 		logger.write("Initializing WRF Auto-Run Program")
 		#Step 1: Load program settings
-		logger.write(" 1. Loading program settings, Performing pre-run directory creations")
+		logger.write(" 1. Loading program settings, Performing pre-run directory creations and loading ANL modules")
 		settings = ApplicationSettings.AppSettings()
 		modelParms = ModelData.ModelDataParameters(settings.fetch("modeldata"))
 		if not modelParms.validModel():
@@ -37,6 +37,16 @@ class Application():
 			Tools.popen(settings, "mkdir " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/postprd")
 		else:
 			logger.write(" 1. run_prerunsteps is turned off, directories have not been created")
+		logger.write(" 1. Loading modules.")
+		Tools.popen(settings, "module swap PrgEnv-intel PrgEnv-gnu")
+		Tools.popen(settings, "module add gcc/7.3.0")
+		Tools.popen(settings, "module add cray-netcdf/4.6.1.2")
+		Tools.popen(settings, "export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/GNU/7.1/")
+		Tools.popen(settings, "export ZLIB=/projects/climate_severe/WRF/Libs/zlib-1.2.11/")
+		Tools.popen(settings, "export JASPERLIB=/projects/climate_severe/WRF/Libs/jasper-1.900.1/lib")
+		Tools.popen(settings, "export JASPERINC=/projects/climate_severe/WRF/Libs/jasper-1.900.1/include")
+		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/zlib-1.2.11/lib")
+		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/libpng-1.6.35/lib")		
 		logger.write(" 1. Done.")
 		#Step 2: Download Data Files
 		logger.write(" 2. Downloading Model Data Files")
@@ -66,15 +76,6 @@ class Application():
 		logger.write(" 3. Done")
 		#Step 4: Run the WRF steps
 		logger.write(" 4. Run WRF Steps")
-		logger.write("  4. Adding Modules")
-		Tools.popen(settings, "module add gcc/7.3.0")
-		Tools.popen(settings, "module add cray-netcdf/4.6.1.2")
-		Tools.popen(settings, "export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/intel/16.0/")
-		Tools.popen(settings, "export ZLIB=/projects/climate_severe/WRF/Libs/zlib-1.2.11/")
-		Tools.popen(settings, "export JASPERLIB=/projects/climate_severe/WRF/Libs/jasper-1.900.1/lib")
-		Tools.popen(settings, "export JASPERINC=/projects/climate_severe/WRF/Libs/jasper-1.900.1/include")
-		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/zlib-1.2.11/lib")
-		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/libpng-1.6.35/lib")
 		jobs = Jobs.JobSteps(settings, modelParms)
 		logger.write("  4.a. Checking for geogrid flag...")
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
