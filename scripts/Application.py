@@ -38,17 +38,14 @@ class Application():
 		else:
 			logger.write(" 1. run_prerunsteps is turned off, directories have not been created")
 		logger.write(" 1. Loading modules.")
-		Tools.popen(settings, "module swap PrgEnv-intel PrgEnv-gnu")
 		Tools.popen(settings, "module add gcc/7.3.0")
 		Tools.popen(settings, "module add cray-netcdf/4.6.1.2")
 		# Export path variables for ANL
-		Tools.popen(settings, "export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/GNU/7.1/")
-		Tools.popen(settings, "export ZLIB=/projects/climate_severe/WRF/Libs/zlib-1.2.11/")
-		Tools.popen(settings, "export JASPERLIB=/projects/climate_severe/WRF/Libs/jasper-1.900.1/lib")
-		Tools.popen(settings, "export JASPERINC=/projects/climate_severe/WRF/Libs/jasper-1.900.1/include")
-		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/zlib-1.2.11/lib")
-		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/libpng-1.6.35/lib")
-		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/cray/pe/gcc-libs/")	
+		Tools.popen(settings, "export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/INTEL/16.0")
+		Tools.popen(settings, "export ZLIB=/projects/climate_severe/WRF/Libs/")
+		Tools.popen(settings, "export JASPERLIB=/projects/climate_severe/WRF/Libs/lib")
+		Tools.popen(settings, "export JASPERINC=/projects/climate_severe/WRF/Libs/include")
+		Tools.popen(settings, "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/projects/climate_severe/WRF/Libs/")	
 		logger.write(" 1. Done.")
 		#Step 2: Download Data Files
 		logger.write(" 2. Downloading Model Data Files")
