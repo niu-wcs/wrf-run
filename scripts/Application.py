@@ -67,8 +67,6 @@ class Application():
 				i += 1
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/geogrid.job.template", "geogrid.job")
-			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/metgrid.job.template", "metgrid.job")
-			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/real.job.template", "real.job")
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/wrf.job.template", "wrf.job")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
