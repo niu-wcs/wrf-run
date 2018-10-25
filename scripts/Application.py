@@ -87,32 +87,16 @@ class Application():
 		logger.write("  4.a. Done")
 		logger.write("  4.b. Running pre-processing executables")
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-		if(settings.fetch("run_ungrib") == '1'):
-			if(jobs.run_ungrib() == False):
-				logger.write("   4.b. Error at Ungrib.exe")
+		if(settings.fetch("run_preprocessing_jobs") == '1'):
+			if(jobs.run_preprocessing() == False):
+				logger.write("   4.b. Error in pre-processing jobs")
 				logger.close()		
-				sys.exit("   4.b. ERROR: Ungrib.exe process failed to complete, check error file.")
+				sys.exit("   4.b. ERROR: Pre-processing jobs failed, check error logs")
 		else:
-			logger.write("  4.b. run_ungrib is turned off, skiping ungrib process")
+			logger.write("  4.b. run_preprocessing_jobs is turned off, skiping this step")
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-		if(settings.fetch("run_metgrid") == '1'):	
-			if(jobs.run_metgrid() == False):
-				logger.write("   4.b. Error at Metgrid.exe")
-				logger.close()		
-				sys.exit("   4.b. ERROR: Metgrid.exe process failed to complete, check error file.")
-		else:
-			logger.write("  4.b. run_metgrid is turned off, skiping metgrid process")
 		logger.write("  4.b. Done")
-		logger.write("  4.c. Running WRF executables")
-		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-		if(settings.fetch("run_real") == '1'):
-			if(jobs.run_real() == False):
-				logger.write("   4.c. Error at Real.exe")
-				logger.close()		
-				sys.exit("   4.c. ERROR: real.exe process failed to complete, check error file.")
-		else:
-			logger.write("  4.c. run_real is turned off, skiping real.exe process")
-		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
+		logger.write("  4.c. Running WRF Model")		
 		if(settings.fetch("run_wrf") == '1'):
 			if(jobs.run_wrf() == False):
 				logger.write("   4.c. Error at WRF.exe")

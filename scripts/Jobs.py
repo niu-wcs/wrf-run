@@ -59,28 +59,30 @@ class JobSteps:
 		self.logger.write("run_geogrid(): Exit")
 		Tools.Process.instance().Unlock()
 	
-	def run_ungrib(self):	
+	def run_preprocessing(self):	
 		#ungrib.exe needs to run in the data directory
 		Tools.Process.instance().Lock()
-		self.logger.write("run_ungrib(): Enter")
+		self.logger.write("run_preprocessing(): Enter")
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv namelist.wps* " + self.wrfDir + '/' + self.startTime[0:8])
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			with open("ungrib.job", 'w') as target_file:
+			with open("prerun.job", 'w') as target_file:
 				target_file.write("#!/bin/bash\n")
-				target_file.write("#COBALT -t " + self.aSet.fetch("ungrib_walltime") + '\n')
-				target_file.write("#COBALT -n " + self.aSet.fetch("num_ungrib_nodes") + '\n')
+				target_file.write("#COBALT -t " + self.aSet.fetch("prerun_walltime") + '\n')
+				target_file.write("#COBALT -n " + self.aSet.fetch("num_prerun_nodes") + '\n')
 				target_file.write("#COBALT -q debug-cache-quad" + '\n')
-				target_file.write("#COBALT -A climate_severe\n")
+				target_file.write("#COBALT -A climate_severe\n\n")
+
+				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")
+				
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("mpi_ranks_per_node") + '\n')
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
+				target_file.write("export n_mpi_ranks_per_node=1\n")
+				target_file.write("export n_mpi_ranks=1\n")
 				target_file.write("export n_openmp_threads_per_rank=4\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
-				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")
-				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '\n')
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
 				target_file.write("./link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
 				i = 0
 				for ext in mParms["FileExtentions"]:
@@ -91,13 +93,36 @@ class JobSteps:
 					target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
 					target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
 					target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
-					target_file.write("./ungrib.exe" + '\n')
-					
+					target_file.write("./ungrib.exe &" + '\n')
+					target_file.write("PID_Ungrib=$!" + '\n')
+					target_file.write("wait $PID_Ungrib" + '\n')
 					i += 1
-			Tools.popen(self.aSet, "chmod +x ungrib.job")
-			Tools.popen(self.aSet, "qsub ungrib.job -q debug-cache-quad -t " + str(self.aSet.fetch("ungrib_walltime")) + " -n " + str(self.aSet.fetch("num_ungrib_nodes")) + " --mode script")
+				# The next process is metgrid.
+				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("mpi_ranks_per_node") + '\n')
+				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")
+				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("./metgrid.exe &" + '\n')
+				target_file.write("PID_Metgrid=$!" + '\n')
+				target_file.write("wait $PID_Metgrid" + "\n\n")	
+				# Finally, run the real.exe process
+				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")
+				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("./real.exe &" + '\n')
+				
+			Tools.popen(self.aSet, "chmod +x prerun.job")
+			Tools.popen(self.aSet, "qsub prerun.job -q debug-cache-quad -t " + str(self.aSet.fetch("prerun_walltime")) + " -n " + str(self.aSet.fetch("num_prerun_nodes")) + " --mode script")
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
-			# Now wait for the log file
+			# Now wait for the log files
 			try:
 				firstWait = [{"waitCommand": "(ls ungrib.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
 				wait1 = Wait.Wait(firstWait, timeDelay = 25)
@@ -112,109 +137,73 @@ class JobSteps:
 							  {"waitCommand": "tail -n 3 ungrib.log*", "contains": "runtime", "retCode": 2},
 							  {"waitCommand": "tail -n 3 ungrib.log*", "contains": "error", "retCode": 2},]
 				wait2 = Wait.Wait(secondWait, timeDelay = 25)
-				wRC = wait2.hold()
-				if wRC == 1:
-					self.logger.write("run_ungrib(): Exit")
-					Tools.Process.instance().Unlock()
-					return True
-				elif wRC == 2:
-					self.logger.write("run_ungrib(): Exit (Failed, Code 2)")
+				wRC1 = wait2.hold()
+				if wRC1 == 1:
+					# Success condition, proceed to the next.
+					try:
+						thirdWait = [{"waitCommand": "(ls metgrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
+						wait3 = Wait.Wait(thirdWait, timeDelay = 25)
+						wait3.hold()
+					except Wait.TimeExpiredException:
+						sys.exit("metgrid.exe job not completed, abort.")
+					self.logger.write("Log file detected, waiting for completion.")
+					#Now wait for the output file to be completed
+					try:
+						fourthWait = [{"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "Successful completion of program metgrid.exe", "retCode": 1},
+									  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "fatal", "retCode": 2},
+									  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "runtime", "retCode": 2},
+									  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "error", "retCode": 2},]
+						wait4 = Wait.Wait(fourthWait, timeDelay = 25)
+						wRC2 = wait2.hold()
+						if wRC2 == 1:
+							# Success Condition, proceed to real.exe
+							try:
+								fifthWait = [{"waitCommand": "(ls output/rsl.out.0000 && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
+								wait5 = Wait.Wait(fifthWait, timeDelay = 25)
+								wait5.hold()			
+							except Wait.TimeExpiredException:
+								sys.exit("real.exe job not completed, abort.")
+							self.logger.write("Log file detected, waiting for completion.")
+							#Now wait for the output file to be completed
+							try:
+								sixthWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS", "retCode": 1},
+											  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "fatal", "retCode": 2},
+											  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
+											  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "error", "retCode": 2},]
+								wait6 = Wait.Wait(sixthWait, timeDelay = 60)
+								wRC3 = wait6.hold()
+								if wRC3 == 2:
+									self.logger.write("run_preprocessing(): Exit (Failed at real, Code 2)")
+									Tools.Process.instance().Unlock()
+									return False
+								else:
+									#Validate the presense of the two files.
+									file1 = os.popen("(ls output/wrfinput_d01 && echo \"yes\") || echo \"no\"").read()
+									file2 = os.popen("(ls output/wrfbdy_d01 && echo \"yes\") || echo \"no\"").read()
+									if("yes" in file1 and "yes" in file2):
+										self.logger.write("run_preprocessing(): Exit")
+										Tools.Process.instance().Unlock()
+										return True
+									self.logger.write("run_preprocessing(): Exit (Failed at real, did not find wrfinput_d01 and wrfbdy_d01")
+									Tools.Process.instance().Unlock()
+									return False					
+							except Wait.TimeExpiredException:
+								sys.exit("real.exe job not completed, abort.")							
+						elif wRC2 == 2:
+							self.logger.write("run_preprocessing(): Exit (Failed at metgrid, Code 2)")
+							Tools.Process.instance().Unlock()
+							return False
+					except Wait.TimeExpiredException:
+						sys.exit("metgrid.exe job not completed, abort.")					
+				elif wRC1 == 2:
+					self.logger.write("run_preprocessing(): Exit (Failed at ungrib, Code 2)")
 					Tools.Process.instance().Unlock()
 					return False
 			except Wait.TimeExpiredException:
 				sys.exit("ungrib.exe job not completed, abort.")			
-		self.logger.write("run_ungrib(): Failed to enter run directory")
+		self.logger.write("run_preprocessing(): Failed to enter run directory")
 		Tools.Process.instance().Unlock()
-		return False
-		
-	def run_metgrid(self):
-		Tools.Process.instance().Lock()
-		self.logger.write("run_metgrid(): Enter")
-		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):	
-			Tools.popen(self.aSet, "chmod +x metgrid.job")		
-			Tools.popen(self.aSet, "qsub metgrid.job -q debug-cache-quad -t " + str(self.aSet.fetch("metgrid_walltime")) + " -n " + str(self.aSet.fetch("num_metgrid_nodes")) + " --mode script")
-			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
-			if(self.aSet.fetch("debugmode") == '1'):
-				self.logger.write("Debug mode is active, skipping")
-				Tools.Process.instance().Unlock()
-				return True
-			#Submit a wait condition for the file to appear
-			try:
-				firstWait = [{"waitCommand": "(ls metgrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
-				wait1 = Wait.Wait(firstWait, timeDelay = 25)
-				wait1.hold()
-			except Wait.TimeExpiredException:
-				sys.exit("metgrid.exe job not completed, abort.")
-			self.logger.write("Log file detected, waiting for completion.")
-			#Now wait for the output file to be completed
-			try:
-				secondWait = [{"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "Successful completion of program metgrid.exe", "retCode": 1},
-							  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "fatal", "retCode": 2},
-							  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "runtime", "retCode": 2},
-							  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "error", "retCode": 2},]
-				wait2 = Wait.Wait(secondWait, timeDelay = 25)
-				wRC = wait2.hold()
-				if wRC == 1:
-					self.logger.write("run_metgrid(): Exit")
-					Tools.Process.instance().Unlock()
-					return True
-				elif wRC == 2:
-					self.logger.write("run_metgrid(): Exit (Failed, Code 2)")
-					Tools.Process.instance().Unlock()
-					return False
-			except Wait.TimeExpiredException:
-				sys.exit("metgrid.exe job not completed, abort.")
-		self.logger.write("run_metgrid(): Failed to enter run directory")
-		Tools.Process.instance().Unlock()
-		return False
-		
-	def run_real(self):
-		Tools.Process.instance().Lock()
-		self.logger.write("run_real(): Enter")
-		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			Tools.popen(self.aSet, "chmod +x real.job")		
-			Tools.popen(self.aSet, "qsub real.job -q debug-cache-quad -t " + str(self.aSet.fetch("real_walltime")) + " -n " + str(self.aSet.fetch("num_real_nodes")) + " --mode script")
-			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
-			if(self.aSet.fetch("debugmode") == '1'):
-				self.logger.write("Debug mode is active, skipping")
-				Tools.Process.instance().Unlock()
-				return True			
-			#Submit a wait condition for the file to appear
-			try:
-				firstWait = [{"waitCommand": "(ls output/rsl.out.0000 && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
-				wait1 = Wait.Wait(firstWait, timeDelay = 25)
-				wait1.hold()			
-			except Wait.TimeExpiredException:
-				sys.exit("real.exe job not completed, abort.")
-			self.logger.write("Log file detected, waiting for completion.")
-			#Now wait for the output file to be completed
-			try:
-				secondWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS", "retCode": 1},
-							  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "fatal", "retCode": 2},
-							  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
-							  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "error", "retCode": 2},]
-				wait2 = Wait.Wait(secondWait, timeDelay = 60)
-				wRC = wait2.hold()
-				if wRC == 2:
-					self.logger.write("run_real(): Exit (Failed, Code 2)")
-					Tools.Process.instance().Unlock()
-					return False
-				else:
-					#Validate the presense of the two files.
-					file1 = os.popen("(ls output/wrfinput_d01 && echo \"yes\") || echo \"no\"").read()
-					file2 = os.popen("(ls output/wrfbdy_d01 && echo \"yes\") || echo \"no\"").read()
-					if("yes" in file1 and "yes" in file2):
-						self.logger.write("run_real(): Exit")
-						Tools.Process.instance().Unlock()
-						return True
-					self.logger.write("run_real(): Exit (Failed, did not find wrfinput_d01 and wrfbdy_d01")
-					Tools.Process.instance().Unlock()
-					return False					
-			except Wait.TimeExpiredException:
-				sys.exit("real.exe job not completed, abort.")		
-		self.logger.write("run_real(): Failed to enter run directory")
-		Tools.Process.instance().Unlock()
-		return False			
+		return False	
 		
 	def run_wrf(self):
 		Tools.Process.instance().Lock()
