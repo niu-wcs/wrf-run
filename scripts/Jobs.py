@@ -140,6 +140,7 @@ class JobSteps:
 				wRC1 = wait2.hold()
 				if wRC1 == 1:
 					# Success condition, proceed to the next.
+					self.logger.write("Ungrib process sucessfully completed, starting metgrid process.")
 					try:
 						thirdWait = [{"waitCommand": "(ls metgrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
 						wait3 = Wait.Wait(thirdWait, timeDelay = 25)
@@ -157,6 +158,7 @@ class JobSteps:
 						wRC2 = wait2.hold()
 						if wRC2 == 1:
 							# Success Condition, proceed to real.exe
+							self.logger.write("Metgrid process sucessfully completed, starting real process.")
 							try:
 								fifthWait = [{"waitCommand": "(ls output/rsl.out.0000 && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
 								wait5 = Wait.Wait(fifthWait, timeDelay = 25)
@@ -167,9 +169,9 @@ class JobSteps:
 							#Now wait for the output file to be completed
 							try:
 								sixthWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS", "retCode": 1},
-											  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "fatal", "retCode": 2},
-											  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
-											  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "error", "retCode": 2},]
+											  {"waitCommand": "tail -n 3 output/rsl.error.0000", "contains": "FATAL", "retCode": 2},
+											  {"waitCommand": "tail -n 3 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
+											  {"waitCommand": "tail -n 3 output/rsl.error.0000", "contains": "error", "retCode": 2},]
 								wait6 = Wait.Wait(sixthWait, timeDelay = 60)
 								wRC3 = wait6.hold()
 								if wRC3 == 2:
