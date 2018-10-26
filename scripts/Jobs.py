@@ -74,6 +74,8 @@ class JobSteps:
 				target_file.write("#COBALT -n " + self.aSet.fetch("num_prerun_nodes") + '\n')
 				target_file.write("#COBALT -q debug-cache-quad" + '\n')
 				target_file.write("#COBALT -A climate_severe\n\n")
+				
+				target_file.write("ulimit -s unlimited\n\n")
 
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")
 				

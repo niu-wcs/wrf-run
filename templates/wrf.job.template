@@ -4,6 +4,8 @@
 #COBALT -A climate_severe
 #COBALT --attrs mcdram=cache:numa=quad
 
+ulimit -s unlimited
+
 cd [run_output_dir]
 
 export n_nodes=$COBALT_JOBSIZE

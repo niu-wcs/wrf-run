@@ -4,6 +4,8 @@
 #COBALT -q debug-cache-quad
 #COBALT -A climate_severe
 
+ulimit -s unlimited
+
 cd [run_dir]
 
 export n_nodes=$COBALT_JOBSIZE
