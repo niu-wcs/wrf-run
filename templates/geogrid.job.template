@@ -4,6 +4,7 @@
 #COBALT -q debug-cache-quad
 #COBALT -A climate_severe
 
+source [source_file]
 ulimit -s unlimited
 
 cd [run_dir]

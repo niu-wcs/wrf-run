@@ -37,8 +37,6 @@ class Application():
 			Tools.popen(settings, "mkdir " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/postprd")
 		else:
 			logger.write(" 1. run_prerunsteps is turned off, directories have not been created")
-		logger.write(" 1. Loading modules.")
-		Tools.popen(settings, "bash " + settings.fetch("sourcefile"))
 		logger.write(" 1. Done.")
 		#Step 2: Download Data Files
 		logger.write(" 2. Downloading Model Data Files")

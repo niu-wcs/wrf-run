@@ -54,6 +54,7 @@ class AppSettings():
 			
 	def assembleKeys(self):	
 		# Construct the replacement dictionary from the settings
+		self.replacementKeys["[source_file]"] = self.fetch("sourcefile")
 		self.replacementKeys["[run_days]"] = str(self.runDays)
 		self.replacementKeys["[run_hours]"] = str(self.runHours)
 		self.replacementKeys["[start_date]"] = str(self.startTime.strftime('%Y-%m-%d_%H:%M:%S'))

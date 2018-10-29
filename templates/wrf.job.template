@@ -4,6 +4,7 @@
 #COBALT -A climate_severe
 #COBALT --attrs mcdram=cache:numa=quad
 
+source [source_file]
 ulimit -s unlimited
 
 cd [run_output_dir]

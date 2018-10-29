@@ -13,7 +13,7 @@
 starttime 2018061000 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
 rundays 1
 runhours 0
-sourcefile /projects/climate_severe/wrf-run/gnu.sh
+sourcefile /projects/climate_severe/wrf-run/gnu
 geogdir /projects/climate_severe/WRF/WPS_GEOG
 tabledir /projects/climate_severe/wrf-run/tables
 datadir /projects/climate_severe/model_data
