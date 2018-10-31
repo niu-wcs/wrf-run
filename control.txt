@@ -19,7 +19,7 @@ tabledir /projects/climate_severe/wrf-run/tables
 datadir /projects/climate_severe/model_data
 wrfdir /projects/climate_severe/runs
 wpsexecutables /projects/climate_severe/WRF/WPS/
-wrfexecutables /projects/climate_severe/WRF/WRF/main/
+wrfexecutables /projects/climate_severe/WRF/WRFV3/main/
 uppexecutables /projects/climate_severe/WRF/UPPV3.2/bin/
 modeldata CFSv2
 debugmode 0
