@@ -116,6 +116,12 @@ class JobSteps:
 				target_file.write("wait $PID_Metgrid" + "\n\n")	
 				# Finally, run the real.exe process
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")
+				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=1\n")
+				target_file.write("export n_mpi_ranks=1\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
 				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
 				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
