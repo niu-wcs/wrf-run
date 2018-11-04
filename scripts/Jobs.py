@@ -46,8 +46,6 @@ class JobSteps:
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "real.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "wrf.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
 	
 	def run_geogrid(self):
 		Tools.Process.instance().Lock()
@@ -118,7 +116,7 @@ class JobSteps:
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
 				target_file.write("export n_mpi_ranks_per_node=1\n")
-				target_file.write("export n_mpi_ranks=1\n")
+				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=4\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
 				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
