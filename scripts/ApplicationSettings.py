@@ -86,6 +86,21 @@ class AppSettings():
 		self.replacementKeys["[wrf_walltime]"] = self.fetch("wrf_walltime")
 		self.replacementKeys["[num_upp_nodes]"] = self.fetch("num_upp_nodes")
 		self.replacementKeys["[upp_walltime]"] = self.fetch("upp_walltime")
+		# New Keys for the namelists
+		self.replacementKeys["[e_we]"] = self.fetch("e_we")
+		self.replacementKeys["[e_sn]"] = self.fetch("e_sn")
+		self.replacementKeys["[e_vert]"] = self.fetch("e_vert")
+		self.replacementKeys["[geog_data_res]"] = self.fetch("geog_data_res")
+		self.replacementKeys["[dx_y]"] = self.fetch("dx_y")
+		self.replacementKeys["[map_proj]"] = self.fetch("map_proj")
+		self.replacementKeys["[ref_lat]"] = self.fetch("ref_lat")
+		self.replacementKeys["[ref_lon]"] = self.fetch("ref_lon")
+		self.replacementKeys["[truelat1]"] = self.fetch("truelat1")
+		self.replacementKeys["[truelat2]"] = self.fetch("truelat2")
+		self.replacementKeys["[stand_lon]"] = self.fetch("stand_lon")
+		self.replacementKeys["[p_top_requested]"] = self.fetch("p_top_requested")
+		self.replacementKeys["[num_metgrid_levels]"] = self.fetch("num_metgrid_levels")
+		self.replacementKeys["[num_metgrid_soil_levels]"] = self.fetch("num_metgrid_soil_levels")
 	 
 	def replace(self, inStr):
 		if not inStr:

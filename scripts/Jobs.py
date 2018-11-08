@@ -38,8 +38,6 @@ class JobSteps:
 		# Move the generated files to the run directory		
 		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
 		Tools.popen(self.aSet, "mv geogrid.job " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "mv metgrid.job " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "mv real.job " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
 		# Copy executables to the correct path
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
