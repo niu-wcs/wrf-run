@@ -49,6 +49,8 @@ num_geogrid_nodes 4
 geogrid_walltime 15
 # Preprocessing Job Parameters
 num_prerun_nodes 8
+num_metgrid_processors 2
+num_real_processors 2
 prerun_walltime 60
 # WRF Parameters
 num_wrf_nodes 256

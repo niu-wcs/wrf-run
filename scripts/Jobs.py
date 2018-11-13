@@ -98,7 +98,7 @@ class JobSteps:
 					i += 1
 				# The next process is metgrid.
 				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("mpi_ranks_per_node") + '\n')
+				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_metgrid_processors") + '\n')
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=4\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
@@ -113,7 +113,7 @@ class JobSteps:
 				# Finally, run the real.exe process
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=1\n")
+				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_real_processors") + "\n")
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=4\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
