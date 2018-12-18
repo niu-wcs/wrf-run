@@ -51,7 +51,7 @@ class JobSteps:
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
-			Tools.popen(self.aSet, "qsub geogrid.job -A climate_severe -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
+			Tools.popen(self.aSet, "qsub -A climate_severe -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script geogrid.job")
 		self.logger.write("run_geogrid(): Exit")
 		Tools.Process.instance().Unlock()
 	
