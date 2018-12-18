@@ -75,8 +75,9 @@ class AppSettings():
 		self.replacementKeys["[run_output_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/output"
 		self.replacementKeys["[run_postprd_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/postprd"
 		self.replacementKeys["[data_dir]"] = self.fetch("datadir") + '/' + self.fetch("modeldata") + '/' + self.fetch("starttime")
-		self.replacementKeys["[mpi_ranks_per_node]"] = self.fetch("mpi_ranks_per_node")
+		self.replacementKeys["[num_geogrid_ranks]"] = self.fetch("num_geogrid_ranks")
 		self.replacementKeys["[num_geogrid_nodes]"] = self.fetch("num_geogrid_nodes")
+		self.replacementKeys["[total_geogrid_procs]"] = int(self.fetch("num_geogrid_ranks")) * int(self.fetch("num_geogrid_nodes"))
 		self.replacementKeys["[geogrid_walltime]"] = self.fetch("geogrid_walltime")
 		self.replacementKeys["[num_metgrid_nodes]"] = self.fetch("num_metgrid_nodes")
 		self.replacementKeys["[metgrid_walltime]"] = self.fetch("metgrid_walltime")
