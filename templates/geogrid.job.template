@@ -1,7 +1,0 @@
-#!/bin/bash
-source [source_file]
-ulimit -s unlimited
-
-cd [run_dir]
-
-runjob --np [total_geogrid_procs] -p [geogrid_ranks_per_node] --block $COBALT_PARTNAME --verbose=INFO: ./geogrid.exe

@@ -39,20 +39,10 @@ num_metgrid_levels 38
 num_metgrid_soil_levels 4
 # Job Step Parameters
 run_prerunsteps 1
-run_geogrid 1
-run_preprocessing_jobs 0
-run_wrf 0
-# Geogrid Parameters
-num_geogrid_nodes 512
-num_geogrid_ranks 1
-geogrid_walltime 30
-# Preprocessing Job Parameters
-num_prerun_nodes 512
-num_metgrid_processors 1
-num_real_processors 1
-prerun_walltime 60
 # WRF Parameters
-num_wrf_nodes 2048
+num_metgrid_processors 10
+num_real_processors 5
+num_wrf_nodes 512
 num_wrf_processors 32
 wrf_walltime 360
 # Post-Processing Parameters

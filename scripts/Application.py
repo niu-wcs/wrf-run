@@ -57,43 +57,16 @@ class Application():
 					Tools.popen(settings, "cp namelist.wps." + ext + " namelist.wps.geogrid")
 				i += 1
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
-			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/geogrid.job.template", "geogrid.job")
-			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/wrf.job.template", "wrf.job")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
 		logger.write(" 3. Done")
 		#Step 4: Run the WRF steps
 		logger.write(" 4. Run WRF Steps")
-		jobs = Jobs.JobSteps(settings, modelParms)
-		logger.write("  4.a. Checking for geogrid flag...")
-		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-		if(settings.fetch("run_geogrid") == '1'):
-			logger.write("  4.a. Geogrid flag is set, preparing geogrid job.")
-			jobs.run_geogrid()
-			logger.write("  4.a. Geogrid job Done")
-		else:
-			logger.write("  4.a. Geogrid flag is not set, skipping step")
-		logger.write("  4.a. Done")
-		logger.write("  4.b. Running pre-processing executables")
-		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-		if(settings.fetch("run_preprocessing_jobs") == '1'):
-			if(jobs.run_preprocessing() == False):
-				logger.write("   4.b. Error in pre-processing jobs")
-				logger.close()		
-				sys.exit("   4.b. ERROR: Pre-processing jobs failed, check error logs")
-		else:
-			logger.write("  4.b. run_preprocessing_jobs is turned off, skiping this step")
-		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
-		logger.write("  4.b. Done")
-		logger.write("  4.c. Running WRF Model")		
-		if(settings.fetch("run_wrf") == '1'):
-			if(jobs.run_wrf() == False):
-				logger.write("   4.c. Error at WRF.exe")
-				logger.close()		
-				sys.exit("   4.c. ERROR: wrf.exe process failed to complete, check error file.")	
-		else:
-			logger.write("  4.c. run_wrf is turned off, skiping wrf.exe process")				
-		logger.write("  4.c. Done")
+		jobs = Jobs.JobSteps(settings, modelParms)	
+		if(jobs.run_wrf() == False):
+			logger.write("   4. Error in WRF Process")
+			logger.close()		
+			sys.exit("   4. ERROR: wrf.exe process failed to complete, check error file.")			
 		logger.write(" 4. Done")
 		#Step 5: Run postprocessing steps
 		if(settings.fetch("run_postprocessing") == '1'):
