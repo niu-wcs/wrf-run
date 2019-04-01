@@ -37,7 +37,6 @@ class JobSteps:
 		Tools.popen(self.aSet, "cp " + settings.fetch("headdir") + "run_files/* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
 		# Move the generated files to the run directory		
 		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		Tools.popen(self.aSet, "mv geogrid.job " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
 		# Copy executables to the correct path
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
@@ -45,54 +44,114 @@ class JobSteps:
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 	
-	def run_wrf(self):	
+	def run_geogrid(self):
+		Tools.Process.instance().Lock()
+		self.logger.write("run_geogrid(): Enter")
+		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
+		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
+			with open("geogrid.job", 'w') as target_file:
+				target_file.write("#!/bin/bash\n")
+				target_file.write("#COBALT -t " + self.aSet.fetch("geogrid_walltime") + '\n')
+				target_file.write("#COBALT -n " + self.aSet.fetch("num_geogrid_nodes") + '\n')
+				target_file.write("#COBALT -q debug-cache-quad" + '\n')
+				target_file.write("#COBALT -A climate_severe\n\n")
+				
+				target_file.write("source " + self.aSet.fetch("sourcefile") + '\n')
+				target_file.write("ulimit -s unlimited\n\n")	
+
+				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")
+				
+				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=1\n")
+				target_file.write("export n_mpi_ranks=1\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")	
+
+				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("./geogrid.exe" + '\n')				
+			
+			Tools.popen(self.aSet, "chmod +x geogrid.job")
+			Tools.popen(self.aSet, "qsub geogrid.job -q debug-cache-quad -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
+		self.logger.write("run_geogrid(): Exit")
+		Tools.Process.instance().Unlock()
+	
+	def run_preprocessing(self):	
 		#ungrib.exe needs to run in the data directory
 		Tools.Process.instance().Lock()
-		self.logger.write("run_wrf(): Enter")
+		self.logger.write("run_preprocessing(): Enter")
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv namelist.wps* " + self.wrfDir + '/' + self.startTime[0:8])
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			with open("runwrfjob.job", 'w') as target_file:
+			with open("prerun.job", 'w') as target_file:
 				target_file.write("#!/bin/bash\n")
+				target_file.write("#COBALT -t " + self.aSet.fetch("prerun_walltime") + '\n')
+				target_file.write("#COBALT -n " + self.aSet.fetch("num_prerun_nodes") + '\n')
+				target_file.write("#COBALT -q debug-cache-quad" + '\n')
+				target_file.write("#COBALT -A climate_severe\n\n")
 				
 				target_file.write("source " + self.aSet.fetch("sourcefile") + '\n')
 				target_file.write("ulimit -s unlimited\n\n")
 
-				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")				
+				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")
+				
+				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=1\n")
+				target_file.write("export n_mpi_ranks=1\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
 				target_file.write("./link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
 				i = 0
 				for ext in mParms["FileExtentions"]:
 					target_file.write("cp " + mParms["VTable"][i] + " Vtable" + '\n')
 					target_file.write("cp namelist.wps." + ext + " namelist.wps" + '\n')
 					
-					target_file.write("runjob --n 1 -p 1 --block $COBALT_PARTNAME --verbose=INFO: ./ungrib.exe" + '\n')
+					target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+					target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+					target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+					target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+					target_file.write("./ungrib.exe &" + '\n')
 					target_file.write("PID_Ungrib=$!" + '\n')
 					target_file.write("wait $PID_Ungrib" + '\n')
 					i += 1
 				# The next process is metgrid.
-				target_file.write("runjob --n " + self.aSet.fetch("num_metgrid_processors") + " -p 1 --block $COBALT_PARTNAME --verbose=INFO: ./metgrid.exe" + '\n')
+				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_metgrid_processors") + '\n')
+				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")
+				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("./metgrid.exe &" + '\n')
 				target_file.write("PID_Metgrid=$!" + '\n')
 				target_file.write("wait $PID_Metgrid" + "\n\n")	
-				# Then, run the real.exe process
+				# Finally, run the real.exe process
 				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")
-				target_file.write("runjob --n " + self.aSet.fetch("num_real_processors") + " -p 1 --block $COBALT_PARTNAME --verbose=INFO: ./real.exe" + '\n')
+				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
+				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_real_processors") + "\n")
+				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
+				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_hyperthreads_per_core=2\n")
+				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
+				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
+				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
+				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("./real.exe &" + '\n')
 				target_file.write("PID_Real=$!" + '\n')
-				target_file.write("wait $PID_Real" + "\n\n")	
-				target_file.write("mv rsl.out.0000 REAL.out\n")
-				target_file.write("mv rsl.error.0000 REAL.error\n")
-				target_file.write("rm rsl.*\n\n")
-				# Finally, our WRF process
-				target_file.write("runjob --n " + self.aSet.fetch("num_wrf_processors") + " -p " + self.aSet.fetch("num_wrf_processors") + " --block $COBALT_PARTNAME --verbose=INFO: ./wrf.exe" + '\n')
-				target_file.write("PID_Wrf=$!" + '\n')
-				target_file.write("wait $PID_Wrf" + "\n\n")	
-				target_file.write("mv rsl.out.0000 WRF.out\n")
-				target_file.write("mv rsl.error.0000 WRF.error\n")
-				target_file.write("rm rsl.*\n")				
+				target_file.write("wait $PID_Real" + "\n\n")				
 				
-			Tools.popen(self.aSet, "chmod +x runwrfjob.job")
-			Tools.popen(self.aSet, "qsub -A climate_severe -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script runwrfjob.job")
+			Tools.popen(self.aSet, "chmod +x prerun.job")
+			Tools.popen(self.aSet, "qsub prerun.job -q debug-cache-quad -t " + str(self.aSet.fetch("prerun_walltime")) + " -n " + str(self.aSet.fetch("num_prerun_nodes")) + " --mode script")
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			# Now wait for the log files
 			try:
@@ -147,7 +206,7 @@ class JobSteps:
 								wait6 = Wait.Wait(sixthWait, timeDelay = 60)
 								wRC3 = wait6.hold()
 								if wRC3 == 2:
-									self.logger.write("run_wrf(): Exit (Failed at real, Code 2)")
+									self.logger.write("run_preprocessing(): Exit (Failed at real, Code 2)")
 									Tools.Process.instance().Unlock()
 									return False
 								else:
@@ -155,55 +214,81 @@ class JobSteps:
 									file1 = os.popen("(ls output/wrfinput_d01 && echo \"yes\") || echo \"no\"").read()
 									file2 = os.popen("(ls output/wrfbdy_d01 && echo \"yes\") || echo \"no\"").read()
 									if("yes" in file1 and "yes" in file2):
-										#Test for the WRF success conditions
-										try:
-											seventhWait = [{"waitCommand": "(ls output/rsl.out.0000 && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
-											wait7 = Wait.Wait(seventhWait, timeDelay = 25)
-											wait7.hold()			
-										except Wait.TimeExpiredException:
-											sys.exit("wrf.exe job not completed, abort.")
-										self.logger.write("Log file detected, waiting for completion.")
-										#Now wait for the output file to be completed (Note: Allow 7 days from the output file first appearing to run)
-										try:
-											finalWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS COMPLETE WRF", "retCode": 1},
-														  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "fatal", "retCode": 2},
-														  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
-														  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "error", "retCode": 2},]
-											# Note: I have the script checking the files once every three minutes so we don't stack five calls rapidly, this can be modified later if needed.
-											wait8 = Wait.Wait(finalWait, timeDelay = 180)
-											wRC4 = wait8.hold()
-											if wRC4 == 2:
-												self.logger.write("run_wrf(): Exit (Failed at wrf, Code 2)")
-												Tools.Process.instance().Unlock()
-												return False
-											else:
-												self.logger.write("run_wrf(): Exit, Success")
-												Tools.Process.instance().Unlock()
-												return True				
-										except Wait.TimeExpiredException:
-											sys.exit("wrf.exe job not completed, abort.")																				
+										self.logger.write("run_preprocessing(): Exit")
 										Tools.Process.instance().Unlock()
 										return True
-									self.logger.write("run_wrf(): Exit (Failed at real, did not find wrfinput_d01 and wrfbdy_d01")
+									self.logger.write("run_preprocessing(): Exit (Failed at real, did not find wrfinput_d01 and wrfbdy_d01")
 									Tools.Process.instance().Unlock()
 									return False					
 							except Wait.TimeExpiredException:
 								sys.exit("real.exe job not completed, abort.")							
 						elif wRC2 == 2:
-							self.logger.write("run_wrf(): Exit (Failed at metgrid, Code 2)")
+							self.logger.write("run_preprocessing(): Exit (Failed at metgrid, Code 2)")
 							Tools.Process.instance().Unlock()
 							return False
 					except Wait.TimeExpiredException:
 						sys.exit("metgrid.exe job not completed, abort.")					
 				elif wRC1 == 2:
-					self.logger.write("run_wrf(): Exit (Failed at ungrib, Code 2)")
+					self.logger.write("run_preprocessing(): Exit (Failed at ungrib, Code 2)")
 					Tools.Process.instance().Unlock()
 					return False
 			except Wait.TimeExpiredException:
 				sys.exit("ungrib.exe job not completed, abort.")			
+		self.logger.write("run_preprocessing(): Failed to enter run directory")
+		Tools.Process.instance().Unlock()
+		return False	
+		
+	def run_wrf(self):
+		Tools.Process.instance().Lock()
+		self.logger.write("run_wrf(): Enter")
+		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
+			# Do a quick file check to ensure wrf can run
+			file1 = os.popen("(ls output/wrfinput_d01 && echo \"yes\") || echo \"no\"").read()
+			file2 = os.popen("(ls output/wrfbdy_d01 && echo \"yes\") || echo \"no\"").read()
+			if(not ("yes" in file1 and "yes" in file2) and (not self.aSet.fetch("debugmode") == '1')):
+				self.logger.write("run_wrf(): Exit (Failed, cannot run wrf.exe without wrfinput_d01 and wrfbdy_d01)")
+				Tools.Process.instance().Unlock()
+				return False
+			# Remove the old log files as these are no longer needed
+			Tools.popen(self.aSet, "rm output/rsl.out.*")
+			Tools.popen(self.aSet, "rm output/rsl.error.*")	
+			Tools.popen(self.aSet, "chmod +x wrf.job")			
+			Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
+			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
+			if(self.aSet.fetch("debugmode") == '1'):
+				self.logger.write("Debug mode is active, skipping")
+				Tools.Process.instance().Unlock()
+				return True			
+			#Submit a wait condition for the file to appear
+			try:
+				firstWait = [{"waitCommand": "(ls output/rsl.out.0000 && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
+				wait1 = Wait.Wait(firstWait, timeDelay = 25)
+				wait1.hold()			
+			except Wait.TimeExpiredException:
+				sys.exit("wrf.exe job not completed, abort.")
+			self.logger.write("Log file detected, waiting for completion.")
+			#Now wait for the output file to be completed (Note: Allow 7 days from the output file first appearing to run)
+			try:
+				secondWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS COMPLETE WRF", "retCode": 1},
+							  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "fatal", "retCode": 2},
+							  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
+							  {"waitCommand": "tail -n 1 output/rsl.error.0000", "contains": "error", "retCode": 2},]
+				# Note: I have the script checking the files once every three minutes so we don't stack five calls rapidly, this can be modified later if needed.
+				wait2 = Wait.Wait(secondWait, timeDelay = 180)
+				wRC = wait2.hold()
+				if wRC == 2:
+					self.logger.write("run_wrf(): Exit (Failed, Code 2)")
+					Tools.Process.instance().Unlock()
+					return False
+				else:
+					self.logger.write("run_wrf(): Exit")
+					Tools.Process.instance().Unlock()
+					return True				
+			except Wait.TimeExpiredException:
+				sys.exit("wrf.exe job not completed, abort.")				
 		self.logger.write("run_wrf(): Failed to enter run directory")
 		Tools.Process.instance().Unlock()
-		return False				
+		return False			
 
 class Postprocessing_Steps:
 	aSet = None

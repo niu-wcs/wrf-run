@@ -1,9 +1,9 @@
-# WRF on Gaea @ NIU #
+# WRF on Theta @ Argonne #
 ## Dpt. Geographic & Atmospheric Sciences ##
 ## By: Robert C. Fritzen ##
 
 ### Introduction ###
-This python script package automates the entire WRF process for use on cluster based computers, such as the Gaea computer provided for use by the Computer Science department at Northern Illinois University. This is a fully self-contained script package that handles the tasks of obtaining the data, running the pre-processing executables, the WRF process, and forking the task to post-processing scripts for visualization.
+This python script package automates the entire WRF process for use on cluster based computers. This is a fully self-contained script package that handles the tasks of obtaining the data, running the pre-processing executables, the WRF process, and forking the task to post-processing scripts for visualization.
 
 ### Contents ###
 This git repository contains the following subdirectories:

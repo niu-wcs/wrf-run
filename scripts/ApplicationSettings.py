@@ -75,6 +75,17 @@ class AppSettings():
 		self.replacementKeys["[run_output_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/output"
 		self.replacementKeys["[run_postprd_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/postprd"
 		self.replacementKeys["[data_dir]"] = self.fetch("datadir") + '/' + self.fetch("modeldata") + '/' + self.fetch("starttime")
+		self.replacementKeys["[mpi_ranks_per_node]"] = self.fetch("mpi_ranks_per_node")
+		self.replacementKeys["[num_geogrid_nodes]"] = self.fetch("num_geogrid_nodes")
+		self.replacementKeys["[geogrid_walltime]"] = self.fetch("geogrid_walltime")
+		self.replacementKeys["[num_metgrid_nodes]"] = self.fetch("num_metgrid_nodes")
+		self.replacementKeys["[metgrid_walltime]"] = self.fetch("metgrid_walltime")
+		self.replacementKeys["[num_real_nodes]"] = self.fetch("num_real_nodes")
+		self.replacementKeys["[real_walltime]"] = self.fetch("real_walltime")
+		self.replacementKeys["[num_wrf_nodes]"] = self.fetch("num_wrf_nodes")
+		self.replacementKeys["[wrf_walltime]"] = self.fetch("wrf_walltime")
+		self.replacementKeys["[num_upp_nodes]"] = self.fetch("num_upp_nodes")
+		self.replacementKeys["[upp_walltime]"] = self.fetch("upp_walltime")
 		# New Keys for the namelists
 		self.replacementKeys["[e_we]"] = self.fetch("e_we")
 		self.replacementKeys["[e_sn]"] = self.fetch("e_sn")
