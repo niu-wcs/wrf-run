@@ -76,6 +76,31 @@ class JobSteps:
 			
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
 			Tools.popen(self.aSet, "qsub geogrid.job -q debug-cache-quad -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
+			# Now wait for the log files
+			try:
+				firstWait = [{"waitCommand": "(ls geogrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
+				wait1 = Wait.Wait(firstWait, timeDelay = 25)
+				wait1.hold()
+			except Wait.TimeExpiredException:
+				sys.exit("geogrid.exe job not completed, abort.")			
+			# Check for completion
+			self.logger.write("Log file detected, waiting for completion.")
+			try:
+				secondWait = [{"waitCommand": "tail -n 3 geogrid.log*", "contains": "Successful completion of program geogrid.exe", "retCode": 1},
+							  {"waitCommand": "tail -n 3 geogrid.log*", "contains": "fatal", "retCode": 2},
+							  {"waitCommand": "tail -n 3 geogrid.log*", "contains": "runtime", "retCode": 2},
+							  {"waitCommand": "tail -n 3 geogrid.log*", "contains": "error", "retCode": 2},]
+				wait2 = Wait.Wait(secondWait, timeDelay = 25)
+				wRC1 = wait2.hold()
+				if wRC1 == 1:
+					# Success condition, proceed to the next.
+					self.logger.write("Geogrid process sucessfully completed.")
+				elif wRC1 == 2:
+					self.logger.write("run_geogrid(): Exit (Failed, Code 2)")
+					Tools.Process.instance().Unlock()
+					return False
+			except Wait.TimeExpiredException:
+				sys.exit("geogrid.exe job not completed, abort.")					
 		self.logger.write("run_geogrid(): Exit")
 		Tools.Process.instance().Unlock()
 	
