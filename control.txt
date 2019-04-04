@@ -10,7 +10,7 @@
 #    This is also an acceptable format for this file
 #
 # General Parameters
-starttime 2018061000 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
+starttime 2018060100 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
 rundays 1
 runhours 0
 sourcefile /projects/climate_severe/wrf-run/gnu
@@ -26,7 +26,7 @@ debugmode 0
 e_we 1150
 e_sn 750
 e_vert 50
-geog_data_res usgs_lakes+30s
+geog_data_res default
 dx_y 4000
 map_proj lambert
 ref_lat 38.5
