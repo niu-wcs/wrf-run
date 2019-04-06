@@ -211,7 +211,7 @@ class JobSteps:
 									  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "runtime", "retCode": 2},
 									  {"waitCommand": "tail -n 3 metgrid.log.0000", "contains": "error", "retCode": 2},]
 						wait4 = Wait.Wait(fourthWait, timeDelay = 25)
-						wRC2 = wait2.hold()
+						wRC2 = wait4.hold()
 						if wRC2 == 1:
 							# Success Condition, proceed to real.exe
 							self.logger.write("Metgrid process sucessfully completed, starting real process.")
