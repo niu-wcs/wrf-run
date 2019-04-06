@@ -79,7 +79,7 @@
  icloud                              = 1,
  surface_input_source                = 1,
  num_soil_layers                     = 4,
- num_land_cat                        = 28,
+ num_land_cat                        = 21,
  sf_urban_physics                    = 0,
  do_radar_ref                        = 1,
  hail_opt                            = 1,
