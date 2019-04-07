@@ -54,7 +54,7 @@ num_real_processors 2
 prerun_walltime 60
 # WRF Parameters
 num_wrf_nodes 128
-wrf_walltime 360
+wrf_walltime 180
 # Post-Processing Parameters
 run_postprocessing 0
 # - If using UPP (Unipost) with GRADS, use the below
