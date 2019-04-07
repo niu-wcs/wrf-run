@@ -6,6 +6,7 @@
 
 source [source_file]
 ulimit -s unlimited
+lfs setstripe -c 32 -S 8m [run_output_dir]
 
 cd [run_output_dir]
 

@@ -53,7 +53,7 @@ num_metgrid_processors 2
 num_real_processors 2
 prerun_walltime 60
 # WRF Parameters
-num_wrf_nodes 256
+num_wrf_nodes 128
 wrf_walltime 360
 # Post-Processing Parameters
 run_postprocessing 0
