@@ -29,7 +29,6 @@
  frames_per_auxhist2                 = 1000,
  debug_level                         = 0,
  nwp_diagnostics                     = 1,
- nocolons                            = .true.,
  /
 
  &domains
