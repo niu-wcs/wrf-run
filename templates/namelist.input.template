@@ -19,15 +19,17 @@
  frames_per_outfile                  = 1,
  restart                             = .false.,
  restart_interval                    = 1440,
- io_form_history                     = 2,
- io_form_restart                     = 2,
- io_form_input                       = 2,
- io_form_boundary                    = 2,
+ io_form_history                     = 11,
+ io_form_restart                     = 11,
+ io_form_input                       = 11,
+ io_form_boundary                    = 11,
  auxhist2_interval                   = 60,
- io_form_auxhist2                    = 2,
+ io_form_auxhist2                    = 11,
+ io_form_auxinput2                   = 11,
  frames_per_auxhist2                 = 1000,
  debug_level                         = 0,
  nwp_diagnostics                     = 1,
+ nocolons                            = .true.,
  /
 
  &domains
