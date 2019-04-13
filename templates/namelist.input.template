@@ -134,6 +134,6 @@
  /
 
  &namelist_quilt
- nio_tasks_per_group = 0,
- nio_groups = 1,
+ nio_tasks_per_group = [nio_tasks_per_group],
+ nio_groups = [nio_groups],
  /

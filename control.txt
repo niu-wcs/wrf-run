@@ -57,6 +57,8 @@ prerun_walltime 60
 # WRF Parameters
 num_wrf_nodes 128
 wrf_walltime 180
+nio_tasks_per_group 8
+nio_groups 1
 # Post-Processing Parameters
 run_postprocessing 0
 # - If using UPP (Unipost) with GRADS, use the below

@@ -101,6 +101,8 @@ class AppSettings():
 		self.replacementKeys["[p_top_requested]"] = self.fetch("p_top_requested")
 		self.replacementKeys["[num_metgrid_levels]"] = self.fetch("num_metgrid_levels")
 		self.replacementKeys["[num_metgrid_soil_levels]"] = self.fetch("num_metgrid_soil_levels")
+		self.replacementKeys["[nio_tasks_per_group]"] = self.fetch("nio_tasks_per_group")
+		self.replacementKeys["[nio_groups]"] = self.fetch("nio_groups")		
 	 
 	def replace(self, inStr):
 		if not inStr:
