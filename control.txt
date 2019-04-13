@@ -57,6 +57,7 @@ prerun_walltime 60
 # WRF Parameters
 num_wrf_nodes 128
 wrf_walltime 180
+# WRF Quilt Parameters
 nio_tasks_per_group 8
 nio_groups 1
 # Post-Processing Parameters
