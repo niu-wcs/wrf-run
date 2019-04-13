@@ -35,23 +35,24 @@ class JobSteps:
 		self.startTime = settings.fetch("starttime")
 		# Copy important files to the directory
 		Tools.popen(self.aSet, "cp " + settings.fetch("headdir") + "run_files/* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		# Move the generated files to the run directory		
-		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
 		# Copy required WRF files
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfrunfiles") + "* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		# Note, we need to remove the .exe files and then recopy from the head dir.
+		# Note, we need to remove the .exe files and sample namelist and then recopy from the head dir.
+		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/namelist.input")
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/wrf.exe")
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/real.exe")
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/ndown.exe")
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/tc.exe")
 		# Now Copy the "Real" WRF .exe files
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "*.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		# Lastly, grab our WPS executables
+		# Grab our WPS executables
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
+		# Finally, move the generated files to the run directory		
+		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
+		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])		
 	
 	def run_geogrid(self):
 		Tools.Process.instance().Lock()
