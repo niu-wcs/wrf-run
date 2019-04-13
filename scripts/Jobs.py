@@ -225,6 +225,8 @@ class JobSteps:
 						if wRC2 == 1:
 							# Success Condition, proceed to real.exe
 							self.logger.write("Metgrid process sucessfully completed, starting real process.")
+							Tools.popen(self.aSet, "mv metgrid.log.0000 metgrid_log.txt")
+							Tools.popen(self.aSet, "rm metgrid.log.*")
 							try:
 								fifthWait = [{"waitCommand": "(ls output/rsl.out.0000 && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
 								wait5 = Wait.Wait(fifthWait, timeDelay = 25)
@@ -245,6 +247,9 @@ class JobSteps:
 									Tools.Process.instance().Unlock()
 									return False
 								else:
+									# Copy the log files.
+									Tools.popen(self.aSet, "mv output/rsl.out.0000 real_log.txt")
+									Tools.popen(self.aSet, "mv output/rsl.error.0000 real_error_log.txt")									
 									#Validate the presense of the two files.
 									file1 = os.popen("(ls output/wrfinput_d01 && echo \"yes\") || echo \"no\"").read()
 									file2 = os.popen("(ls output/wrfbdy_d01 && echo \"yes\") || echo \"no\"").read()
@@ -316,6 +321,10 @@ class JobSteps:
 					Tools.Process.instance().Unlock()
 					return False
 				else:
+					Tools.popen(self.aSet, "mv output/rsl.out.0000 wrf_log.txt")
+					Tools.popen(self.aSet, "mv output/rsl.error.0000 wrf_error_log.txt")
+					Tools.popen(self.aSet, "rm output/rsl.out.*")
+					Tools.popen(self.aSet, "rm output/rsl.error.*")					
 					self.logger.write("run_wrf(): Exit")
 					Tools.Process.instance().Unlock()
 					return True				
