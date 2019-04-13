@@ -18,8 +18,10 @@ geogdir /projects/climate_severe/WRF/WPS_GEOG
 tabledir /projects/climate_severe/wrf-run/tables
 datadir /projects/climate_severe/model_data
 wrfdir /projects/climate_severe/runs
+wrfexecutables /projects/climate_severe/WRF/WRF/main/
+wrfrunfiles /projects/climate_severe/WRF/WRF/run/
 wpsexecutables /projects/climate_severe/WRF/WPS/
-uppexecutables /projects/climate_severe/WRF/UPPV3.2/bin/
+uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
 modeldata CFSv2
 debugmode 0
 # Model Specific Parameters

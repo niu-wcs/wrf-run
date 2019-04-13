@@ -38,7 +38,16 @@ class JobSteps:
 		# Move the generated files to the run directory		
 		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
 		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])
-		# Copy executables to the correct path
+		# Copy required WRF files
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfrunfiles") + "* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
+		# Note, we need to remove the .exe files and then recopy from the head dir.
+		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/wrf.exe")
+		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/real.exe")
+		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/ndown.exe")
+		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/tc.exe")
+		# Now Copy the "Real" WRF .exe files
+		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "*.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
+		# Lastly, grab our WPS executables
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
