@@ -47,7 +47,7 @@ run_wrf 0
 # Argonne Specific Parameters
 mpi_ranks_per_node 32
 # Geogrid Parameters
-num_geogrid_nodes 4
+num_geogrid_nodes 8
 geogrid_walltime 30
 # Preprocessing Job Parameters
 num_prerun_nodes 8
