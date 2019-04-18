@@ -1,6 +1,6 @@
 # This makefile is to create Post flat file from available and control XML file
 
-FLATFILEDIR		= /data1/climlab/wrf-gaea-run/post/UPP/parm/
+FLATFILEDIR		= /projects/climate_severe/wrf-run/post/UPP/parm/
 
 # Target flat file
 FLATFILENAME		= postxconfig-NT.txt
