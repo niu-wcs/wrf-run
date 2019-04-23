@@ -12,3 +12,5 @@ export JASPERINC=/projects/climate_severe/WRF/Libs/include
 export LD_LIBRARY_PATH=/projects/climate_severe/WRF/Libs:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/cray/pe/gcc-libs/:$LD_LIBRARY_PATH
 export LIBINCLUDE="/projects/climate_severe/WRF/Libs:/projects/climate_severe/WRF/Libs/include":$LIBINCLUDE
+
+export PATH=$PATH:/projects/climate_severe/WRF/grib2/wgrib2/

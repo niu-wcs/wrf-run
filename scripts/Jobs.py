@@ -435,8 +435,8 @@ class Postprocessing_Steps:
 				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
 				aprun += "./unipost.exe > " + logName + '\n'
-				aprun += "sleep 1\n"
-				upp_job_contents += "\n" + aprun + '\n'
+				aprun += "sleep 3\n"
+				upp_job_contents += "\n" + aprun + '\n\n'
 				
 				aprun = ""
 			# Create the job file, then submit it.
