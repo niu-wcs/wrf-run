@@ -64,8 +64,9 @@ nio_groups 1
 run_postprocessing 0
 # - If using UPP (Unipost) with GRADS, use the below
 post_run_unipost 1
+unipost_maximum_hours_per_job 24
 unipost_out grib2
-num_upp_nodes 8
+num_upp_nodes 6
 upp_walltime 60
 # - If using Python, use the below
 post_run_python 0

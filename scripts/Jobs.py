@@ -10,6 +10,7 @@ import os.path
 import datetime
 import glob
 import time
+import math
 from multiprocessing.pool import ThreadPool
 import ApplicationSettings
 import ModelData
@@ -395,19 +396,34 @@ class Postprocessing_Steps:
 			return False
 		
 	def run_postprocessing_upp(self):
-		# We run unipost in a single job by assembling all of out wrfout files and writing the UPP steps into one file for each
+		# Unipost needs to be run across multiple jobs that are broken up 24 hours of forecast per job.
+		#  this is done to prevent the job time limit from expiring while UPP is running.
 		Tools.Process.instance().Lock()
-		tWrite = Template.Template_Writer(self.aSet)
 		curDir = os.path.dirname(os.path.abspath(__file__)) 
-		temDir = self.aSet.fetch("headdir") + "templates/"
 		uppDir = self.aSet.fetch("headdir") + "post/UPP/"
-		fList = glob.glob(self.wrfDir + '/' + self.startTime[0:8] + "/output/wrfout*")
+		hoursPerJob = int(self.aSet.fetch("unipost_maximum_hours_per_job"))
+		fList = sorted(glob.glob(self.wrfDir + '/' + self.startTime[0:8] + "/output/wrfout*"))
 		fileCount = len(fList)
 		fLogs = []
+		currentCount = 0
+		currentUPPFile = 1
+		upp_job_contents = ""
 		self.logger.write("  5.b. Running UPP on " + str(fileCount) + " wrfout files")
+		self.logger.write("   -> Program is set for a maximum of " + str(hoursPerJob) + " hours per job.")
+		self.logger.write("   -> " + str(math.ceil(fileCount / hoursPerJob)) + " job(s) will be required.")
 		with Tools.cd(self.postDir):
-			upp_job_contents = ""
 			for iFile in fList:
+				# First, check if we're at the start of the job
+				if(currentCount == 0):
+					# Write the header to the stream.
+					upp_job_contents += "#!/bin/bash\n"
+					upp_job_contents += "#COBALT -t " + self.aSet.fetch("upp_walltime") + "\n"
+					upp_job_contents += "#COBALT -n " + self.aSet.fetch("num_upp_nodes") + "\n"
+					upp_job_contents += "#COBALT -q debug-cache-quad\n"
+					upp_job_contents += "#COBALT -A climate_severe\n\n"
+					upp_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
+					upp_job_contents += "ulimit -s unlimited\n\n"
+					upp_job_contents += "cd " + self.aSet.fetch("wrfdir") + '/' + self.aSet.fetch("starttime")[0:8] + "/postprd" + "\n\n"
 				dNum = iFile[-23:-20]
 				year = iFile[-19:-15]
 				month = iFile[-14:-12]
@@ -439,11 +455,25 @@ class Postprocessing_Steps:
 				upp_job_contents += "\n" + aprun + '\n\n'
 				
 				aprun = ""
-			# Create the job file, then submit it.
-			tWrite.generateTemplatedFile(temDir + "upp.job.template", "upp.job", extraKeys = {"[upp_job_contents]": upp_job_contents})
-			# Once the file has been written, submit the job.
-			Tools.popen(self.aSet, "chmod +x upp.job")
-			Tools.popen(self.aSet, "qsub upp.job -q debug-cache-quad -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
+				currentCount += 1
+				
+				# Check if the threshold has been reached.
+				if(currentCount == hoursPerJob):
+					# Threshold has been reached, write the output to a job, then reset.
+					with open("upp." + str(currentUPPFile) + ".job", 'w') as target_file:
+						target_file.write(upp_job_contents)
+						upp_job_contents = ""
+					Tools.popen(self.aSet, "chmod +x upp." + str(currentUPPFile) + ".job")
+					currentCount = 0
+					currentUPPFile += 1
+			self.logger.write("   -> Completed writing " + str(currentUPPFile-1) + " job files.")
+			self.logger.write("   -> Begin submitting jobs to the queue")
+			# All files have been accounted for, queue up the jobs.
+			for jobNumber in range(1, currentUPPFile):
+				jobFile = "upp." + str(jobNumber) + ".job"
+				self.logger.write("   -> Submitting " + jobFile + " to the queue.")
+				Tools.popen(self.aSet, "qsub " + jobFile + " -q debug-cache-quad -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
+			self.logger.write("   -> All job files have been submitted, waiting for unipost completion")
 			# Wait for all logs to flag as job complete
 			for iFile in fLogs:
 				try:
