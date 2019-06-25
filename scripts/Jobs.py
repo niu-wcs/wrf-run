@@ -405,25 +405,20 @@ class Postprocessing_Steps:
 		fList = sorted(glob.glob(self.wrfDir + '/' + self.startTime[0:8] + "/output/wrfout*"))
 		fileCount = len(fList)
 		fLogs = []
-		currentCount = 0
-		currentUPPFile = 1
 		upp_job_contents = ""
 		self.logger.write("  5.b. Running UPP on " + str(fileCount) + " wrfout files")
-		self.logger.write("   -> Program is set for a maximum of " + str(hoursPerJob) + " hours per job.")
-		self.logger.write("   -> " + str(math.ceil(fileCount / hoursPerJob)) + " job(s) will be required.")
+		
+		upp_job_contents += "#!/bin/bash\n"
+		upp_job_contents += "#COBALT -t " + self.aSet.fetch("upp_walltime") + "\n"
+		upp_job_contents += "#COBALT -n " + self.aSet.fetch("num_upp_nodes") + "\n"
+		upp_job_contents += "#COBALT -q debug-cache-quad\n"
+		upp_job_contents += "#COBALT -A climate_severe\n\n"
+		upp_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
+		upp_job_contents += "ulimit -s unlimited\n\n"
+		upp_job_contents += "cd " + self.aSet.fetch("wrfdir") + '/' + self.aSet.fetch("starttime")[0:8] + "/postprd" + "\n\n"		
+		
 		with Tools.cd(self.postDir):
 			for iFile in fList:
-				# First, check if we're at the start of the job
-				if(currentCount == 0):
-					# Write the header to the stream.
-					upp_job_contents += "#!/bin/bash\n"
-					upp_job_contents += "#COBALT -t " + self.aSet.fetch("upp_walltime") + "\n"
-					upp_job_contents += "#COBALT -n " + self.aSet.fetch("num_upp_nodes") + "\n"
-					upp_job_contents += "#COBALT -q debug-cache-quad\n"
-					upp_job_contents += "#COBALT -A climate_severe\n\n"
-					upp_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
-					upp_job_contents += "ulimit -s unlimited\n\n"
-					upp_job_contents += "cd " + self.aSet.fetch("wrfdir") + '/' + self.aSet.fetch("starttime")[0:8] + "/postprd" + "\n\n"
 				dNum = iFile[-23:-20]
 				year = iFile[-19:-15]
 				month = iFile[-14:-12]
@@ -446,34 +441,23 @@ class Postprocessing_Steps:
 				if(self.aSet.fetch("unipost_out") == "grib"):
 					upp_job_contents += "\nln -sf " + uppDir + "parm/wrf_cntrl.parm fort.14"
 				
-				aprun = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
+				aprun = "aprun -n " + str(self.aSet.fetch(upp_ensemble_nodes_per_hour)) + " -N $n_mpi_ranks_per_node \\" + '\n'
 				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
 				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
-				aprun += "./unipost.exe > " + logName + '\n'
-				aprun += "sleep 3\n"
+				aprun += "./unipost.exe > " + logName + " &\n"
+				aprun += "sleep 1\n"
 				upp_job_contents += "\n" + aprun + '\n\n'
 				
 				aprun = ""
-				currentCount += 1
-				
-				# Check if the threshold has been reached.
-				if(currentCount == hoursPerJob):
-					# Threshold has been reached, write the output to a job, then reset.
-					with open("upp." + str(currentUPPFile) + ".job", 'w') as target_file:
-						target_file.write(upp_job_contents)
-						upp_job_contents = ""
-					Tools.popen(self.aSet, "chmod +x upp." + str(currentUPPFile) + ".job")
-					currentCount = 0
-					currentUPPFile += 1
-			self.logger.write("   -> Completed writing " + str(currentUPPFile-1) + " job files.")
-			self.logger.write("   -> Begin submitting jobs to the queue")
-			# All files have been accounted for, queue up the jobs.
-			for jobNumber in range(1, currentUPPFile):
-				jobFile = "upp." + str(jobNumber) + ".job"
-				self.logger.write("   -> Submitting " + jobFile + " to the queue.")
-				Tools.popen(self.aSet, "qsub " + jobFile + " -q debug-cache-quad -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
-			self.logger.write("   -> All job files have been submitted, waiting for unipost completion")
+
+			upp_job_contents += "wait\necho \"Job Complete\""
+			with open("upp.job", 'w') as target_file:
+				target_file.write(upp_job_contents)
+			Tools.popen(self.aSet, "chmod +x upp.job")
+			self.logger.write("   -> Submitting upp job to the queue")
+			Tools.popen(self.aSet, "qsub upp.job -q normal -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
+			self.logger.write("   -> Job file submitted, waiting for completion")
 			# Wait for all logs to flag as job complete
 			for iFile in fLogs:
 				try:
