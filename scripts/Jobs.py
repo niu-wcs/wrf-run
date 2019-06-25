@@ -401,7 +401,6 @@ class Postprocessing_Steps:
 		Tools.Process.instance().Lock()
 		curDir = os.path.dirname(os.path.abspath(__file__)) 
 		uppDir = self.aSet.fetch("headdir") + "post/UPP/"
-		hoursPerJob = int(self.aSet.fetch("unipost_maximum_hours_per_job"))
 		fList = sorted(glob.glob(self.wrfDir + '/' + self.startTime[0:8] + "/output/wrfout*"))
 		fileCount = len(fList)
 		fLogs = []
