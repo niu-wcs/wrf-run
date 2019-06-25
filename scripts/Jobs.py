@@ -440,7 +440,7 @@ class Postprocessing_Steps:
 				if(self.aSet.fetch("unipost_out") == "grib"):
 					upp_job_contents += "\nln -sf " + uppDir + "parm/wrf_cntrl.parm fort.14"
 				
-				aprun = "aprun -n " + str(self.aSet.fetch(upp_ensemble_nodes_per_hour)) + " -N $n_mpi_ranks_per_node \\" + '\n'
+				aprun = "aprun -n " + str(self.aSet.fetch("upp_ensemble_nodes_per_hour")) + " -N $n_mpi_ranks_per_node \\" + '\n'
 				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
 				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
