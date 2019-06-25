@@ -410,7 +410,7 @@ class Postprocessing_Steps:
 		upp_job_contents += "#!/bin/bash\n"
 		upp_job_contents += "#COBALT -t " + self.aSet.fetch("upp_walltime") + "\n"
 		upp_job_contents += "#COBALT -n " + self.aSet.fetch("num_upp_nodes") + "\n"
-		upp_job_contents += "#COBALT -q debug-cache-quad\n"
+		upp_job_contents += "#COBALT -q default\n"
 		upp_job_contents += "#COBALT -A climate_severe\n\n"
 		upp_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
 		upp_job_contents += "ulimit -s unlimited\n\n"
@@ -455,7 +455,7 @@ class Postprocessing_Steps:
 				target_file.write(upp_job_contents)
 			Tools.popen(self.aSet, "chmod +x upp.job")
 			self.logger.write("   -> Submitting upp job to the queue")
-			Tools.popen(self.aSet, "qsub upp.job -q normal -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
+			Tools.popen(self.aSet, "qsub upp.job -q default -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
 			self.logger.write("   -> Job file submitted, waiting for completion")
 			# Wait for all logs to flag as job complete
 			for iFile in fLogs:
