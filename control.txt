@@ -58,8 +58,8 @@ prerun_walltime 60
 num_wrf_nodes 128
 wrf_walltime 180
 # WRF Quilt Parameters
-nio_tasks_per_group 8
-nio_groups 1
+nio_tasks_per_group 16
+nio_groups 2
 # Post-Processing Parameters
 run_postprocessing 0
 # - If using UPP (Unipost) with GRADS, use the below
@@ -67,6 +67,6 @@ post_run_unipost 1
 unipost_out grib2
 num_upp_nodes 128
 upp_ensemble_nodes_per_hour 4
-upp_walltime 180
+upp_walltime 60
 # - If using Python, use the below
 post_run_python 0
