@@ -452,7 +452,7 @@ class Postprocessing_Steps:
 				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
 				aprun += "./unipost.exe > " + logName + " &\n"
-				aprun += "sleep 1\n"
+				aprun += "sleep 5\n"
 				upp_job_contents += "\n" + aprun + '\n\n'
 				
 				aprun = ""
