@@ -100,14 +100,14 @@ class Application():
 			post = Jobs.Postprocessing_Steps(settings, modelParms)
 			Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 			if(post.prepare_postprocessing() == False):
-				logger.write("   5. Error initializing unipost")
+				logger.write("   5. Error initializing post-processing")
 				logger.close()			
-				sys.exit("   5. ERROR: unipost.exe process failed to initialize, check error file.")
+				sys.exit("   5. ERROR: post-processing process failed to initialize, check error file.")
 			Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 			if(post.run_postprocessing() == False):
-				logger.write("   5. Error running unipost")
+				logger.write("   5. Error running post-processing")
 				logger.close()				
-				sys.exit("   5. ERROR: unipost.exe process failed to complete, check error file.")			
+				sys.exit("   5. ERROR: post-processing process failed to complete, check error file.")			
 			logger.write(" 5. Done")
 		else:
 			logger.write(" 5. Post-processing flag disabled, skipping step")

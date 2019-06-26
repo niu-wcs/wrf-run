@@ -414,7 +414,7 @@ class Postprocessing_Steps:
 		upp_job_contents += "#COBALT -A climate_severe\n\n"
 		upp_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
 		upp_job_contents += "ulimit -s unlimited\n\n"
-		upp_job_contents += "export n_nodes=$COBALT_JOBSIZE\n"
+		upp_job_contents += "export n_nodes="+ str(self.aSet.fetch("upp_ensemble_nodes_per_hour")) +"\n"
 		upp_job_contents += "export n_mpi_ranks_per_node=32\n"
 		upp_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
 		upp_job_contents += "export n_openmp_threads_per_rank=4\n"
@@ -447,7 +447,7 @@ class Postprocessing_Steps:
 				if(self.aSet.fetch("unipost_out") == "grib"):
 					upp_job_contents += "\nln -sf " + uppDir + "parm/wrf_cntrl.parm fort.14"
 				
-				aprun = "aprun -n " + str(self.aSet.fetch("upp_ensemble_nodes_per_hour")) + " -N $n_mpi_ranks_per_node \\" + '\n'
+				aprun = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
 				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
 				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
