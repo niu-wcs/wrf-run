@@ -414,6 +414,13 @@ class Postprocessing_Steps:
 		upp_job_contents += "#COBALT -A climate_severe\n\n"
 		upp_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
 		upp_job_contents += "ulimit -s unlimited\n\n"
+		upp_job_contents += "export n_nodes=$COBALT_JOBSIZE\n"
+		upp_job_contents += "export n_mpi_ranks_per_node=32\n"
+		upp_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
+		upp_job_contents += "export n_openmp_threads_per_rank=4\n"
+		upp_job_contents += "export n_hyperthreads_per_core=2\n"
+		upp_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
+
 		upp_job_contents += "cd " + self.aSet.fetch("wrfdir") + '/' + self.aSet.fetch("starttime")[0:8] + "/postprd" + "\n\n"		
 		
 		with Tools.cd(self.postDir):
