@@ -51,6 +51,9 @@ export LIBINCLUDE="/projects/climate_severe/WRF/Libs:/projects/climate_severe/WR
 COMPILING WRF (~20 - 30m)
 ==========================================================
 
+First edit the file share/module_check_a_mundo.F, you need to comment (! in the front) lines 2068 - 2100 to allow
+ smaller than 10x10 grids to be used with MPI
+
 Run ./configure
 
 Select options:
