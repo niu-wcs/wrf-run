@@ -85,9 +85,16 @@
        <param>
        <shortname>VVEL_ON_HYBRID_LVL</shortname>
        <pname>VVEL</pname>
-       <level>1.</level>
+       <level>1. 2. 3. 4. 5.</level>
        <scale>5.0</scale>
        </param>
+	   
+	   <param>
+	   <shortname>ABSV_ON_HYBRID_LVL</shortname>
+	   <pname>ABSV</pname>
+	   <level>1. 2. 3. 4. 5.</level>
+	   <scale>3.0</scale>
+	   </param>	   
 
        <param>
        <shortname>REFD_ON_HYBRID_LVL</shortname>
@@ -145,6 +152,13 @@
        <level>10000. 20000. 25000. 30000. 50000. 70000. 85000. 90000. 92500. 100000.</level>
        <scale>5.0</scale>
        </param>
+	   
+	   <param>
+	   <shortname>ABSV_ON_ISOBARIC_SFC</shortname>
+	   <pname>ABSV</pname>
+	   <level>10000. 20000. 25000. 30000. 50000. 70000. 85000. 90000. 92500. 100000.</level>
+	   <scale>4.0</scale>
+	   </param>	   
 
        <param>
        <shortname>CICE_ON_ISOBARIC_SFC</shortname>
@@ -599,13 +613,9 @@
        </param>
 	   
 	   <param>
-	   <post_avblfldidx>427</post_avblfldidx>
 	   <shortname>UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
-	   <longname>Updraft Helicity on Specified Height Level Above Ground</longname>
 	   <pname>MXUPHL</pname>
-	   <fixed_sfc1_type>spec_hgt_lvl_above_grnd</fixed_sfc1_type>
 	   <level>5000.</level>
-	   <fixed_sfc2_type>spec_hgt_lvl_above_grnd</fixed_sfc2_type>
 	   <level2>2000.</level2>
 	   <scale>3.0</scale>
 	   </param>	   
@@ -614,9 +624,7 @@
        <shortname>MAX_UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
        <pname>MXUPHL</pname>
        <stats_proc>MAX</stats_proc>       
-       <fixed_sfc1_type>spec_hgt_lvl_above_grnd</fixed_sfc1_type>
        <level>5000.</level>
-       <fixed_sfc2_type>spec_hgt_lvl_above_grnd</fixed_sfc2_type>
        <level2>2000.</level2>
        <scale>3.0</scale>
        </param>
