@@ -597,6 +597,29 @@
        <level2>0.</level2>
        <scale>3.0</scale>
        </param>
+	   
+	   <param>
+	   <post_avblfldidx>427</post_avblfldidx>
+	   <shortname>UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
+	   <longname>Updraft Helicity on Specified Height Level Above Ground</longname>
+	   <pname>MXUPHL</pname>
+	   <fixed_sfc1_type>spec_hgt_lvl_above_grnd</fixed_sfc1_type>
+	   <level>5000.</level>
+	   <fixed_sfc2_type>spec_hgt_lvl_above_grnd</fixed_sfc2_type>
+	   <level2>2000.</level2>
+	   <scale>3.0</scale>
+	   </param>	   
+	   
+	   <param>
+       <shortname>MAX_UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
+       <pname>MXUPHL</pname>
+       <stats_proc>MAX</stats_proc>       
+       <fixed_sfc1_type>spec_hgt_lvl_above_grnd</fixed_sfc1_type>
+       <level>5000.</level>
+       <fixed_sfc2_type>spec_hgt_lvl_above_grnd</fixed_sfc2_type>
+       <level2>2000.</level2>
+       <scale>3.0</scale>
+       </param>
 
        <param>
        <shortname>NLAT_ON_SURFACE</shortname>
