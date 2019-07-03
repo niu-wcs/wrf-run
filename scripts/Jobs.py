@@ -463,10 +463,10 @@ class Postprocessing_Steps:
 			Tools.popen(self.aSet, "chmod +x upp.job")
 			self.logger.write("   -> Submitting upp job to the queue")
 			jobSub = Tools.popen(self.aSet, "qsub upp.job -q default -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
-			self.logger.write("   -> Job file submitted, wait for " + jobSub.fetch()[0] + ".output")
+			self.logger.write("   -> Job file submitted, wait for " + jobSub.fetch()[0].rstrip("\n\r") + ".output")
 			# Wait for all logs to flag as job complete
 			try:
-				wCond = [{"waitCommand": "tail -n 2 " + jobSub.fetch()[0] + ".output", "contains": "Job Complete", "retCode": 1},]
+				wCond = [{"waitCommand": "tail -n 2 " + jobSub.fetch()[0].rstrip("\n\r") + ".output", "contains": "Job Complete", "retCode": 1},]
 				waitCond = Wait.Wait(wCond, timeDelay = 60)
 				wRC = waitCond.hold()			
 				if wRC == 1:
