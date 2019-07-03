@@ -462,20 +462,19 @@ class Postprocessing_Steps:
 				target_file.write(upp_job_contents)
 			Tools.popen(self.aSet, "chmod +x upp.job")
 			self.logger.write("   -> Submitting upp job to the queue")
-			Tools.popen(self.aSet, "qsub upp.job -q default -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
+			jobSub = Tools.popen(self.aSet, "qsub upp.job -q default -t " + str(self.aSet.fetch("upp_walltime")) + " -n " + str(self.aSet.fetch("num_upp_nodes")) + " --mode script")
 			self.logger.write("   -> Job file submitted, waiting for completion")
 			# Wait for all logs to flag as job complete
-			for iFile in fLogs:
-				try:
-					wCond = [{"waitCommand": "tail -n 2 " + iFile, "contains": "PROGRAM UNIFIED_POST HAS ENDED", "retCode": 1},
-							  {"waitCommand": "tail -n 3 " + iFile, "contains": "Primary job  terminated normally, but 1 process returned", "retCode": 2},]
-					waitCond = Wait.Wait(wCond, timeDelay = 60)
-					wRC = waitCond.hold()
-					if wRC == 2:
-						Tools.Process.instance().Unlock()
-						return False			
-				except Wait.TimeExpiredException:
-					sys.exit("unipost.exe job not completed, abort.")
+			try:
+				wCond = [{"waitCommand": "tail -n 2 " + jobSub.fetch()[0] + ".output", "contains": "Job Complete", "retCode": 1},]
+				waitCond = Wait.Wait(wCond, timeDelay = 60)
+				wRC = waitCond.hold()			
+				if wRC == 2:
+					Tools.Process.instance().Unlock()
+					return False			
+			except Wait.TimeExpiredException:
+				sys.exit("unipost.exe job not completed, abort.")
+			self.logger.write("   -> Unipost Job Completed, Verifying files.")
 			# Run a quick ls -l test to ensure the number of files present matches what we're expecting
 			fCountTest = Tools.popen(self.aSet, "ls -l WRFPRS*")
 			cmdTxt = fCountTest.fetch()

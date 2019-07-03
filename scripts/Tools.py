@@ -37,7 +37,7 @@ class popen:
 			cResult = str(cResult)
 			stderr = str(stderr)
 			self.stored = [cResult, stderr]
-			loggedPrint.instance().write("popen(" + command +"): \nSTORED[0]: " + self.stored[0] + "\nSTORED[1]: " + self.stored[1])
+			loggedPrint.instance().write("popen(" + command +"): " + self.stored[0] + ", " + self.stored[1])
 			
 	def fetch(self):
 		return self.stored
