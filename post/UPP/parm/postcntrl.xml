@@ -615,6 +615,7 @@
 	   <param>
 	   <shortname>UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
 	   <pname>UPHL</pname>
+	   <table_info>NCEP</table_info>
 	   <level>5000.</level>
 	   <level2>2000.</level2>
 	   <scale>3.0</scale>
@@ -623,6 +624,7 @@
 	   <param>
        <shortname>MAX_UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
        <pname>UPHL</pname>
+	   <table_info>NCEP</table_info>
        <stats_proc>MAX</stats_proc>       
        <level>5000.</level>
        <level2>2000.</level2>
