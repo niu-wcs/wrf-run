@@ -614,7 +614,7 @@
 	   
 	   <param>
 	   <shortname>UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
-	   <pname>MXUPHL</pname>
+	   <pname>UPHL</pname>
 	   <level>5000.</level>
 	   <level2>2000.</level2>
 	   <scale>3.0</scale>
@@ -622,7 +622,7 @@
 	   
 	   <param>
        <shortname>MAX_UPHL_ON_SPEC_HGT_LVL_ABOVE_GRND_2-5km</shortname>
-       <pname>MXUPHL</pname>
+       <pname>UPHL</pname>
        <stats_proc>MAX</stats_proc>       
        <level>5000.</level>
        <level2>2000.</level2>

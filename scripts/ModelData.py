@@ -40,6 +40,7 @@ class ModelData():
 	modelParms = None
 	startTime = ""
 	dataDir = ""
+	dataForecastHour = 0
 	runDays = 1
 	runHours = 1
 
@@ -50,9 +51,11 @@ class ModelData():
 		self.startTime = datetime.datetime.strptime(settings.fetch("starttime"), "%Y%m%d%H")
 		self.runDays = settings.fetch("rundays")
 		self.runHours = settings.fetch("runhours")
+		self.dataForecastHour = settings.fetch("modeldataforecasthour")
 		logger = Tools.loggedPrint.instance()
 		logger.write(" - Initializing model data with the following settings:")
 		logger.write("  -> Model Data: " + settings.fetch("modeldata"))
+		logger.write("  -> Model Data Forecast Hour: " + settings.fetch("modeldataforecasthour"))
 		logger.write("  -> Data Directory: " + self.dataDir)
 		logger.write("  -> Initialization Time: " + self.startTime.strftime('%Y%m%d%H'))
 		logger.write("  -> Run Days: " + str(self.runDays))

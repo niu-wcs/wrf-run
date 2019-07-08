@@ -23,6 +23,7 @@ wrfrunfiles /projects/climate_severe/WRF/WRF/run/
 wpsexecutables /projects/climate_severe/WRF/WPS/
 uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
 modeldata CFSv2
+modeldataforecasthour 0
 debugmode 0
 # Model Specific Parameters
 e_we 1150

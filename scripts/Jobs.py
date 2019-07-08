@@ -17,6 +17,7 @@ import ModelData
 import Tools
 import Wait
 import Template
+from .post.Python import PythonPostProcessing
 
 # JobSteps: Class responsible for handling the steps that involve job submission and checkup
 class JobSteps:
@@ -377,8 +378,7 @@ class Postprocessing_Steps:
 			Tools.Process.instance().Unlock()
 			return True
 		elif(self.aSet.fetch("post_run_python") == '1'):
-			self.logger.write("  5.a. Python Flagged Active")
-			self.logger.write("  5.a. Done")
+			self.logger.write("  5.a. Python Flagged Active, no pre-job work required.")
 			Tools.Process.instance().Unlock()
 			return True
 		else:
@@ -390,7 +390,8 @@ class Postprocessing_Steps:
 		if(self.aSet.fetch("post_run_unipost") == '1'):
 			return self.run_postprocessing_upp()
 		elif(self.aSet.fetch("post_run_python") == '1'):
-			return True
+			post = PythonPostProcessing(self.aSet, self.wrfDir + '/' + self.startTime[0:8] + "/output", self.postDir)
+			return post.run_postprocessing_python()
 		else:
 			sys.exit("Error: run_postprocessing() called without a mode flagged, abort.")
 			return False
