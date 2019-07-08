@@ -318,85 +318,85 @@ def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
 	hgt = daskArray["HGT"]
 	ph = daskArray["PH"]
 	phb = daskArray["PHB"]
-	
-    varname = either("U", "UU")(daskArray)
-	uS = daskArray[varname]
-    u = wrapped_unstagger(daskArray[varname], -1, num_workers, save_numpy=True)
 
-    varname = either("V", "VV")(daskArray)
+	varname = either("U", "UU")(daskArray)
+	uS = daskArray[varname]
+	u = wrapped_unstagger(daskArray[varname], -1, num_workers, save_numpy=True)
+
+	varname = either("V", "VV")(daskArray)
 	vS = daskArray[varname]
-    v = wrapped_unstagger(daskArray[varname], -2, num_workers, save_numpy=True)
-	
+	v = wrapped_unstagger(daskArray[varname], -2, num_workers, save_numpy=True)
+
 	geopt = map_blocks(wrapped_add, ph, phb, omp_threads, dtype=ph.dtype)
 	geopt_f = wrapped_unstagger(geopt, -3, num_workers)	
 	zS = map_blocks(wrapped_div, geopt_f, Constants.G, omp_threads, dtype=ph.dtype)
 	z = to_np(zS, num_workers)
-	
-    u1 = to_da(np.ascontiguousarray(u[..., ::-1, :, :]))
-    v1 = to_da(np.ascontiguousarray(v[..., ::-1, :, :]))
-    z1 = to_da(np.ascontiguousarray(z[..., ::-1, :, :]))
+
+	u1 = to_da(np.ascontiguousarray(u[..., ::-1, :, :]))
+	v1 = to_da(np.ascontiguousarray(v[..., ::-1, :, :]))
+	z1 = to_da(np.ascontiguousarray(z[..., ::-1, :, :]))
 
 	srh = srh_wrap(u1, v1, z1, hgt, lats, top, omp_threads)
 	return srh.compute(num_workers)
 	
 def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1):
-    wstag = daskArray["W"]
-    ph = daskArray["PH"]
-    phb = daskArray["PHB"]
-    mapfct = daskArray["MAPFAC_M"]
-	
+	wstag = daskArray["W"]
+	ph = daskArray["PH"]
+	phb = daskArray["PHB"]
+	mapfct = daskArray["MAPFAC_M"]
+
 	dx = daskArray["DX"]
 	dy = daskArray["DY"]
-	
-    varname = either("U", "UU")(daskArray)
-	uS = daskArray[varname]
-    u = wrapped_unstagger(daskArray[varname], -1, num_workers)
 
-    varname = either("V", "VV")(daskArray)
+	varname = either("U", "UU")(daskArray)
+	uS = daskArray[varname]
+	u = wrapped_unstagger(daskArray[varname], -1, num_workers)
+
+	varname = either("V", "VV")(daskArray)
 	vS = daskArray[varname]
-    v = wrapped_unstagger(daskArray[varname], -2, num_workers)	
-	
+	v = wrapped_unstagger(daskArray[varname], -2, num_workers)	
+
 	geopt = map_blocks(wrapped_add, ph, phb, omp_threads, dtype=ph.dtype)
 	geopt_f = wrapped_unstagger(geopt, -3, num_workers)	
 	zp = map_blocks(wrapped_div, geopt_f, Constants.G, omp_threads, dtype=ph.dtype)	
-	
+
 	udhel = udhel_wrap(zp, mapfct, u, v, wstag, dx, dy, bottom, top, omp_threads)
 	return udhel.compute(num_workers)
 	
 def get_omega(daskArray, omp_threads=1, num_workers=1):
-    t = daskArray["T"]
-    p = daskArray["P"]
-    w = daskArray["W"]
-    pb = daskArray["PB"]
-    qv = daskArray["QVAPOR"]
-	
+	t = daskArray["T"]
+	p = daskArray["P"]
+	w = daskArray["W"]
+	pb = daskArray["PB"]
+	qv = daskArray["QVAPOR"]
+
 	wa = wrapped_unstagger(w, -3, num_workers)
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, omp_threads, dtype=t.dtype)
 	full_p = map_blocks(wrapped_add, p, pb, omp_threads, dtype=p.dtype)	
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=p.dtype)
-	
+
 	omega = omega_wrap(qv, tk, wa, full_p, omp_threads)
 	return omega.compute(num_workers)
 	
 def get_accum_precip(daskArray, omp_threads=1, num_workers=1):
-    rainc = daskArray["RAINC"]
-    rainnc = daskArray["RAINNC"]	
+	rainc = daskArray["RAINC"]
+	rainnc = daskArray["RAINNC"]	
 	rainsum = map_blocks(wrapped_add, rainc, rainnc, omp_threads, dtype=rainc.dtype)
 	return rainsum.compute(num_workers)
 	
 def get_pw(daskArray, omp_threads=1, num_workers=1):
-    t = daskArray["T"]
-    p = daskArray["P"]
-    pb = daskArray["PB"]
-    ph = daskArray["PH"]
-    phb = daskArray["PHB"]
-    qv = daskArray["QVAPOR"]
-	
+	t = daskArray["T"]
+	p = daskArray["P"]
+	pb = daskArray["PB"]
+	ph = daskArray["PH"]
+	phb = daskArray["PHB"]
+	qv = daskArray["QVAPOR"]
+
 	full_p = map_blocks(wrapped_add, p, pb, omp_threads, dtype=p.dtype)
 	full_ph = map_blocks(wrapped_add, ph, pb, omp_threads, dtype=ph.dtype)
 	ht = map_blocks(wrapped_div, full_ph, Constants.G, omp_threads, dtype=p.dtype)
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, omp_threads, dtype=t.dtype)
-	
+
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=p.dtype)
 	tv = map_blocks(tv_wrap, tk, qv, omp_threads, dtype=p.dtype)
 
@@ -404,85 +404,85 @@ def get_pw(daskArray, omp_threads=1, num_workers=1):
 	return pw.compute(num_workers)
 	
 def get_rh(daskArray, omp_threads=1, num_workers=1):
-    t = daskArray["T"]
-    p = daskArray["P"]
-    pb = daskArray["PB"]
-    qvapor = daskArray["QVAPOR"].copy()
-	
+	t = daskArray["T"]
+	p = daskArray["P"]
+	pb = daskArray["PB"]
+	qvapor = daskArray["QVAPOR"].copy()
+
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, omp_threads, dtype=t.dtype)
 	full_p = map_blocks(wrapped_add, p, pb, omp_threads, dtype=p.dtype)
-	
+
 	qvapor[qvapor < 0] = 0.
-	
+
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=p.dtype)
 	rh = map_blocks(rh_wrap, qvapor, full_p, tk, omp_threads, dtype=p.dtype)
 	
 def get_slp(daskArray, omp_threads=1, num_workers=1):
-    t = daskArray["T"]
-    p = daskArray["P"]
-    pb = daskArray["PB"]
-    qvapor = daskArray["QVAPOR"].copy()
-    ph = daskArray["PH"]
-    phb = daskArray["PHB"]	
-	
+	t = daskArray["T"]
+	p = daskArray["P"]
+	pb = daskArray["PB"]
+	qvapor = daskArray["QVAPOR"].copy()
+	ph = daskArray["PH"]
+	phb = daskArray["PHB"]	
+
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, omp_threads, dtype=t.dtype)
 	full_p = map_blocks(wrapped_add, p, pb, omp_threads, dtype=p.dtype)
 	qvapor[qvapor < 0] = 0.	
-	
+
 	pre_full_ph = map_blocks(wrapped_add, ph, phb, omp_threads, dtype=ph.dtype)
 	full_ph = map_blocks(wrapped_div, pre_full_ph, Constants.G, omp_threads, dtype=ph.dtype)
 	destag_ph = wrapped_unstagger(full_ph, -3, num_workers)
-	
+
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=p.dtype)
 	slp = slp_wrap(destag_ph, tk, full_p, qvapor, omp_threads)
 	return slp.compute(num_workers)
 	
 def get_avo(daskArray, omp_threads=1, num_workers=1):
-    u = daskArray["U"]
-    v = daskArray["V"]
-    msfu = daskArray["MAPFAC_U"]
-    msfv = daskArray["MAPFAC_V"]
-    msfm = daskArray["MAPFAC_M"]
-    cor = daskArray["F"]
+	u = daskArray["U"]
+	v = daskArray["V"]
+	msfu = daskArray["MAPFAC_U"]
+	msfv = daskArray["MAPFAC_V"]
+	msfm = daskArray["MAPFAC_M"]
+	cor = daskArray["F"]
 
-    dx = daskArray["DX"]
-    dy = daskArray["DY"]
+	dx = daskArray["DX"]
+	dy = daskArray["DY"]
 
 	avo = avo_wrap(u, v, msfu, msfv, msfm, cor, dx, dy, omp_threads)
 	return avo.compute(num_workers)
 	
 def get_rvor(daskArray, omp_threads=1, num_workers=1):
-    u = daskArray["U"]
-    v = daskArray["V"]
-    msfu = daskArray["MAPFAC_U"]
-    msfv = daskArray["MAPFAC_V"]
-    msfm = daskArray["MAPFAC_M"]
-    cor = daskArray["F"]
+	u = daskArray["U"]
+	v = daskArray["V"]
+	msfu = daskArray["MAPFAC_U"]
+	msfv = daskArray["MAPFAC_V"]
+	msfm = daskArray["MAPFAC_M"]
+	cor = daskArray["F"]
 
-    dx = daskArray["DX"]
-    dy = daskArray["DY"]
+	dx = daskArray["DX"]
+	dy = daskArray["DY"]
 
 	avo = avo_wrap(u, v, msfu, msfv, msfm, cor, dx, dy, omp_threads)
 	rvor = map_blocks(wrapped_sub, avo, cor, omp_threads, dtype=cor.dtype)
-	
+
 	return rvor.compute(num_workers)
 	
 def get_pvo(daskArray, omp_threads=1, num_workers=1):
-    u = daskArray["U"]
-    v = daskArray["V"]
-    t = daskArray["T"]
-    p = daskArray["P"]
-    pb = daskArray["PB"]
-    msfu = daskArray["MAPFAC_U"]
-    msfv = daskArray["MAPFAC_V"]
-    msfm = daskArray["MAPFAC_M"]
-    cor = daskArray["F"]
+	u = daskArray["U"]
+	v = daskArray["V"]
+	t = daskArray["T"]
+	p = daskArray["P"]
+	pb = daskArray["PB"]
+	msfu = daskArray["MAPFAC_U"]
+	msfv = daskArray["MAPFAC_V"]
+	msfm = daskArray["MAPFAC_M"]
+	cor = daskArray["F"]
 
-    dx = daskArray["DX"]
-    dy = daskArray["DY"]
-	
+	dx = daskArray["DX"]
+	dy = daskArray["DY"]
+
 	full_t = map_blocks(wrapped_add, t, 300, omp_threads, dtype=t.dtype)
 	full_p = map_blocks(wrapped_add, p, pb, omp_threads, dtype=p.dtype)
-	
+
 	pvo = pvo_wrap(u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads)
 	return pvo.compute(num_workers)
