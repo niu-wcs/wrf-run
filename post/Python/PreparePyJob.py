@@ -1,15 +1,15 @@
 #!/usr/bin/python
-# PythonPostProcessing.py
+# PreparePyJob.py
 # Robert C Fritzen - Dpt. Geographic & Atmospheric Sciences
 #
-# The head class instance for post-processing WRF using python
+# This class instance is responsible for preparing the post-processing job file that submits the python scripts
+#  to clusters
 
-import Calculation
+import glob
 from ..scripts import Tools
 from netCDF4 import Dataset
-from wrf import getvar, ALL_TIMES, extract_vars, omp_set_num_threads, omp_get_max_threads
 
-class PythonPostProcessing:
+class PreparePyJob:
 	aSet = None
 	wrfOutDir = ""
 	targetDir = ""
@@ -22,10 +22,10 @@ class PythonPostProcessing:
 		self.targetDir = targetDir
 		self.logger = Tools.loggedPrint.instance()
 		
-	# run_postprocessing_python: This function initializes the post-processing steps
-	def run_postprocessing_python(self):
+	# prepare_job: This function writes the post-processing job file
+	def prepare_job(self):
 		Tools.Process.instance().Lock()	
-		self.logger.write("  5.b. Entering run_postprocessing_python(), scanning for wrfout files.")
+		self.logger.write("  5.b. Entering prepare_job(), constructing job file.")
 		fList = sorted(glob.glob(self.wrfOutDir + "/wrfout*"))
 		fileCount = len(fList)
 		upp_job_contents = ""
