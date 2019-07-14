@@ -15,7 +15,7 @@ from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
 from wrf.utils import either
 from wrf.latlonutils import _lat_varname, _lon_varname
-from ArrayTools import wrapped_unstagger
+from ArrayTools import wrapped_unstagger, wrapped_either
 		
 """
 	This block contains simple wrappers for basic mathematical operations, this is needed to support
@@ -317,7 +317,7 @@ def get_dewpoint(daskArray, omp_threads=1, num_workers=1):
 	return td.compute(num_workers=num_workers)
 	
 def get_geoht(daskArray, height=True, msl=True, omp_threads=1, num_workers=1):
-	varname = either("PH", "GHT")(daskArray)
+	varname = wrapped_either(daskArray, ("PH", "GHT"))
 	if varname == "PH":
 		ph = daskArray["PH"].data[0]
 		phb = daskArray["PHB"].data[0]
@@ -364,11 +364,11 @@ def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
 	phb = daskArray["PHB"].data[0]
 	dtype = ph.dtype
 
-	varname = either("U", "UU")(daskArray)
+	varname = wrapped_either(daskArray, ("U", "UU"))
 	uS = daskArray[varname].data[0]
 	u = wrapped_unstagger(uS, -1)
 
-	varname = either("V", "VV")(daskArray)
+	varname = wrapped_either(daskArray, ("V", "VV"))
 	vS = daskArray[varname].data[0]
 	v = wrapped_unstagger(vS, -2)
 
@@ -403,11 +403,11 @@ def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1
 	dx = daskArray["DX"].data
 	dy = daskArray["DY"].data
 
-	varname = either("U", "UU")(daskArray)
+	varname = wrapped_either(daskArray, ("U", "UU"))
 	uS = daskArray[varname].data[0]
 	u = wrapped_unstagger(uS, -1)
 
-	varname = either("V", "VV")(daskArray)
+	varname = wrapped_either(daskArray, ("V", "VV"))
 	vS = daskArray[varname].data[0]
 	v = wrapped_unstagger(vS, -2)	
 	

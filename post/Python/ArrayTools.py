@@ -28,3 +28,13 @@ def wrapped_unstagger(daskArray, stagger_dim):
 
     result = .5*(daskArray[tuple(dim_ranges_1)] + daskArray[tuple(dim_ranges_2)])
     return result
+	
+#wrapped_either() - A wrapper method that support's the wrf-python either() method for dask arrays
+def wrapped_either(daskArray, varNames):
+	for name in varNames:
+		try:
+			daskArray[name]
+			return name
+		except KeyError:
+			continue
+		
