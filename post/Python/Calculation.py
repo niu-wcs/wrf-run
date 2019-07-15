@@ -391,37 +391,35 @@ def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
     return srh.compute(num_workers=num_workers)
 	
 def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1):
-	wstag = daskArray["W"].data[0]
-	ph = daskArray["PH"].data[0]
-	phb = daskArray["PHB"].data[0]
-	dtype = ph.dtype
-	
-	mapfct = daskArray["MAPFAC_M"].data[0]
-	dx = daskArray.DX
-	dy = daskArray.DY
+    wstag = daskArray["W"].data[0]
+    ph = daskArray["PH"].data[0]
+    phb = daskArray["PHB"].data[0]
+    dtype = ph.dtype
 
-	varname = wrapped_either(daskArray, ("U", "UU"))
-	uS = daskArray[varname].data[0]
-	u = wrapped_destagger(uS, -1)
+    mapfct = daskArray["MAPFAC_M"].data[0]
+    dx = daskArray.DX
+    dy = daskArray.DY
 
-	varname = wrapped_either(daskArray, ("V", "VV"))
-	vS = daskArray[varname].data[0]
-	v = wrapped_destagger(vS, -2)	
-	
-	del(uS)
-	del(vS)
+    varname = wrapped_either(daskArray, ("U", "UU"))
+    uS = daskArray[varname].data[0]
+    u = wrapped_unstagger(uS, -1)
 
-	geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-	geopt_f = wrapped_destagger(geopt, -3)	
-	zp = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)	
+    varname = wrapped_either(daskArray, ("V", "VV"))
+    vS = daskArray[varname].data[0]
+    v = wrapped_unstagger(vS, -2)
 
-	del(ph)
-	del(phb)
-	del(geopt)
-	del(geopt_f)
-	
-	udhel = map_blocks(udhel_wrap, zp, mapfct, u, v, wstag, dx, dy, bottom, top, omp_threads, dtype=dtype)
-	return udhel.compute(num_workers=num_workers)
+    del(uS)
+    del(vS)
+
+    geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
+    zp = map_blocks(wrapped_div, geopt, Constants.G, dtype=dtype)
+
+    del(ph)
+    del(phb)
+    del(geopt)
+
+    udhel = map_blocks(udhel_wrap, zp, mapfct, u, v, wstag, dx, dy, bottom, top, omp_threads, dtype=dtype)
+    return udhel.compute(num_workers=num_workers)
 	
 def get_omega(daskArray, omp_threads=1, num_workers=1):
 	t = daskArray["T"].data[0]
