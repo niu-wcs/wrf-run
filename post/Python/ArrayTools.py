@@ -3,13 +3,15 @@
 # Robert C Fritzen - Dpt. Geographic & Atmospheric Sciences
 #
 # This class instance grants some additional array tool support for handling
-#  NumPy & Dask interactions that may not be supported out-of-the-box
+#  NumPy & Dask interactions that may not be supported by wrf-python's implementations
+#  out-of-box. Functions in this class are named wrapped_name with name being the same
+#  as the original wrf-python implementation
 
 import numpy as np
 import dask.array as da
 
-#wrapped_unstagger() - A wrapper method that handles the wrf-python destagger function(), safe for Dask
-def wrapped_unstagger(daskArray, stagger_dim):
+#wrapped_destagger() - A wrapper method that handles the wrf-python destagger() function, safe for Dask
+def wrapped_destagger(daskArray, stagger_dim):
     shape = daskArray.shape
     dims = daskArray.ndim
     dim_size = shape[stagger_dim]
@@ -38,6 +40,11 @@ def wrapped_either(daskArray, varNames):
 		except KeyError:
 			continue
 		
+"""
+This block of code allows you to use interplevel() on daskArrays via wrapped_interplevel
+ NOTE: At the moment it returns the [time] index as the first array index, so calling out[0] is how
+  you extract the 2D field.
+"""
 def wrapped_interpz3d(field3d, z, desiredloc, missingval, outview=None, omp_threads=1):
 	from wrf.extension import _interpz3d, omp_set_num_threads
 	
@@ -77,6 +84,7 @@ def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float
     masked = ma.masked_values(result, missing)
     return masked
             
+# Wrapped version of _lat_varname
 def wrapped_lat_varname(daskArray, stagger):
     if stagger is None or stagger.lower() == "m":
         varname = wrapped_either(daskArray, ("XLAT", "XLAT_M"))
@@ -87,6 +95,7 @@ def wrapped_lat_varname(daskArray, stagger):
 
     return varname    
 
+# Wrapped version of _lon_varname
 def wrapped_lon_varname(daskArray, stagger):
     if stagger is None or stagger.lower() == "m":
         varname = wrapped_either(daskArray, ("XLONG", "XLONG_M"))

@@ -13,7 +13,7 @@ import dask.array as da
 from dask.array import map_blocks
 from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
-from ArrayTools import wrapped_unstagger, wrapped_either, wrapped_lat_varname, wrapped_lon_varname
+from ArrayTools import wrapped_destagger, wrapped_either, wrapped_lat_varname, wrapped_lon_varname
 		
 """
 	This block contains simple wrappers for basic mathematical operations, this is needed to support
@@ -240,7 +240,7 @@ def get_cape3d(daskArray, omp_threads=1, num_workers=1):
     del(p)
 
     geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-    geopt_unstag = wrapped_unstagger(geopt, -3)
+    geopt_unstag = wrapped_destagger(geopt, -3)
     z = map_blocks(wrapped_div, geopt_unstag, Constants.G, dtype=dtype)
     
     del(ph)
@@ -322,7 +322,7 @@ def get_geoht(daskArray, height=True, msl=True, omp_threads=1, num_workers=1):
 		hgt = daskArray["HGT"].data[0]
 		dtype = ph.dtype
 		geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-		geopt_f = wrapped_unstagger(geopt, -3)
+		geopt_f = wrapped_destagger(geopt, -3)
 	else:
 		geopt = daskArray["GHT"].data[0]
 		hgt = daskArray["HGT_M"].data[0]
@@ -364,14 +364,14 @@ def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
 
     varname = wrapped_either(daskArray, ("U", "UU"))
     uS = daskArray[varname].data[0]
-    u = wrapped_unstagger(uS, -1)
+    u = wrapped_destagger(uS, -1)
 
     varname = wrapped_either(daskArray, ("V", "VV"))
     vS = daskArray[varname].data[0]
-    v = wrapped_unstagger(vS, -2)
+    v = wrapped_destagger(vS, -2)
 
     geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-    geopt_f = wrapped_unstagger(geopt, -3, num_workers)
+    geopt_f = wrapped_destagger(geopt, -3, num_workers)
     z = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)
 
     del(ph)
@@ -402,17 +402,17 @@ def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1
 
 	varname = wrapped_either(daskArray, ("U", "UU"))
 	uS = daskArray[varname].data[0]
-	u = wrapped_unstagger(uS, -1)
+	u = wrapped_destagger(uS, -1)
 
 	varname = wrapped_either(daskArray, ("V", "VV"))
 	vS = daskArray[varname].data[0]
-	v = wrapped_unstagger(vS, -2)	
+	v = wrapped_destagger(vS, -2)	
 	
 	del(uS)
 	del(vS)
 
 	geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-	geopt_f = wrapped_unstagger(geopt, -3)	
+	geopt_f = wrapped_destagger(geopt, -3)	
 	zp = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)	
 
 	del(ph)
@@ -432,7 +432,7 @@ def get_omega(daskArray, omp_threads=1, num_workers=1):
 	
 	dtype = t.dtype
 
-	wa = wrapped_unstagger(w, -3)
+	wa = wrapped_destagger(w, -3)
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, dtype=dtype)
 	full_p = map_blocks(wrapped_add, p, pb, dtype=dtype)	
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
@@ -520,7 +520,7 @@ def get_slp(daskArray, omp_threads=1, num_workers=1):
 
     pre_full_ph = map_blocks(wrapped_add, ph, phb, dtype=dtype)
     full_ph = map_blocks(wrapped_div, pre_full_ph, Constants.G, dtype=dtype)
-    destag_ph = wrapped_unstagger(full_ph, -3) 
+    destag_ph = wrapped_destagger(full_ph, -3) 
     
     del(full_ph)
     del(ph)
