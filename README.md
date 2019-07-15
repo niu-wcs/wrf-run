@@ -8,6 +8,7 @@ This python script package automates the entire WRF process for use on cluster b
 ### Contents ###
 This git repository contains the following subdirectories:
   * post: The folder containing the two post-processing methodologies used by this script.
+    * Python: A python based post-processing solution that uses wrf-python, dask, cartopy, and scipy. (See below section on python post processing)
     * UPP: The Unified Post-Processor 3.2 package scripts, support for both GRIB/GRIB2 to GrADS
 	  * includes: A collection of the WRF binary files required to run the UPP process
 	  * parm: Parameter files required by UPP
@@ -146,6 +147,12 @@ Next, scroll down to the *ModelData* class and find the pooled_download section.
 ```
 
 Finally, change the modeldata parameter in control.txt to match your model source.
+
+### Python Post-Processing ###
+This package contains a basic python post-processing script that incorporates multiple other python packages. If you would like to use the python post-processor you first need to set **post_run_python** to 1 in **control.txt**. This will create a job-script to execute PythonPost.py in parallel using Dask and wrf-python. Controlling the outputs of this are handled by a second control text file located in the Python/ directory.
+
+Here are the available fields that may be visualized:
+T.B.D
 				
 ### Contact Info ###
 Any questions regarding the script package can be sent to Robert C. Fritzen (rfritzen1@niu.edu). In-person questions can be done from my office in Davis Hall, room 209.
