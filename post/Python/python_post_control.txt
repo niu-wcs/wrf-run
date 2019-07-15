@@ -1,0 +1,58 @@
+# python_post_control.txt
+# Parameter file for the python post-processing module
+#  Information:
+#   Lines that begin with a '#' are comment lines and are ignored
+#   All other lines will store a variable under the name of the first word, with the value of the second
+#    EX: myVariable 12
+#    Would store the parameter myVariable as 12
+#   All remaining information following the second block is ignored, allowing for comments to be used
+#    EX: myVariable 12 This is a sample variable
+#    This is also an acceptable format for this file
+#
+# Post-Processing Controls
+save_datafiles_when_done 1 # This will preserve the created data files when done
+create_animated_gifs 1 # Create .GIF images for each?
+gif_timestep 250 # How many miliseconds between each time step?
+sftp_push_results_when_done 0
+sftp_push_saved_datafile 0
+sftp_server none
+sftp_server_port 22
+sftp_user none
+stfp_password none
+# Standard Atmospheric Fields
+plot_surface_map 1 
+plot_surface_map_temperature 1
+plot_surface_map_winds 1
+plot_surface_map_mslp 1
+plot_simulated_reflectivity 1
+plot_accumulated_precip 1
+plot_accumulated_snowfall 0
+plot_precipitable_water 1
+plot_precipitable_water_with_mslp_contours 1
+plot_dewpoint_temperature 1
+plot_surface_rh_and_winds 0
+plot_surface_theta_e 1
+plot_surface_omega 0
+# U-L Plots
+plot_upper_lv_winds 1
+plot_upper_lv_winds_withheights 1
+upper_winds_levels (int)[925,850,700,500,300,250,200]
+plot_theta_e 1
+plot_theta_e_heights 1
+plot_theta_e_winds 1
+theta_e_levels (int)[925,850,700,500]
+plot_rh_and_wind 0
+rh_and_wind_levels (int)[925,850,700,500,300,250,200]
+plot_500_rel_vort 1
+plot_500_rel_vort_withheights 1
+# Convective Parameters
+plot_CAPE 1
+plot_MUCAPE 1
+plot_CIN 0
+plot_AFWA_Hail 1
+plot_shear 1
+plot_srh 1
+plot_updft_helcy 1
+updft_helcy_levels (int)[2000,5000]
+srh_levels (int)[1000,3000]
+shear_levels (int)[3000,6000]
