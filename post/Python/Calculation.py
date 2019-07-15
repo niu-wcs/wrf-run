@@ -13,9 +13,7 @@ import dask.array as da
 from dask.array import map_blocks
 from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
-from wrf.utils import either
-from wrf.latlonutils import _lat_varname, _lon_varname
-from ArrayTools import wrapped_unstagger, wrapped_either
+from ArrayTools import wrapped_unstagger, wrapped_either, wrapped_lat_varname, wrapped_lon_varname
 		
 """
 	This block contains simple wrappers for basic mathematical operations, this is needed to support
@@ -356,42 +354,41 @@ def get_height_agl(daskArray, omp_threads=1, num_workers=1):
 	return get_geoht(daskArray, height=True, msl=False, omp_threads=omp_threads, num_workers=num_workers)
 	
 def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
-	lat_VN = _lat_varname(wrfin, stagger=None)
-	lats = daskArray[lat_VN].data[0]
+    lat_VN = wrapped_lat_varname(daskArray, stagger=None)
+    lats = daskArray[lat_VN].data[0]
 
-	hgt = daskArray["HGT"].data[0]
-	ph = daskArray["PH"].data[0]
-	phb = daskArray["PHB"].data[0]
-	dtype = ph.dtype
+    hgt = daskArray["HGT"].data[0]
+    ph = daskArray["PH"].data[0]
+    phb = daskArray["PHB"].data[0]
+    dtype = ph.dtype
 
-	varname = wrapped_either(daskArray, ("U", "UU"))
-	uS = daskArray[varname].data[0]
-	u = wrapped_unstagger(uS, -1)
+    varname = wrapped_either(daskArray, ("U", "UU"))
+    uS = daskArray[varname].data[0]
+    u = wrapped_unstagger(uS, -1)
 
-	varname = wrapped_either(daskArray, ("V", "VV"))
-	vS = daskArray[varname].data[0]
-	v = wrapped_unstagger(vS, -2)
+    varname = wrapped_either(daskArray, ("V", "VV"))
+    vS = daskArray[varname].data[0]
+    v = wrapped_unstagger(vS, -2)
 
-	geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-	geopt_f = wrapped_unstagger(geopt, -3, num_workers)	
-	zS = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)
-	z = to_np(zS, num_workers)
-	
-	del(ph)
-	del(phb)
-	del(geopt)
-	del(geopt_f)
+    geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
+    geopt_f = wrapped_unstagger(geopt, -3, num_workers)
+    z = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)
 
-	u1 = np.ascontiguousarray(u[..., ::-1, :, :])
-	v1 = np.ascontiguousarray(v[..., ::-1, :, :])
-	z1 = np.ascontiguousarray(z[..., ::-1, :, :])
-	
-	del(u)
-	del(v)
-	del(z)
+    del(ph)
+    del(phb)
+    del(geopt)
+    del(geopt_f)
 
-	srh = map_blocks(srh_wrap, u1, v1, z1, hgt, lats, top, omp_threads, dtype=dtype)
-	return srh.compute(num_workers=num_workers)
+    u1 = np.ascontiguousarray(u[..., ::-1, :, :])
+    v1 = np.ascontiguousarray(v[..., ::-1, :, :])
+    z1 = np.ascontiguousarray(z[..., ::-1, :, :])
+
+    del(u)
+    del(v)
+    del(z)
+
+    srh = map_blocks(srh_wrap, u1, v1, z1, hgt, lats, top, omp_threads, dtype=dtype)
+    return srh.compute(num_workers=num_workers)
 	
 def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1):
 	wstag = daskArray["W"].data[0]
@@ -400,8 +397,8 @@ def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1
 	dtype = ph.dtype
 	
 	mapfct = daskArray["MAPFAC_M"].data[0]
-	dx = daskArray["DX"].data
-	dy = daskArray["DY"].data
+	dx = daskArray.DX
+	dy = daskArray.DY
 
 	varname = wrapped_either(daskArray, ("U", "UU"))
 	uS = daskArray[varname].data[0]
@@ -543,8 +540,8 @@ def get_avo(daskArray, omp_threads=1, num_workers=1):
 	msfm = daskArray["MAPFAC_M"].data[0]
 	cor = daskArray["F"].data[0]
 
-	dx = daskArray["DX"].data
-	dy = daskArray["DY"].data
+	dx = daskArray.DX
+	dy = daskArray.DY
 	
 	dtype = u.dtype
 
@@ -559,8 +556,8 @@ def get_rvor(daskArray, omp_threads=1, num_workers=1):
 	msfm = daskArray["MAPFAC_M"].data[0]
 	cor = daskArray["F"].data[0]
 
-	dx = daskArray["DX"].data
-	dy = daskArray["DY"].data
+	dx = daskArray.DX
+	dy = daskArray.DY
 
 	dtype = u.dtype
 
@@ -580,8 +577,8 @@ def get_pvo(daskArray, omp_threads=1, num_workers=1):
 	msfm = daskArray["MAPFAC_M"].data[0]
 	cor = daskArray["F"].data[0]
 
-	dx = daskArray["DX"].data
-	dy = daskArray["DY"].data
+	dx = daskArray.DX
+	dy = daskArray.DY
 	
 	dtype=u.dtype
 

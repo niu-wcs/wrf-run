@@ -38,3 +38,61 @@ def wrapped_either(daskArray, varNames):
 		except KeyError:
 			continue
 		
+def wrapped_interpz3d(field3d, z, desiredloc, missingval, outview=None, omp_threads=1):
+	from wrf.extension import _interpz3d, omp_set_num_threads
+	
+	omp_set_num_threads(omp_threads)
+	result = _interpz3d(field3d, z, desiredloc, missingval, outview)
+	
+    return result
+	
+def wrapped_interpz3d_lev2d(field3d, z, lev2d, missingval, outview=None, omp_threads=1):
+	from wrf.extension import _interpz3d_lev2d, omp_set_num_threads
+	
+	omp_set_num_threads(omp_threads)
+	result = _interpz3d_lev2d(field3d, z, lev2d, missingval, outview)
+	
+    return result
+	
+def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float64), omp_threads=1):
+	from wrf.extension import omp_set_num_threads
+	import numpy.ma as ma
+	from dask.array import map_blocks	
+	
+	omp_set_num_threads(omp_threads)
+	dtype = field3d.dtype
+	
+    _desiredlev = da.asarray(desiredlev)
+    if _desiredlev.ndim == 0:
+        _desiredlev = da.array([desiredlev], np.float64)
+        levsare2d = False
+    else:
+        levsare2d = _desiredlev.ndim >= 2
+
+    if not levsare2d:
+        result = map_blocks(wrapped_interpz3d, field3d, vert, _desiredlev, missing, omp_threads=omp_threads, dtype=dtype)
+    else:
+        result = map_blocks(wrapped_interpz3d_lev2d, field3d, vert, _desiredlev, missing, omp_threads=omp_threads, dtype=dtype)
+
+    masked = ma.masked_values(result, missing)
+    return masked
+            
+def wrapped_lat_varname(daskArray, stagger):
+    if stagger is None or stagger.lower() == "m":
+        varname = wrapped_either(daskArray, ("XLAT", "XLAT_M"))
+    elif stagger.lower() == "u" or stagger.lower() == "v":
+        varname = "XLAT_{}".format(stagger.upper())
+    else:
+        raise ValueError("invalid 'stagger' value")
+
+    return varname    
+
+def wrapped_lon_varname(daskArray, stagger):
+    if stagger is None or stagger.lower() == "m":
+        varname = wrapped_either(daskArray, ("XLONG", "XLONG_M"))
+    elif stagger.lower() == "u" or stagger.lower() == "v":
+        varname = "XLONG_{}".format(stagger.upper())
+    else:
+        raise ValueError("invalid 'stagger' value")
+
+    return varname 	
