@@ -36,6 +36,14 @@ def wrapped_mul(base, prod):
 def wrapped_div(base, div):
 	return base / div
 	
+# Wrapped call for add then divide (Used by p+pb calls)
+def wrapped_add_then_div(base, add, div):
+	return (base + add) / div
+	
+# Wrapped call for add then multiply (Used by p+pb calls)
+def wrapped_add_then_mul(base, add, prod):
+	return (base + add) * prod
+	
 """
 	This block of code is focused on handling the "gather" routines for specific variables
 	
@@ -160,6 +168,50 @@ def pvo_wrap(u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads=1)
 	This block of code handles the multiprocessed variable calculation routines.
 	 -> These are wrapped calls of the original g_func* methods in the wrf-python library
 """
+def get_full_p(daskArray, omp_threads=1, num_workers=1):
+    p = daskArray["P"].data[0]
+    pb = daskArray["PB"].data[0]
+    
+    full_p = map_blocks(wrapped_add_then_div, p, pb, 100, dtype=p.dtype)
+    return full_p.compute(num_workers=num_workers)
+
+def get_winds_at_level(daskArray, vertical_field=None, requested_top=0.):
+    varname = wrapped_either(daskArray, ("U", "UU"))
+    uS = daskArray[varname].data[0]
+    u = wrapped_unstagger(uS, -1)
+    
+    varname = wrapped_either(daskArray, ("V", "VV"))
+    vS = daskArray[varname].data[0]
+    v = wrapped_unstagger(vS, -2)
+
+    del(varname)
+    del(uS)
+    del(vS)
+
+    if(requested_top == 0.):
+        return u[0], v[0]
+    else:
+        uLev = wrapped_interplevel(u, vertical_field, requested_top)
+        vLev = wrapped_interplevel(v, vertical_field, requested_top)
+        return uLev, vLev
+
+def get_wind_shear(daskArray, top=6000.0):
+    z = get_height(ncFile, omp_threads=4, num_workers=2)
+    
+    u0, v0 = get_winds_at_level(daskArray)
+    ut, vt = get_winds_at_level(daskArray, z, top)
+    
+    uS = ut - u0
+    vS = vt - v0   
+    
+    del(z)
+    del(u0)
+    del(v0)
+    del(ut)
+    del(vt)
+    
+    return uS, vS
+
 def get_theta(daskArray, omp_threads=1, num_workers=1):
 	t = daskArray["T"].data[0]
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, omp_threads, dtype=t.dtype)
