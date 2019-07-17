@@ -105,3 +105,17 @@ def wrapped_lon_varname(daskArray, stagger):
         raise ValueError("invalid 'stagger' value")
 
     return varname 	
+	
+# fetch_variable() is used to access variables in the netCDF file
+def fetch_variable(daskArray, varName, include_time=False, include_meta=False):
+	try:
+		subArray = daskArray[varName]
+	except KeyError:
+		raise KeyError("Invalid key. " + varName + " is not found.")
+		
+	if(include_meta):
+		subArray2 = subArray
+	else:
+		subArray2 = subArray.data
+		
+	return subArray2 if include_time else subArray2.squeeze()
