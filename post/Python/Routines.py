@@ -65,9 +65,10 @@ class Routines():
 	srh_levels = []
 	shear_levels = []
 
-	def __init__(self, pySettings):
+	def __init__(self, pySettings, client):
 		self.logger = Tools.loggedPrint.instance()	
 		self.pySet = pySettings
+		self.dask_client = client
 		#
 		try:
 			nodes = os.environ["PYTHON_POST_NODES"]
@@ -80,10 +81,7 @@ class Routines():
 		except KeyError:
 			self.logger.write("Could not locate environment variables set by the original application (NODES/THREADS), check the logs to ensure it is being done.")
 			self.logger.close()
-			sys.exit("Failed to find environmental variable (NODES/THREADS), check original application to ensure it is being set.")		
-		#
-		cluster = LocalCluster(n_workers=self.dask_nodes)
-		self.dask_client = Client(cluster)		
+			sys.exit("Failed to find environmental variable (NODES/THREADS), check original application to ensure it is being set.")			
 		self.gatherRoutines()
 		
 	def gatherRoutines(self):
