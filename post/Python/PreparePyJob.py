@@ -28,6 +28,11 @@ class PreparePyJob:
 		self.logger.write("  5.b. Entering prepare_job(), constructing job file.")
 		fList = sorted(glob.glob(self.wrfOutDir + "/wrfout*"))
 		fileCount = len(fList)
-		upp_job_contents = ""
+		out_job_contents = ""
 		self.logger.write("  5.b. " + str(fileCount) + " wrfout files have been found.")
-		#wrfin = [Dataset(x) for x in fList]				
+		if(fileCount > 0):
+			Tools.popen(self.aSet, "export PYTHON_POST_DIR=" + self.wrfOutDir + '/')
+			Tools.popen(self.aSet, "export PYTHON_POST_TARG_DIR=" + self.targetDir + '/')
+			Tools.popen(self.aSet, "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes"))
+			Tools.popen(self.aSet, "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_ranks_per_node"))
+			Tools.popen(self.aSet, "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime"))

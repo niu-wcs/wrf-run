@@ -9,7 +9,7 @@ import time
 import os
 from ..scripts import Tools
 
-# AppSettings: Class responsible for obtaining information from the control file and parsing it to classes that need the information
+# PyPostSettings: Class responsible for obtaining information from the control file and parsing it to classes that need the information
 class PyPostSettings():
 	settings = {}
 	logger = None
