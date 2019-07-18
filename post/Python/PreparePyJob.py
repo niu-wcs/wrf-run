@@ -7,7 +7,6 @@
 
 import glob
 from ..scripts import Tools
-from netCDF4 import Dataset
 
 class PreparePyJob:
 	aSet = None
@@ -36,3 +35,47 @@ class PreparePyJob:
 			Tools.popen(self.aSet, "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes"))
 			Tools.popen(self.aSet, "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_ranks_per_node"))
 			Tools.popen(self.aSet, "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime"))
+		#
+		out_job_contents += "#!/bin/bash\n"
+		out_job_contents += "#COBALT -t " + self.aSet.fetch("python_walltime") + "\n"
+		out_job_contents += "#COBALT -n " + self.aSet.fetch("num_python_nodes") + "\n"
+		out_job_contents += "#COBALT -q default\n"
+		out_job_contents += "#COBALT -A climate_severe\n\n"
+		out_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
+		out_job_contents += "ulimit -s unlimited\n\n"
+		out_job_contents += "export n_nodes="+ str(self.aSet.fetch("num_python_nodes")) +"\n"
+		out_job_contents += "export n_mpi_ranks_per_node=32\n"
+		out_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
+		out_job_contents += "export n_openmp_threads_per_rank=4\n"
+		out_job_contents += "export n_hyperthreads_per_core=2\n"
+		out_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
+		
+		out_job_contents += "cd " + self.aSet.fetch("postdir") + "\n\n"
+		
+		out_job_contents = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
+		out_job_contents += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
+		out_job_contents += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
+		out_job_contents += "-j $n_hyperthreads_per_core \\" + '\n'
+		out_job_contents += "python PythonPost.py&\n"
+		
+		with Tools.cd(self.targetDir):
+			with open("python_post.job", 'w') as target_file:
+				target_file.write(out_job_contents)		
+			Tools.popen(self.aSet, "chmod +x python_post.job")
+			self.logger.write("   -> Submitting Python Post Processing job to the queue")
+			jobSub = Tools.popen(self.aSet, "qsub python_post.job -q default -t " + str(self.aSet.fetch("python_walltime")) + " -n " + str(self.aSet.fetch("num_python_nodes")) + " --mode script")	
+
+			try:
+				wCond = [{"waitCommand": "tail -n 3 pypost.log", "contains": "***SUCCESS***", "retCode": 1},
+						 {"waitCommand": "tail -n 3 pypost.log", "contains": "***FAIL***", "retCode": 2}]
+				waitCond = Wait.Wait(wCond, timeDelay = 60)
+				wRC = waitCond.hold()			
+				if wRC == 1:
+					Tools.Process.instance().Unlock()
+				elif wRC == 2:
+					self.logger.write("PreparePyJob(): Exit (Failed at python, Code 2)")
+					Tools.Process.instance().Unlock()
+					return False					
+			except Wait.TimeExpiredException:
+				sys.exit("Python post processing job not completed, abort.")	
+			return True
