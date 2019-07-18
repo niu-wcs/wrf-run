@@ -7,7 +7,7 @@
 import datetime
 import time
 import os
-from ..scripts import Tools
+import PyPostTools
 
 # PyPostSettings: Class responsible for obtaining information from the control file and parsing it to classes that need the information
 class PyPostSettings():
@@ -51,7 +51,7 @@ class PyPostSettings():
 							self.logger.write("Applying setting (" + tokenized[0] +"): " + tokenized[1])
 		#Test for program critical settings
 		if(not self.settings):
-			self.logger.write("Program critical variables missing, check for existence of python_post_control.txt, abort.")
+			self.logger.write("***FAIL*** Program critical variables missing, check for existence of python_post_control.txt, abort.")
 			return False
 		else:
 			self.settings["headdir"] = curDir[:curDir.rfind('/')] + '/'
@@ -65,9 +65,9 @@ class PyPostSettings():
 			return None    
      
 	def __init__(self):
-		self.logger = Tools.loggedPrint.instance()	
+		self.logger = PyPostTools.pyPostLogger.instance()
 	
 		if(self.loadSettings() == False):
-			logger.write("Unable to init PyPostSettings(), python_post_control.txt not found")
+			logger.write("***FAIL*** Unable to init PyPostSettings(), python_post_control.txt not found")
 			logger.close()
 			sys.exit("Failed to load settings, please check for python_post_control.txt")

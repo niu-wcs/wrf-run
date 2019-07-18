@@ -22,6 +22,7 @@ wrfexecutables /projects/climate_severe/WRF/WRF/main/
 wrfrunfiles /projects/climate_severe/WRF/WRF/run/
 wpsexecutables /projects/climate_severe/WRF/WPS/
 uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
+postdir /projects/climate_severe/wrf-run/post
 modeldata CFSv2
 modeldataforecasthour 0
 debugmode 0

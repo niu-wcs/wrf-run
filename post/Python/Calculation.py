@@ -208,7 +208,7 @@ def get_winds_at_level(daskArray, vertical_field=None, requested_top=0.):
         return uLev, vLev
 
 def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
-	if(z == None):
+	if(len(z) == 0):
 		z = get_height(daskArray, omp_threads=omp_threads, num_workers=num_workers)
     
     u0, v0 = get_winds_at_level(daskArray)
