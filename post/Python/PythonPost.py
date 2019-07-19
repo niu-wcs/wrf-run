@@ -17,6 +17,7 @@ import xarray
 import dask.array as da
 from dask.array import map_blocks
 from dask.distributed import Client, progress, metrics, LocalCluster, wait
+from datetime import datetime
 
 dask_client = None
 dask_nodes = 0
@@ -43,7 +44,7 @@ def launch_python_post():
 		logger.write("***FAIL*** KeyError encountered while trying to access important environmental variables, abort.")
 		sys.exit("")
 	logger.write("  - Success!")
-	logger.write("  - Initializing Dask Client (" + dask_nodes + " Nodes Requested), Collecting routines needed")
+	logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	cluster = LocalCluster(n_workers=dask_nodes)
 	dask_client = Client(cluster)
 	_routines = Routines.Routines(_pySet)
@@ -91,14 +92,14 @@ def run_calculation_routines(ncFile_Name):
 		sys.exit("Failed to find environmental variable (FIRSTTIME), check original application to ensure it is being set.")		
 		return False
 	startTime = datetime.strptime(start, '%Y%m%d%H')
-	daskArray = xarray.open_mfdataset(ncFile_name, parallel=True)
-	forecastTime_str = ncFile_name[-19:]
+	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=True)
+	forecastTime_str = ncFile_Name[-19:]
 	forecastTime = datetime.strptime(forecastTime_str, '%Y-%m-%d_%H_%M_%S')
 	elapsedTime = forecastTime - startTime
 	elapsedHours = elapsedTime.days*24 + elapsedTime.seconds//3600
 	# Grab the vertical interpolation levels
-	p_vert = get_full_p(daskArray)
-	z_vert = get_height(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
+	p_vert = Calculation.get_full_p(daskArray)
+	z_vert = Calculation.get_height(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 	# Our end goal is to create a new xArray saving only what we need to it. Start by creaying a "blank" xarray
 	xrOut = xarray.Dataset()
 	# Start with important attributes
@@ -146,7 +147,7 @@ def run_calculation_routines(ncFile_Name):
 	## - Precipitable Water			
 	if(_routines.need_prec_wat):
 		prec_wat = Calculation.get_pw(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
-		xrOut["PW"] = (('south_north', 'west_east'), prec_wat[0])
+		xrOut["PW"] = (('south_north', 'west_east'), prec_wat)
 		del(prec_wat)
 	##
 	## - Dewpoint Temperature			

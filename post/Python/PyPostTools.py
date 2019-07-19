@@ -9,27 +9,33 @@ import os
 import os.path
 import datetime
 import time
+import threading
+
+# Thread-Safe Singleton: https://stackoverflow.com/questions/50566934/why-is-this-singleton-implementation-not-thread-safe
+lock = threading.Lock()
+def synchronized(lock):
+    """ Synchronization decorator """
+    def wrapper(f):
+        @functools.wraps(f)
+        def inner_wrapper(*args, **kw):
+            with lock:
+                return f(*args, **kw)
+        return inner_wrapper
+    return wrapper
 		
-#singleton: Class decorator used to define classes as single instances across the program (See https://stackoverflow.com/questions/31875/is-there-a-simple-elegant-way-to-define-singletons)
-class Singleton:
-    def __init__(self, decorated):
-        self._decorated = decorated
+class SingletonOptmized(type):
+    _instances = {}
+    def call(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            with lock:
+                if cls not in cls._instances:
+                    cls._instances[cls] = super(SingletonOptmizedOptmized, cls).call(*args, **kwargs)
+        return cls._instances[cls]
 
-    def instance(self):
-        try:
-            return self._instance
-        except AttributeError:
-            self._instance = self._decorated()
-            return self._instance
-
-    def __call__(self):
-        raise TypeError('Singletons must be accessed through `instance()`.')
-
-    def __instancecheck__(self, inst):
-        return isinstance(inst, self._decorated)
+class Singleton(metaclass=SingletonOptmized):
+    pass
 		
-@Singleton
-class pyPostLogger:
+class pyPostLogger(Singleton):
 	f = None
 	filePath = None
 	

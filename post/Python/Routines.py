@@ -9,9 +9,11 @@ from datetime import datetime
 import time
 import os
 import glob
+import PyPostTools
+import PyPostSettings
 
 # Routines: Class responsible for parsing the control file and flagging what calculation methods are needed.
-class Routines():
+class Routines(PyPostTools.Singleton):
 	pySet = None
 	logger = None	
 	
@@ -50,8 +52,8 @@ class Routines():
 	srh_levels = []
 	shear_levels = []
 
-	def __init__(self, pySettings):
-		self.pySet = pySettings		
+	def __init__(self):
+		self.pySet = PyPostSettings.PyPostSettings()	
 		self.gatherRoutines()
 		
 	def gatherRoutines(self):

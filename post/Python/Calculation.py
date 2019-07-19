@@ -13,7 +13,7 @@ import dask.array as da
 from dask.array import map_blocks
 from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
-from ArrayTools import wrapped_destagger, wrapped_either, wrapped_lat_varname, wrapped_lon_varname, fetch_variable
+from ArrayTools import wrapped_destagger, wrapped_either, wrapped_lat_varname, wrapped_lon_varname, wrapped_interplevel, fetch_variable
 		
 """
 	This block contains simple wrappers for basic mathematical operations, this is needed to support
@@ -210,26 +210,26 @@ def get_winds_at_level(daskArray, vertical_field=None, requested_top=0.):
 def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
 	if(len(z) == 0):
 		z = get_height(daskArray, omp_threads=omp_threads, num_workers=num_workers)
-    
-    u0, v0 = get_winds_at_level(daskArray)
-    ut, vt = get_winds_at_level(daskArray, z, top)
-    
-    uS = map_blocks(wrapped_sub, ut, u0) #ut - u0
-    vS = map_blocks(wrapped_sub, vt, v0) #vt - v0   
-    
-    speed = map_blocks(wrapped_magnitude, uS, vS) #da.sqrt(uS*uS + vS*vS)
-    
-    del(z)
-    del(u0)
-    del(v0)
-    del(ut)
-    del(vt)
-    
-    uComp = uS.compute(num_workers=num_workers)
-    vComp = vS.compute(num_workers=num_workers)
-    sComp = speed.compute(num_workers=num_workers)
-    
-    return uComp, vComp, sComp
+
+	u0, v0 = get_winds_at_level(daskArray)
+	ut, vt = get_winds_at_level(daskArray, z, top)
+
+	uS = map_blocks(wrapped_sub, ut, u0) #ut - u0
+	vS = map_blocks(wrapped_sub, vt, v0) #vt - v0   
+
+	speed = map_blocks(wrapped_magnitude, uS, vS) #da.sqrt(uS*uS + vS*vS)
+
+	del(z)
+	del(u0)
+	del(v0)
+	del(ut)
+	del(vt)
+
+	uComp = uS.compute(num_workers=num_workers)
+	vComp = vS.compute(num_workers=num_workers)
+	sComp = speed.compute(num_workers=num_workers)
+
+	return uComp, vComp, sComp
 
 def get_theta(daskArray, omp_threads=1, num_workers=1):
 	t = fetch_variable(daskArray, "T")
@@ -280,14 +280,14 @@ def get_eth(daskArray, omp_threads=1, num_workers=1):
 
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, dtype=dtype)
 	full_p = map_blocks(wrapped_add, p, pb, dtype=dtype)
-	
+
 	del(t)
 	del(p)
 	del(pb)
-	
-    tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
+
+	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
 	del(full_t)
-	
+
 	eth = map_blocks(eth_wrap, qv, tk, full_p, omp_threads, dtype=dtype)
 	return eth.compute(num_workers=num_workers)
 	
@@ -434,7 +434,7 @@ def get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=1, num_w
 def get_dewpoint(daskArray, omp_threads=1, num_workers=1):
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
-	qv = fetch_variable(daskArray, "QVAPOR")
+	qvapor = fetch_variable(daskArray, "QVAPOR", include_meta=True)
 	dtype = p.dtype
 	
 	full_p = map_blocks(wrapped_add, p, pb, dtype=dtype)
@@ -595,7 +595,7 @@ def get_pw(daskArray, omp_threads=1, num_workers=1):
 	dtype = t.dtype
 
 	full_p = map_blocks(wrapped_add, p, pb, dtype=dtype)
-	full_ph = map_blocks(wrapped_add, ph, pb, dtype=dtype)
+	full_ph = map_blocks(wrapped_add, ph, phb, dtype=dtype)
 	ht = map_blocks(wrapped_div, full_ph, Constants.G, dtype=dtype)
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, dtype=dtype)
 	
