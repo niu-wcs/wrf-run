@@ -7,9 +7,9 @@
 #     https://github.com/NCAR/wrf-python/wiki/How-to-add-dask-support
 
 import numpy as np
-import numpy.ma as ma
 import xarray
 import dask.array as da
+import dask.array.ma as ma
 from dask.array import map_blocks
 from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
@@ -187,7 +187,7 @@ def get_full_p(daskArray, omp_threads=1, num_workers=1):
     full_p = map_blocks(wrapped_add_then_div, p, pb, 100, dtype=p.dtype)
     return full_p.compute(num_workers=num_workers)
 
-def get_winds_at_level(daskArray, vertical_field=None, requested_top=0.):
+def get_winds_at_level(daskArray, vertical_field=None, requested_top=0., omp_threads=1, num_workers=1):
     varname = wrapped_either(daskArray, ("U", "UU"))
     uS = fetch_variable(daskArray, varname)
     u = wrapped_destagger(uS, -1)
@@ -203,16 +203,16 @@ def get_winds_at_level(daskArray, vertical_field=None, requested_top=0.):
     if(requested_top == 0.):
         return u[0], v[0]
     else:
-        uLev = wrapped_interplevel(u, vertical_field, requested_top)
-        vLev = wrapped_interplevel(v, vertical_field, requested_top)
+        uLev = wrapped_interplevel(u, vertical_field, requested_top, omp_threads=omp_threads, num_workers=num_workers)
+        vLev = wrapped_interplevel(v, vertical_field, requested_top, omp_threads=omp_threads, num_workers=num_workers)
         return uLev, vLev
 
 def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
 	if(len(z) == 0):
 		z = get_height(daskArray, omp_threads=omp_threads, num_workers=num_workers)
 
-	u0, v0 = get_winds_at_level(daskArray)
-	ut, vt = get_winds_at_level(daskArray, z, top)
+	u0, v0 = get_winds_at_level(daskArray, omp_threads=omp_threads, num_workers=num_workers)
+	ut, vt = get_winds_at_level(daskArray, z, top, omp_threads=omp_threads, num_workers=num_workers)
 
 	uS = map_blocks(wrapped_sub, ut, u0) #ut - u0
 	vS = map_blocks(wrapped_sub, vt, v0) #vt - v0   
@@ -354,48 +354,63 @@ def get_cape3d(daskArray, omp_threads=1, num_workers=1):
     return comp
 	
 def get_cape2d(daskArray, omp_threads=1, num_workers=1):	
-    missing = default_fill(np.float64)
+	missing = default_fill(np.float64)
 
-    t = fetch_variable(daskArray, "T")
-    p = fetch_variable(daskArray, "P")
-    pb = fetch_variable(daskArray, "PB")
-    qv = fetch_variable(daskArray, "QVAPOR")
-    ph = fetch_variable(daskArray, "PH")
-    phb = fetch_variable(daskArray, "PHB")
-    ter = fetch_variable(daskArray, "HGT")
-    psfc = fetch_variable(daskArray, "PSFC")
-    dtype = p.dtype
+	t = fetch_variable(daskArray, "T")
+	p = fetch_variable(daskArray, "P")
+	pb = fetch_variable(daskArray, "PB")
+	qv = fetch_variable(daskArray, "QVAPOR")
+	ph = fetch_variable(daskArray, "PH")
+	phb = fetch_variable(daskArray, "PHB")
+	ter = fetch_variable(daskArray, "HGT")
+	psfc = fetch_variable(daskArray, "PSFC")
+	dtype = p.dtype
 
-    full_t = map_blocks(wrapped_add, t, Constants.T_BASE, dtype=dtype)
-    full_p = map_blocks(wrapped_add, p, pb, dtype=dtype)
-    tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
+	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, dtype=dtype)
+	full_p = map_blocks(wrapped_add, p, pb, dtype=dtype)
+	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
 
-    del(full_t)
-    del(t)
-    del(p)
+	del(full_t)
+	del(t)
+	del(p)
 
-    geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-    geopt_unstag = wrapped_destagger(geopt, -3)
-    z = map_blocks(wrapped_div, geopt_unstag, Constants.G, dtype=dtype)
+	geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
+	geopt_unstag = wrapped_destagger(geopt, -3)
+	z = map_blocks(wrapped_div, geopt_unstag, Constants.G, dtype=dtype)
 
-    del(ph)
-    del(phb)
-    del(geopt)
-    del(geopt_unstag)
+	del(ph)
+	del(phb)
+	del(geopt)
+	del(geopt_unstag)
 
-    p_hpa = map_blocks(wrapped_mul, full_p, ConversionFactors.PA_TO_HPA, dtype=dtype)
-    psfc_hpa = map_blocks(wrapped_mul, psfc, ConversionFactors.PA_TO_HPA, dtype=dtype)
+	p_hpa = map_blocks(wrapped_mul, full_p, ConversionFactors.PA_TO_HPA, dtype=dtype)
+	psfc_hpa = map_blocks(wrapped_mul, psfc, ConversionFactors.PA_TO_HPA, dtype=dtype)
 
-    del(full_p)
-    del(psfc)
+	del(full_p)
+	del(psfc)
 
-    i3dflag = 0
-    ter_follow = 1
+	i3dflag = 0
+	ter_follow = 1
 
-    cape_cin = map_blocks(cape_wrap, p_hpa, tk, qv, z, ter, psfc_hpa, missing, i3dflag, ter_follow, omp_threads, dtype=dtype)
-    comp = cape_cin.compute(num_workers=num_workers)
+	cape_cin = map_blocks(cape_wrap, p_hpa, tk, qv, z, ter, psfc_hpa, missing, i3dflag, ter_follow, omp_threads, dtype=dtype)
 
-    return comp	
+	left_dims = cape_cin.shape[1:-3]
+	right_dims = cape_cin.shape[-2:]
+
+	resdim = (4,) + left_dims + right_dims
+
+	# Make a new output array for the result
+	result = da.zeros(resdim, cape_cin.dtype)
+
+	# Cape 2D output is not flipped in the vertical, so index from the
+	# end
+	result[0, ..., :, :] = cape_cin[0, ..., -1, :, :]
+	result[1, ..., :, :] = cape_cin[1, ..., -1, :, :]
+	result[2, ..., :, :] = cape_cin[1, ..., -2, :, :]
+	result[3, ..., :, :] = cape_cin[1, ..., -3, :, :]
+
+	out = ma.masked_values(result, missing)	
+	return out.compute(num_workers=num_workers)
 	
 def get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=1, num_workers=1):
     t = fetch_variable(daskArray, "T")
@@ -506,7 +521,7 @@ def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
     v = wrapped_destagger(vS, -2)
 
     geopt = map_blocks(wrapped_add, ph, phb, dtype=dtype)
-    geopt_f = wrapped_destagger(geopt, -3, num_workers)
+    geopt_f = wrapped_destagger(geopt, -3)
     z = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)
 
     del(ph)

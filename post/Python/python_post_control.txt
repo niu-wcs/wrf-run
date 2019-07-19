@@ -47,10 +47,10 @@ plot_500_rel_vort 1
 plot_500_rel_vort_withheights 1
 # Convective Parameters
 plot_CAPE 1
-plot_MUCAPE 1
+plot_MUCAPE 0
 plot_MUCIN 0
-plot_LCL 1
-plot_LFC 1
+plot_LCL 0
+plot_LFC 0
 plot_CIN 0
 plot_AFWA_Hail 1
 plot_AFWA_Tor 1

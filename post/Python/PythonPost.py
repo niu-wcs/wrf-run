@@ -59,7 +59,8 @@ def launch_python_post():
 	logger.write(" 3. Done.")
 	logger.write(" 4. Final Steps")
 	
-	logger.write(" 4. Done.")
+	logger.write(" 4. Done, Closing Dask Client.")
+	dask_client.close()
 	logger.write("All Steps Completed.")
 	logger.write("***SUCCESS*** Program execution complete.")
 	logger.close()	
@@ -225,9 +226,9 @@ def run_calculation_routines(ncFile_Name):
 	##
 	## - 500 mb Relative Vorticity			
 	if(_routines.need_relvort):
-		rvo = get_rvor(daskArray, omp_threads=dask_threads, num_workers=dask_nodes) 
+		rvo = Calculation.get_rvor(daskArray, omp_threads=dask_threads, num_workers=dask_nodes) 
 		rvo_500 = ArrayTools.wrapped_interplevel(rvo, p_vert, 500, omp_threads=dask_threads, num_workers=dask_nodes) 
-		xrOut["RVO_500"] = (('south_north', 'west_east'), rvo_500)
+		xrOut["RVO_500"] = (('south_north', 'west_east'), rvo_500[0])
 		del(rvo)
 		del(rvo_500)
 	##

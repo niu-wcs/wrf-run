@@ -10,6 +10,7 @@
 import numpy as np
 import dask.array as da
 from wrf.constants import default_fill
+import PyPostTools
 
 #wrapped_destagger() - A wrapper method that handles the wrf-python destagger() function, safe for Dask
 def wrapped_destagger(daskArray, stagger_dim):
@@ -62,28 +63,31 @@ def wrapped_interpz3d_lev2d(field3d, z, lev2d, missingval, outview=None, omp_thr
 
 	return result
 	
-def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float64), omp_threads=1):
-	from wrf.extension import omp_set_num_threads
-	import numpy.ma as ma
-	from dask.array import map_blocks	
+def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float64), omp_threads=1, num_workers=1):
+    from wrf.extension import omp_set_num_threads
+    import dask.array.ma as ma
+    from dask.array import map_blocks
 
-	omp_set_num_threads(omp_threads)
-	dtype = field3d.dtype
+    omp_set_num_threads(omp_threads)
+    dtype = field3d.dtype
 
-	_desiredlev = da.asarray(desiredlev)
-	if _desiredlev.ndim == 0:
-		_desiredlev = da.array([desiredlev], np.float64)
-		levsare2d = False
-	else:
-		levsare2d = _desiredlev.ndim >= 2
+    _desiredlev = da.asarray(desiredlev)
+    if _desiredlev.ndim == 0:
+        _desiredlev = np.array([desiredlev], np.float64)
+        levsare2d = False
+    else:
+        levsare2d = _desiredlev.ndim >= 2
+        
+    desiredlev_da = da.from_array(_desiredlev)
 
-	if not levsare2d:
-		result = map_blocks(wrapped_interpz3d, field3d, vert, _desiredlev, missing, omp_threads=omp_threads, dtype=dtype)
-	else:
-		result = map_blocks(wrapped_interpz3d_lev2d, field3d, vert, _desiredlev, missing, omp_threads=omp_threads, dtype=dtype)
+    if not levsare2d:
+        result = map_blocks(wrapped_interpz3d, field3d, vert, desiredlev_da, missing, omp_threads=omp_threads, dtype=dtype)
+    else:
+        result = map_blocks(wrapped_interpz3d_lev2d, field3d, vert, desiredlev_da, missing, omp_threads=omp_threads, dtype=dtype)
 
-	masked = ma.masked_values(result, missing)
-	return masked
+    #TODO: Fill this
+    masked = ma.masked_values(result, missing)
+    return masked.compute(num_workers=num_workers)
             
 # Wrapped version of _lat_varname
 def wrapped_lat_varname(daskArray, stagger):
