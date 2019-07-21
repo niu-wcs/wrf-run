@@ -10,6 +10,7 @@ import numpy as np
 import xarray
 import dask.array as da
 import dask.array.ma as ma
+import numpy.ma as npma
 from dask.array import map_blocks
 from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
@@ -393,24 +394,24 @@ def get_cape2d(daskArray, omp_threads=1, num_workers=1):
 	ter_follow = 1
 
 	cape_cin = map_blocks(cape_wrap, p_hpa, tk, qv, z, ter, psfc_hpa, missing, i3dflag, ter_follow, omp_threads, dtype=dtype)
+	calc_cape = cape_cin.compute(num_workers=num_workers)
 
-	left_dims = cape_cin.shape[1:-3]
-	right_dims = cape_cin.shape[-2:]
+	left_dims = calc_cape.shape[1:-3]
+	right_dims = calc_cape.shape[-2:]
 
 	resdim = (4,) + left_dims + right_dims
 
 	# Make a new output array for the result
-	result = da.zeros(resdim, cape_cin.dtype)
+	result = np.zeros(resdim, calc_cape.dtype)
 
 	# Cape 2D output is not flipped in the vertical, so index from the
 	# end
-	result[0, ..., :, :] = cape_cin[0, ..., -1, :, :]
-	result[1, ..., :, :] = cape_cin[1, ..., -1, :, :]
-	result[2, ..., :, :] = cape_cin[1, ..., -2, :, :]
-	result[3, ..., :, :] = cape_cin[1, ..., -3, :, :]
+	result[0, ..., :, :] = calc_cape[0, ..., -1, :, :]
+	result[1, ..., :, :] = calc_cape[1, ..., -1, :, :]
+	result[2, ..., :, :] = calc_cape[1, ..., -2, :, :]
+	result[3, ..., :, :] = calc_cape[1, ..., -3, :, :]
 
-	out = ma.masked_values(result, missing)	
-	return out.compute(num_workers=num_workers)
+	return npma.masked_values(result, missing)
 	
 def get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=1, num_workers=1):
     t = fetch_variable(daskArray, "T")

@@ -4,7 +4,7 @@ max_dom = 1,
 start_date = '[start_date]',
 end_date = '[end_date]',
 interval_seconds = 21600,
-io_form_geogrid = 2,
+io_form_geogrid = 102,
 opt_output_from_geogrid_path ='[out_geogrid_path]/',
 active_grid = .true.,
 /
@@ -36,5 +36,5 @@ fg_name = [fg_name]
 constants_name = './input_data/constant_file',
 opt_metgrid_tbl_path = '[table_path]/',
 opt_output_from_metgrid_path = '[out_geogrid_path]/',
-io_form_metgrid = 2,
+io_form_metgrid = 102,
 /
