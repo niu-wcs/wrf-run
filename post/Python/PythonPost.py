@@ -39,7 +39,7 @@ def launch_python_post():
 	logger.write("  - Testing Environmental Variables")
 	try:
 		dask_nodes = os.environ["PYTHON_POST_NODES"]
-		dask_threads = os.environ["PYTHON_POST_THREADS"]					
+		dask_threads = os.environ["PYTHON_POST_THREADS"]		
 	except KeyError:
 		logger.write("***FAIL*** KeyError encountered while trying to access important environmental variables, abort.")
 		sys.exit("")
@@ -52,7 +52,8 @@ def launch_python_post():
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
 	calculation_future = start_calculations(dask_client)
-	wait(calculation_future) 
+	if(calculation_future != None):
+		wait(calculation_future) 
 	logger.write(" 2. Done.")
 	logger.write(" 3. Generating Figures")
 	plotting_future = start_plotting(dask_client)
@@ -70,6 +71,7 @@ def start_calculations(dask_client):
 
 	try:
 		postDir = os.environ["PYTHON_POST_DIR"]
+		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
 		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
 		logger.close()
@@ -78,7 +80,13 @@ def start_calculations(dask_client):
 	# Get the list of files
 	logger.write("  - Collecting files from target directory (" + postDir + ").")
 	fList = sorted(glob.glob(postDir + "wrfout*"))
-	logger.write("  - " + str(len(fList)) + " files have been found, pushing run_calculation_routines() to dask.")
+	logger.write("  - " + str(len(fList)) + " files have been found.")
+	logger.write("  - Checking target directory if this job has been done?")
+	fList2 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
+	if(len(fList) == len(fList2)):
+		logger.write("  - " + str(len(fList2)) + " WRFPRS files have been found, calculations are already completed, skipping step.")
+		return None
+	logger.write("Pushing run_calculation_routines() to dask.")
 	calculation_future = dask_client.map(run_calculation_routines, fList)
 	return calculation_future
 	
