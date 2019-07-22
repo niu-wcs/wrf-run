@@ -312,7 +312,7 @@ def run_calculation_routines(ncFile_Name):
 			highs = _routines.updft_helcy_levels[1::2]
 			for i in range(0, len(lows)):
 				uphel = Calculation.get_udhel(daskArray, bottom=lows[i], top=highs[i], omp_threads=dask_threads, num_workers=dask_nodes)
-				xrOut["UPHEL_" + lows[i] + "_" + highs[i]] = (('south_north', 'west_east'), uphel)
+				xrOut["UPHEL_" + str(lows[i]) + "_" + str(highs[i])] = (('south_north', 'west_east'), uphel)
 				del(uphel)
 	##
 	## - Wind Shear
