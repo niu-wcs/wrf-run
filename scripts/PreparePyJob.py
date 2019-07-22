@@ -30,14 +30,10 @@ class PreparePyJob:
 		fileCount = len(fList)
 		out_job_contents = ""
 		self.logger.write("  5.b. " + str(fileCount) + " wrfout files have been found.")
-		if(fileCount > 0):
-			Tools.popen(self.aSet, "export PYTHON_POST_DIR=" + self.wrfOutDir + '/')
-			Tools.popen(self.aSet, "export PYTHON_POST_TARG_DIR=" + self.targetDir + '/')
-			Tools.popen(self.aSet, "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes"))
-			Tools.popen(self.aSet, "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_ranks_per_node"))
-			Tools.popen(self.aSet, "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime"))
-			Tools.popen(self.aSet, "export PYTHON_POST_LOG_DIR=" + self.targetDir + '/')
-		#
+		if(fileCount <= 0):
+			# Something went wrong.
+			self.logger.write("  No files found, something is wrong, please check the output directory to ensure the wrfout* files are present.")
+			return False
 		out_job_contents += "#!/bin/bash\n"
 		out_job_contents += "#COBALT -t " + self.aSet.fetch("python_walltime") + "\n"
 		out_job_contents += "#COBALT -n " + self.aSet.fetch("num_python_nodes") + "\n"
@@ -51,6 +47,13 @@ class PreparePyJob:
 		out_job_contents += "export n_openmp_threads_per_rank=4\n"
 		out_job_contents += "export n_hyperthreads_per_core=2\n"
 		out_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
+		
+		out_job_contents += "export PYTHON_POST_DIR=" + self.wrfOutDir + "/\n"
+		out_job_contents += "export PYTHON_POST_TARG_DIR=" + self.targetDir + "/\n"
+		out_job_contents += "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes") + "\n"
+		out_job_contents += "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_ranks_per_node") + "\n"
+		out_job_contents += "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime") + "\n"
+		out_job_contents += "export PYTHON_POST_LOG_DIR=" + self.targetDir + "/\n\n"
 		
 		out_job_contents += "cd " + self.aSet.fetch("postdir") + "/Python\n\n"
 		
