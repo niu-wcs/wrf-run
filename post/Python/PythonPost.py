@@ -25,9 +25,6 @@ dask_client = None
 dask_nodes = 0
 dask_threads = 0
 
-_routines = None
-_pySet = None
-
 def launch_python_post():
 	curDir = os.path.dirname(os.path.abspath(__file__)) 
 	logger = PyPostTools.pyPostLogger()
@@ -56,7 +53,7 @@ def launch_python_post():
 						   queue="debug-cache-quad")
 	cluster.scale(8)
 	dask_client = Client(cluster)
-	_routines = Routines.Routines(_pySet)
+	_routines = Routines.Routines()
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
