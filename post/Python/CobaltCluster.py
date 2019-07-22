@@ -13,16 +13,7 @@ class CobaltCluster(JobQueueCluster):
     submit_command = "qsub"
     cancel_command = "qdel"
 
-    def __init__(
-		self,
-		queue=None,
-		project=None,
-		walltime=None,
-		ncpus=None,
-		job_extra=None,
-		config_name="cobalt",
-		**kwargs
-		):
+    def __init__(self, queue=None, project=None, walltime=None, ncpus=None, job_extra=None, config_name="cobalt", **kwargs):
 		if queue is None:
 			queue = dask.config.get("jobqueue.%s.queue" % config_name)
 		if project is None:
