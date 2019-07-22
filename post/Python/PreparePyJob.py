@@ -35,6 +35,7 @@ class PreparePyJob:
 			Tools.popen(self.aSet, "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes"))
 			Tools.popen(self.aSet, "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_ranks_per_node"))
 			Tools.popen(self.aSet, "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime"))
+			Tools.popen(self.aSet, "export PYTHON_POST_LOG_DIR=" + self.targetDir + '/')
 		#
 		out_job_contents += "#!/bin/bash\n"
 		out_job_contents += "#COBALT -t " + self.aSet.fetch("python_walltime") + "\n"

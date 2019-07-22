@@ -41,7 +41,10 @@ class pyPostLogger(Singleton):
 	
 	def __init__(self):
 		curTime = datetime.date.today().strftime("%B%d%Y-%H%M%S")
-		curDir = os.path.dirname(os.path.abspath(__file__)) 	
+		try:
+			curDir = os.environ["PYTHON_POST_LOG_DIR"]
+		except KeyError:
+			curDir = os.path.dirname(os.path.abspath(__file__)) 	
 		logName = "pypost.log"	
 		logFile = curDir + '/' + logName
 		self.filePath = logFile
