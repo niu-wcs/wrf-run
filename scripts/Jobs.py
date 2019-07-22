@@ -17,7 +17,7 @@ import ModelData
 import Tools
 import Wait
 import Template
-from .post.Python import PreparePyJob
+import PreparePyJob
 
 # JobSteps: Class responsible for handling the steps that involve job submission and checkup
 class JobSteps:
@@ -390,7 +390,7 @@ class Postprocessing_Steps:
 		if(self.aSet.fetch("post_run_unipost") == '1'):
 			return self.run_postprocessing_upp()
 		elif(self.aSet.fetch("post_run_python") == '1'):
-			post = PreparePyJob(self.aSet, self.wrfDir + '/' + self.startTime[0:8] + "/output", self.postDir)
+			post = PreparePyJob.PreparePyJob(self.aSet, self.wrfDir + '/' + self.startTime[0:8] + "/output", self.postDir)
 			return post.prepare_job()
 		else:
 			sys.exit("Error: run_postprocessing() called without a mode flagged, abort.")

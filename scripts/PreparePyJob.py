@@ -6,7 +6,7 @@
 #  to clusters
 
 import glob
-from ..scripts import Tools
+from scripts import Tools
 
 class PreparePyJob:
 	aSet = None
@@ -51,7 +51,7 @@ class PreparePyJob:
 		out_job_contents += "export n_hyperthreads_per_core=2\n"
 		out_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
 		
-		out_job_contents += "cd " + self.aSet.fetch("postdir") + "\n\n"
+		out_job_contents += "cd " + self.aSet.fetch("postdir") + "/Python\n\n"
 		
 		out_job_contents = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
 		out_job_contents += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
