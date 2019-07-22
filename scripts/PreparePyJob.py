@@ -7,6 +7,7 @@
 
 import glob
 import Tools
+import Wait
 
 class PreparePyJob:
 	aSet = None
