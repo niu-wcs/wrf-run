@@ -38,7 +38,7 @@ class Singleton(metaclass=SingletonOptmized):
 class pyPostLogger(Singleton):
 	f = None
 	filePath = None
-	
+
 	def __init__(self):
 		curTime = datetime.date.today().strftime("%B%d%Y-%H%M%S")
 		try:
@@ -48,12 +48,12 @@ class pyPostLogger(Singleton):
 		logName = "pypost.log"	
 		logFile = curDir + '/' + logName
 		self.filePath = logFile
-	
+
 	def write(self, out):
 		self.f = open(self.filePath, "a")
 		self.f.write(out + '\n')
 		self.f.close()
 		print(out)
-	
+
 	def close(self):
 		self.f.close()

@@ -14,3 +14,5 @@ export LD_LIBRARY_PATH=/opt/cray/pe/gcc-libs/:$LD_LIBRARY_PATH
 export LIBINCLUDE="/projects/climate_severe/WRF/Libs:/projects/climate_severe/WRF/Libs/include":$LIBINCLUDE
 
 export PATH=$PATH:/projects/climate_severe/WRF/grib2/wgrib2/
+
+alias python=/projects/climate_severe/Python/anaconda/bin/python3.7
