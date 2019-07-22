@@ -41,7 +41,7 @@ class PreparePyJob:
 		out_job_contents += "#!/bin/bash\n"
 		out_job_contents += "#COBALT -t " + self.aSet.fetch("python_walltime") + "\n"
 		out_job_contents += "#COBALT -n " + self.aSet.fetch("num_python_nodes") + "\n"
-		out_job_contents += "#COBALT -q default\n"
+		out_job_contents += "#COBALT -q debug-cache-quad\n"
 		out_job_contents += "#COBALT -A climate_severe\n\n"
 		out_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
 		out_job_contents += "ulimit -s unlimited\n\n"
@@ -67,7 +67,7 @@ class PreparePyJob:
 				target_file.write(out_job_contents)		
 			Tools.popen(self.aSet, "chmod +x python_post.job")
 			self.logger.write("   -> Submitting Python Post Processing job to the queue")
-			jobSub = Tools.popen(self.aSet, "qsub python_post.job -q default -t " + str(self.aSet.fetch("python_walltime")) + " -n " + str(self.aSet.fetch("num_python_nodes")) + " --mode script")	
+			jobSub = Tools.popen(self.aSet, "qsub python_post.job -q debug-cache-quad -t " + str(self.aSet.fetch("python_walltime")) + " -n " + str(self.aSet.fetch("num_python_nodes")) + " --mode script")	
 
 			try:
 				wCond = [{"waitCommand": "tail -n 3 pypost.log", "contains": "***SUCCESS***", "retCode": 1},
