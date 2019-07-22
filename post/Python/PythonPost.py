@@ -29,7 +29,7 @@ _pySet = None
 
 def launch_python_post():
 	curDir = os.path.dirname(os.path.abspath(__file__)) 
-	logger = PyPostTools.pyPostLogger.instance()
+	logger = PyPostTools.pyPostLogger()
 
 	logger.write("Initializing WRF Python Post-Processing Program")
 	#Step 1: Load program settings
@@ -69,7 +69,7 @@ def launch_python_post():
 	logger.close()	
 
 def start_calculations(dask_client):	
-	logger = PyPostTools.pyPostLogger.instance()
+	logger = PyPostTools.pyPostLogger()
 
 	try:
 		postDir = os.environ["PYTHON_POST_DIR"]
@@ -94,7 +94,7 @@ def start_calculations(dask_client):
 	return calculation_future
 	
 def start_plotting(dask_client):	
-	logger = PyPostTools.pyPostLogger.instance()
+	logger = PyPostTools.pyPostLogger()
 	try:
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
@@ -111,7 +111,7 @@ def start_plotting(dask_client):
 	return plotting_future	
 	
 def run_calculation_routines(ncFile_Name):
-	logger = PyPostTools.pyPostLogger.instance()
+	logger = PyPostTools.pyPostLogger()
 	try:
 		start = os.environ["PYTHON_POST_FIRSTTIME"]
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
@@ -347,7 +347,7 @@ def run_calculation_routines(ncFile_Name):
 	return True		
 	
 def run_plotting_routines(ncFile_Name):
-	logger = PyPostTools.pyPostLogger.instance()
+	logger = PyPostTools.pyPostLogger()
 	_pySet = PyPostSettings.PyPostSettings()
 	try:
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
