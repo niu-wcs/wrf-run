@@ -24,16 +24,16 @@ def synchronized(lock):
     return wrapper
 		
 class SingletonOptmized(type):
-    _instances = {}
-    def call(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            with lock:
-                if cls not in cls._instances:
-                    cls._instances[cls] = super(SingletonOptmizedOptmized, cls).call(*args, **kwargs)
-        return cls._instances[cls]
+	_instances = {}
+	def call(cls, *args, **kwargs):
+		if cls not in cls._instances:
+			with lock:
+				if cls not in cls._instances:
+					cls._instances[cls] = super(SingletonOptmizedOptmized, cls).call(*args, **kwargs)
+		return cls._instances[cls]
 
 class Singleton(metaclass=SingletonOptmized):
-    pass
+	pass
 		
 class pyPostLogger(Singleton):
 	f = None
