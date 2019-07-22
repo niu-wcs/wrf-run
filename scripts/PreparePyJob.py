@@ -61,7 +61,7 @@ class PreparePyJob:
 		out_job_contents += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
 		out_job_contents += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 		out_job_contents += "-j $n_hyperthreads_per_core \\" + '\n'
-		out_job_contents += "python PythonPost.py&\n"
+		out_job_contents += self.aSet.fetch("condainstallation") + " PythonPost.py&\n"
 		out_job_contents += "PID_PyPost=$!\n"
 		out_job_contents += "wait $PID_PyPost\n\n"
 		

@@ -23,6 +23,7 @@ wrfrunfiles /projects/climate_severe/WRF/WRF/run/
 wpsexecutables /projects/climate_severe/WRF/WPS/
 uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
 postdir /projects/climate_severe/wrf-run/post
+condainstallation /projects/climate_severe/Python/anaconda/bin/python3.7
 modeldata CFSv2
 modeldataforecasthour 0
 debugmode 0
