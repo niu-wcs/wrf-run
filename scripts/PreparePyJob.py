@@ -44,14 +44,14 @@ class PreparePyJob:
 		out_job_contents += "export n_nodes="+ str(self.aSet.fetch("num_python_nodes")) +"\n"
 		out_job_contents += "export n_mpi_ranks_per_node=32\n"
 		out_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
-		out_job_contents += "export n_openmp_threads_per_rank=4\n"
+		out_job_contents += "export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n"
 		out_job_contents += "export n_hyperthreads_per_core=2\n"
 		out_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
 		
 		out_job_contents += "export PYTHON_POST_DIR=" + self.wrfOutDir + "/\n"
 		out_job_contents += "export PYTHON_POST_TARG_DIR=" + self.targetDir + "/\n"
 		out_job_contents += "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes") + "\n"
-		out_job_contents += "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_ranks_per_node") + "\n"
+		out_job_contents += "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_threads_per_rank") + "\n"
 		out_job_contents += "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime") + "\n"
 		out_job_contents += "export PYTHON_POST_LOG_DIR=" + self.targetDir + "/\n\n"
 		

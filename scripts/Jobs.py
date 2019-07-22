@@ -76,7 +76,7 @@ class JobSteps:
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
 				target_file.write("export n_mpi_ranks_per_node=1\n")
 				target_file.write("export n_mpi_ranks=1\n")
-				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
 				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")	
 
@@ -141,7 +141,7 @@ class JobSteps:
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
 				target_file.write("export n_mpi_ranks_per_node=1\n")
 				target_file.write("export n_mpi_ranks=1\n")
-				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
 				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
 				target_file.write("./link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
@@ -162,7 +162,7 @@ class JobSteps:
 				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
 				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_metgrid_processors") + '\n')
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
 				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
@@ -177,7 +177,7 @@ class JobSteps:
 				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
 				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_real_processors") + "\n")
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=4\n")
+				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
 				target_file.write("export n_hyperthreads_per_core=2\n")
 				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
@@ -418,7 +418,7 @@ class Postprocessing_Steps:
 		upp_job_contents += "export n_nodes="+ str(self.aSet.fetch("upp_ensemble_nodes_per_hour")) +"\n"
 		upp_job_contents += "export n_mpi_ranks_per_node=32\n"
 		upp_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
-		upp_job_contents += "export n_openmp_threads_per_rank=4\n"
+		upp_job_contents += "export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n"
 		upp_job_contents += "export n_hyperthreads_per_core=2\n"
 		upp_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
 
