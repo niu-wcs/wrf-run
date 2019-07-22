@@ -48,8 +48,8 @@ def launch_python_post():
 	logger.write("  - Success!")
 	logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	#cluster = LocalCluster(n_workers=dask_nodes)
-	cluster = SLURMCluster(processes=8,
-						   threads=4,
+	cluster = SLURMCluster(processes=1,
+						   cores=64,
 						   memory="100GB",
 						   project="climate_severe",
 						   walltime="01:00:00",
