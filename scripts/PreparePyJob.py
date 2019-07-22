@@ -54,11 +54,13 @@ class PreparePyJob:
 		
 		out_job_contents += "cd " + self.aSet.fetch("postdir") + "/Python\n\n"
 		
-		out_job_contents = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
+		out_job_contents += "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
 		out_job_contents += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
 		out_job_contents += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
 		out_job_contents += "-j $n_hyperthreads_per_core \\" + '\n'
 		out_job_contents += "python PythonPost.py&\n"
+		out_job_contents += "PID_PyPost=$!\n"
+		out_job_contents += "wait $PID_PyPost\n\n"
 		
 		with Tools.cd(self.targetDir):
 			with open("python_post.job", 'w') as target_file:
