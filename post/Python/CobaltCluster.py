@@ -10,10 +10,10 @@ from dask_jobqueue.core import JobQueueCluster
 logger = logging.getLogger(__name__)
 
 class CobaltCluster(JobQueueCluster):
-    submit_command = "qsub"
-    cancel_command = "qdel"
+	submit_command = "qsub"
+	cancel_command = "qdel"
 
-    def __init__(self, queue=None, project=None, walltime=None, ncpus=None, job_extra=None, config_name="cobalt", **kwargs):
+	def __init__(self, queue=None, project=None, walltime=None, ncpus=None, job_extra=None, config_name="cobalt", **kwargs):
 		if queue is None:
 			queue = dask.config.get("jobqueue.%s.queue" % config_name)
 		if project is None:
@@ -39,9 +39,7 @@ class CobaltCluster(JobQueueCluster):
 		if ncpus is None:
 			# Compute default cores specifications
 			ncpus = self.worker_cores
-			logger.info(
-				"ncpus specification for COBALT not set, initializing it to %s" % ncpus
-			)
+			logger.info("ncpus specification for COBALT not set, initializing it to %s" % ncpus)
 		if ncpus is not None:
 			header_lines.append("#COBALT -n %s" % ncpus)
 		if self.log_directory is not None:
