@@ -35,18 +35,8 @@ class PreparePyJob:
 			self.logger.write("  No files found, something is wrong, please check the output directory to ensure the wrfout* files are present.")
 			return False
 		out_job_contents += "#!/bin/bash\n"
-		out_job_contents += "#COBALT -t " + self.aSet.fetch("python_walltime") + "\n"
-		out_job_contents += "#COBALT -n " + self.aSet.fetch("num_python_nodes") + "\n"
-		out_job_contents += "#COBALT -q debug-cache-quad\n"
-		out_job_contents += "#COBALT -A climate_severe\n\n"
 		out_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
 		out_job_contents += "ulimit -s unlimited\n\n"
-		out_job_contents += "export n_nodes="+ str(self.aSet.fetch("num_python_nodes")) +"\n"
-		out_job_contents += "export n_mpi_ranks_per_node=32\n"
-		out_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
-		out_job_contents += "export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n"
-		out_job_contents += "export n_hyperthreads_per_core=2\n"
-		out_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
 		
 		out_job_contents += "export PYTHON_POST_DIR=" + self.wrfOutDir + "/\n"
 		out_job_contents += "export PYTHON_POST_TARG_DIR=" + self.targetDir + "/\n"
@@ -57,10 +47,6 @@ class PreparePyJob:
 		
 		out_job_contents += "cd " + self.aSet.fetch("postdir") + "/Python\n\n"
 		
-		out_job_contents += "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
-		out_job_contents += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
-		out_job_contents += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
-		out_job_contents += "-j $n_hyperthreads_per_core \\" + '\n'
 		out_job_contents += self.aSet.fetch("condainstallation") + " PythonPost.py&\n"
 		out_job_contents += "PID_PyPost=$!\n"
 		out_job_contents += "wait $PID_PyPost\n\n"
@@ -69,8 +55,8 @@ class PreparePyJob:
 			with open("python_post.job", 'w') as target_file:
 				target_file.write(out_job_contents)		
 			Tools.popen(self.aSet, "chmod +x python_post.job")
-			self.logger.write("   -> Submitting Python Post Processing job to the queue")
-			jobSub = Tools.popen(self.aSet, "qsub python_post.job -q debug-cache-quad -t " + str(self.aSet.fetch("python_walltime")) + " -n " + str(self.aSet.fetch("num_python_nodes")) + " --mode script")	
+			self.logger.write("   -> Starting Python Post Processing Script, moving this script to holding pattern")
+			jobSub = Tools.popen(self.aSet, "./python_post.job")	
 
 			try:
 				wCond = [{"waitCommand": "tail -n 3 pypost.log", "contains": "***SUCCESS***", "retCode": 1},

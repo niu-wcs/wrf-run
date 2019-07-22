@@ -17,7 +17,8 @@ import Plotting
 import xarray
 import dask.array as da
 from dask.array import map_blocks
-from dask.distributed import Client, progress, metrics, LocalCluster, wait
+from dask.distributed import Client, progress, metrics, wait
+from dask_jobqueue import SLURMCluster
 from datetime import datetime
 
 dask_client = None
@@ -46,7 +47,14 @@ def launch_python_post():
 		sys.exit("")
 	logger.write("  - Success!")
 	logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
-	cluster = LocalCluster(n_workers=dask_nodes)
+	#cluster = LocalCluster(n_workers=dask_nodes)
+	cluster = SLURMCluster(processes=8,
+						   threads=4,
+						   memory="100GB",
+						   project="climate_severe",
+						   walltime="01:00:00",
+						   queue="debug-cache-quad")
+	cluster.scale(8)
 	dask_client = Client(cluster)
 	_routines = Routines.Routines(_pySet)
 	logger.write("  - Success!")
@@ -63,6 +71,7 @@ def launch_python_post():
 	logger.write(" 4. Final Steps")
 	
 	logger.write(" 4. Done, Closing Dask Client.")
+	cluster.stop_all_jobs()
 	dask_client.close()
 	logger.write("All Steps Completed.")
 	logger.write("***SUCCESS*** Program execution complete.")
