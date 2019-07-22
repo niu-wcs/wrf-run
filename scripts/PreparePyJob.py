@@ -6,7 +6,7 @@
 #  to clusters
 
 import glob
-from scripts import Tools
+import Tools
 
 class PreparePyJob:
 	aSet = None
