@@ -48,7 +48,7 @@ def launch_python_post():
 	logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	#cluster = LocalCluster(n_workers=dask_nodes)
 	cluster = CobaltCluster(processes=1,
-						   cores=8,
+						   ncpus=8,
 						   project="climate_severe",
 						   walltime="01:00:00",
 						   queue="debug-cache-quad")
