@@ -60,7 +60,7 @@ def launch_python_post():
 							   project="climate_severe",
 							   walltime="60",
 							   queue="debug-cache-quad")
-		cluster.scale(8)
+		cluster.scale(1)
 		dask_client = Client(cluster, timeout=60)
 	except tornado.util.TimeoutError:
 		logger.write("  - Failed to initialize dask client, abort.")
