@@ -60,7 +60,7 @@ def launch_python_post():
 							   ncpus=8,
 							   project="climate_severe",
 							   walltime="60",
-							   queue="debug-cache-quad"
+							   queue="debug-cache-quad",
 							   log_directory=targetDir)
 		cluster.scale(1)
 		dask_client = Client(cluster, timeout=60)
