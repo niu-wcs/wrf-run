@@ -20,7 +20,7 @@ from dask.array import map_blocks
 from dask.distributed import Client, progress, metrics, wait
 #from dask_jobqueue import SLURMCluster
 import dask_jobqueue
-from CobaltCluster import CobaltCluster
+from dask_jobqueue import CobaltCluster
 from datetime import datetime
 
 dask_client = None
