@@ -52,7 +52,7 @@ def launch_python_post():
 						   cores=64,
 						   ncpus=8,
 						   project="climate_severe",
-						   walltime="01:00:00",
+						   walltime="60",
 						   queue="debug-cache-quad")
 	cluster.scale(8)
 	dask_client = Client(cluster)
