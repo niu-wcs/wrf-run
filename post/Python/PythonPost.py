@@ -6,6 +6,7 @@
 #  processing on the wrfout files.
 
 import os
+import sys
 import glob
 #from ..scripts import Tools
 import PyPostTools
@@ -22,6 +23,7 @@ from dask.distributed import Client, progress, metrics, wait
 import dask_jobqueue
 from dask_jobqueue import CobaltCluster
 from datetime import datetime
+import tornado.util.TimeoutError
 
 dask_client = None
 dask_nodes = 0
@@ -45,17 +47,22 @@ def launch_python_post():
 		logger.write("***FAIL*** KeyError encountered while trying to access important environmental variables, abort.")
 		sys.exit("")
 	logger.write("  - Success!")
-	logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
-	#cluster = LocalCluster(n_workers=dask_nodes)
-	cluster = CobaltCluster(processes=1,
-						   memory="100GB",
-						   cores=64,
-						   ncpus=8,
-						   project="climate_severe",
-						   walltime="60",
-						   queue="debug-cache-quad")
-	cluster.scale(8)
-	dask_client = Client(cluster)
+	try:
+		logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
+		#cluster = LocalCluster(n_workers=dask_nodes)
+		cluster = CobaltCluster(processes=1,
+							   memory="100GB",
+							   cores=64,
+							   ncpus=8,
+							   project="climate_severe",
+							   walltime="60",
+							   queue="debug-cache-quad")
+		cluster.scale(8)
+		dask_client = Client(cluster, timeout=60)
+	except tornado.util.TimeoutError:
+		logger.write("  - Failed to initialize dask client, abort.")
+		sys.exit("")
+		return False
 	_routines = Routines.Routines()
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
