@@ -45,7 +45,8 @@ def launch_python_post():
 	logger.write("  - Testing Environmental Variables")
 	try:
 		dask_nodes = os.environ["PYTHON_POST_NODES"]
-		dask_threads = os.environ["PYTHON_POST_THREADS"]		
+		dask_threads = os.environ["PYTHON_POST_THREADS"]	
+		targetDir = os.environ["PYTHON_POST_TARG_DIR"]		
 	except KeyError:
 		logger.write("***FAIL*** KeyError encountered while trying to access important environmental variables, abort.")
 		sys.exit("")
@@ -59,7 +60,8 @@ def launch_python_post():
 							   ncpus=8,
 							   project="climate_severe",
 							   walltime="60",
-							   queue="debug-cache-quad")
+							   queue="debug-cache-quad"
+							   log_directory=targetDir)
 		cluster.scale(1)
 		dask_client = Client(cluster, timeout=60)
 	except tornado.util.TimeoutError:
