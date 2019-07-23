@@ -23,7 +23,7 @@ from dask.distributed import Client, progress, metrics, wait
 import dask_jobqueue
 from dask_jobqueue import CobaltCluster
 from datetime import datetime
-import tornado.util.TimeoutError
+import tornado.util
 
 dask_client = None
 dask_nodes = 0
