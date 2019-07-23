@@ -25,6 +25,9 @@ from dask_jobqueue import CobaltCluster
 from datetime import datetime
 import tornado.util
 
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
 dask_client = None
 dask_nodes = 0
 dask_threads = 0
