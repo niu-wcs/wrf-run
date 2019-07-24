@@ -5,15 +5,30 @@
 ### Introduction ###
 This python script package automates the entire WRF process for use on cluster based computers (This package automates for Argonne's Theta Cluster). This is a fully self-contained script package that handles the tasks of obtaining the data, running the pre-processing executables, the WRF process, and forking the task to post-processing scripts for visualization.
 
+### Requirements ###
+Included in this repository is a post-processing solution written in Python 3 as well as a UPP wrapper. If you want to use UPP, you may ignore this section, however, if you plan on using the Python module, you will need three other Python Packages to be installed:
+  * wrf-python: https://github.com/NCAR/wrf-python
+  * dask: https://github.com/dask/dask
+  * dask-jobqueue: https://github.com/Phantom139/dask-jobqueue (This is a custom fork that has support for Argonne's Theta Machine)
+
 ### Contents ###
 This git repository contains the following subdirectories:
   * post: The folder containing the two post-processing methodologies used by this script.
     * Python: A python based post-processing solution that uses wrf-python, dask, cartopy, and scipy. (See below section on python post processing)
+	  * **__init.py**: Empty text file used to define the folder as a module
+	  * ArrayTools.py: A set of wrf-python functions that have dask supported wrapper calls around them
+	  * Calculation.py: A full suite of dask wrapped calls to wrf-python's fortran calculated fields, and method calls to obtain calculated variables
+	  * ColorMaps.py: A set of color maps used for matplotlib figures
+	  * Plotting.py: A set of functions used to generate figures of calbulated variables
+	  * PyPostSettings.py: A class instance used to apply program settings from a control file.
+	  * PyPostTools.py: A set of tools used by the other classes in this module
+	  * PythonPost.py: The main script of the post-processing module, includes the main() call.
+	  * **python_post_control.txt**: The control file for the post-processing module, please see the section below for more information.
+	  * Routines.py: A wrapper class instance that collects information from the control file and parses it into a list of required function calls.
     * UPP: The Unified Post-Processor 3.2 package scripts, support for both GRIB/GRIB2 to GrADS
 	  * includes: A collection of the WRF binary files required to run the UPP process
 	  * parm: Parameter files required by UPP
 	  * scripts: Additional scripts needed for post-processing
-	* Python: A plotting package based off of the wrf-python library
   * scripts: The python scripts used by this package
     * Application.py: The script package containing the execution path of the program
 	* ApplicationSettings.py: Classes used to apply program settings via control.txt
@@ -21,6 +36,7 @@ This git repository contains the following subdirectories:
 	* Jobs.py: Classes and methods used to submit and monitor WRF jobs to clusters
 	* Logging: Singleton class instance that handles logging the program process to a text file
 	* ModelData.py: Classes and methods used to manage various data sources for the model
+	* PreparePyJob.py: Class instance used to construct and monitor the Python Post-Processing job
 	* Template.py: Classes and methods used to modify and write template files
 	* Tools.py: Extra classes and methods used as support tools for the program
 	* Wait.py: Classes and methods used to hold the main thread until conditions are met
@@ -152,7 +168,101 @@ Finally, change the modeldata parameter in control.txt to match your model sourc
 This package contains a basic python post-processing script that incorporates multiple other python packages. If you would like to use the python post-processor you first need to set **post_run_python** to 1 in **control.txt**. This will create a job-script to execute PythonPost.py in parallel using Dask and wrf-python. Controlling the outputs of this are handled by a second control text file located in the Python/ directory.
 
 Here are the available fields that may be visualized:
-T.B.D
+
+  * Temperature
+  * Pressure (MSLP)
+  * Winds
+  * Simulated Reflectivity
+  * Precipitation Type [IN DEVELOPMENT]
+  * Accumulated Precipitation
+  * Accumulated Snowfall
+  * Precipitable Water
+  * Dewpoint Temperature
+  * Omega
+  * 10m Max Wind Gusts
+  * Theta-E (Equiv. Pot. Temp)
+  * Geopotential Height
+  * Relative Humidity
+  * 500mb Relative Vorticity
+  * 3D CAPE
+  * 3D CIN
+  * MUCAPE
+  * MUCIN
+  * Lifting Condensation Level
+  * Level of Free Convection
+  * Wind Shear
+  * Storm Relative Helicity
+  * Updraft Helicity
+  * AFWA Parameters
+  
+To control the fields that are output, you need to edit the **python_post_control.txt** file located in the /Post/Python/ directory. This has a similar format to the base control.txt file with the addition of array-like element support. Here is a list of the parameters for this file:
+
+This first batch of configuration options are used for internal processing and do not control plotting:
+  * save_datafiles_when_done: A 1/0 flag to save the resulting netCDF4 file after plotting is done, or delete them.
+  * create_animated_gifs: A 1/0 flag to instruct the program to generate animated .GIF files using all timesteps of the image.
+  * gif_timestep: How many frames per second (FPS) will be used for makign the GIF images
+  * sftp_push_results_when_done: A 1/0 flag to SFTP the resulting files from this machine when done
+  * sftp_push_saved_datafile: A 1/0 flag to SFTP the resulting netCDF4 datafiles when done, only active if save_datafiles_when_done is also on.
+  * sftp_server: The web link or IP address of the target server
+  * sftp_server_port: Which port to use for SFTP (Defaults to 22)
+  * sftp_user: The username to log in with
+  * sftp_pass: The passwork to use to log in
+  
+This second batch of options is used to define what plotting is done:
+  * plot_surface_map: A flag to plot a surface map (See next three options)
+  * plot_surface_map_temperature: A flag used to toggle filled temperature contours on the surface map
+  * plot_surface_map_winds: A flag used to toggle wind barbs on the surface map
+  * plot_surface_map_mslp: A flag used to toggle contour lines of mean sea level pressure on the surface map
+  * plot_simulated_reflectivity: A flag to plot a map of simulated radar reflectivity
+  * plot_precip_type: A flag used to plot a map of precipitation type [IN DEVELOPMENT]
+  * plot_accumulated_precip: A flag used to plot a map of total accumulated precipitation
+  * plot_accumulated_snowfall: A flag used to plot a map of total accumulated snowfall
+  * plot_precipitable_water: A flag used to plot a map of precipitable water
+  * plot_precipitable_water_with_mslp_contours: A flag used to instruct the plotter to add MSLP contours to the precipitable water plot (Only active if the above is on).
+  * plot_dewpoint_temperature: A flag used to plot a map of surface dewpoint temperature
+  * plot_surface_omega: A flag used to plot a map of surface omega
+  * plot_10m_max_winds: A flag used to plot a map of the maximum 10m wind gusts
+  * plot_upper_lv_winds: A flag used to plot a map of upper-level winds
+  * plot_upper_lv_winds_withheights: A flag used to instruct the plotter to add geopotential height contours to the upper level wind map
+  * upper_winds_levels: An array-like field to instruct which levels to plot the upper-level winds on (See below for more info)
+  * plot_theta_e: A flag used to plot a map of equivalent potential temperature
+  * plot_theta_e_heights: A flag used to instruct the plotter to add geopotential height contours to the theta-e map
+  * plot_theta_e_winds: A flag used to instruct the plotter to add wind barbs to the theta-e map
+  * theta_e_levels: An array-like field to instruct which levels to plot theta-e on (See below for more info)
+  * plot_rh_and_wind: A flag used to plot a map of relative humidity and winds
+  * rh_and_wind_levels: An array-like field to instruct which levels to plot RH and winds on (See below for more info)
+  * plot_500_rel_vort: A flag used to plot a map of 500mb relative vorticity
+  * plot_500_rel_vort_withheights: A flag used to instruct the plotter to add geopotential height contours to the relative vorticity map
+  * plot_CAPE: A flag used to plot a map of surface based convective available potential energy
+  * plot_CIN: A flag used to plot a map of surface based convective inhibition
+  * plot_MUCAPE: A flag used to plot a map of most unstable CAPE (MUCAPE)
+  * plot_MUCIN: A flag used to plot a map of most unstable CIN (MUCIN)
+  * plot_LCL: A flag used to plot a map of the lifting condenstion level
+  * plot_LFC: A flag used to plot a map of the level of free convection
+  * plot_AFWA_Hail: A flag used to plot a map of the AFWA Hail Diagnostic
+  * plot_AFWA_Tor: A flag used to plot a map of the AFWA Tornado Diagnostic
+  * plot_shear: A flag used to plot a map of wind shear from the surface to a defined upper bound (Next parameter)
+  * shear_levels: An array-like field that defines the upper bounds of wind shear to use
+  * plot_srh: A flag used to plot a map of the storm relative helicity from the surface to defined upper bounds (Next parameter)
+  * srh_levels: An array-like field that defines the upper bounds of SRH to use
+  * plot_updft_helcy: A flag used to plot a map of updraft helicity between levels
+  * updft_helcy_levels: An array-like field that defines the levels of updraft helicity to plot, NOTE: You may define multiple layers to use here, but the number of values must be divisible by 2.
+  
+Some of the above field have support for "array-like" options. This means it will be loaded into the system as a list and then parsed at each of the defined parameters. Here is an example of one of these parameters:
+
+upper_winds_levels (int)[925,850,700,500,300,250,200]
+
+The formatting starts with a singular argument in parenthesis to define the datatype transformation (How python will treat the value). If you do not define this, it will be loaded as a string. There is support for integer (int) and float (float) transformations. Next, enclose in square brackets the values you want to use. **NOTE:** You cannot include spaces between these values, ie:
+upper_winds_levels (int)[925, 850, 700, 500, 300, 250, 200]
+Would be wrong.
+
+Most of the standard paramters use this as interpolation to a pressure level, you may include the surface as well by having the first element of the array be a 0.
+
+ie:
+
+upper_winds_levels (int)[0,925,850,700,500,300,250,200]
+				
+Would save the U & V components of the wind at the surface, 925mb, 850mb, 700mb, 500mb, 300mb, 250mb, and 200mb.				
 				
 ### Contact Info ###
 Any questions regarding the script package can be sent to Robert C. Fritzen (rfritzen1@niu.edu). In-person questions can be done from my office in Davis Hall, room 209.
