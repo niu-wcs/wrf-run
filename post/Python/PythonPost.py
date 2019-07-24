@@ -46,7 +46,8 @@ def launch_python_post():
 	try:
 		dask_nodes = os.environ["PYTHON_POST_NODES"]
 		dask_threads = os.environ["PYTHON_POST_THREADS"]	
-		targetDir = os.environ["PYTHON_POST_TARG_DIR"]		
+		postDir = os.environ["PYTHON_POST_DIR"]
+		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
 		logger.write("***FAIL*** KeyError encountered while trying to access important environmental variables, abort.")
 		sys.exit("")
@@ -72,12 +73,25 @@ def launch_python_post():
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
-	calculation_future = start_calculations(dask_client)
-	if(calculation_future != None):
+	logger.write("  - Collecting files from target directory (" + postDir + ").")
+	fList = sorted(glob.glob(postDir + "wrfout*"))
+	fList2 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
+	logger.write("  - " + str(len(fList)) + " files have been found.")
+	logger.write("  - Checking target directory if this job has been done?")
+	if(len(fList) == len(fList2)):
+		logger.write("   - " + str(len(fList2)) + " WRFPRS files have been found, calculations are already completed, skipping step.")
+	else:
+		logger.write("   - No.")		
+		logger.write("Pushing run_calculation_routines() to dask.")
+		calculation_future = dask_client.map(run_calculation_routines, fList)	
 		wait(calculation_future) 
 	logger.write(" 2. Done.")
 	logger.write(" 3. Generating Figures")
-	plotting_future = start_plotting(dask_client)
+	logger.write("  - Collecting files from target directory (" + targetDir + ").")
+	fList3 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
+	logger.write("  - " + str(len(fList3)) + " files have been found.")
+	logger.write("Pushing run_plotting_routines() to dask.")
+	plotting_future = dask_client.map(run_plotting_routines, fList3)
 	wait(plotting_future)
 	logger.write(" 3. Done.")
 	logger.write(" 4. Final Steps")
@@ -87,49 +101,7 @@ def launch_python_post():
 	dask_client.close()
 	logger.write("All Steps Completed.")
 	logger.write("***SUCCESS*** Program execution complete.")
-	logger.close()	
-
-def start_calculations(dask_client):	
-	logger = PyPostTools.pyPostLogger()
-
-	try:
-		postDir = os.environ["PYTHON_POST_DIR"]
-		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
-	except KeyError:
-		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
-		logger.close()
-		sys.exit("Failed to find environmental variable (DIRS), check original application to ensure it is being set.")		
-		return False
-	# Get the list of files
-	logger.write("  - Collecting files from target directory (" + postDir + ").")
-	fList = sorted(glob.glob(postDir + "wrfout*"))
-	logger.write("  - " + str(len(fList)) + " files have been found.")
-	logger.write("  - Checking target directory if this job has been done?")
-	fList2 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
-	if(len(fList) == len(fList2)):
-		logger.write("   - " + str(len(fList2)) + " WRFPRS files have been found, calculations are already completed, skipping step.")
-		return None
-	logger.write("   - No.")		
-	logger.write("Pushing run_calculation_routines() to dask.")
-	calculation_future = dask_client.map(run_calculation_routines, fList)
-	return calculation_future
-	
-def start_plotting(dask_client):	
-	logger = PyPostTools.pyPostLogger()
-	try:
-		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
-	except KeyError:
-		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
-		logger.close()
-		sys.exit("Failed to find environmental variable (DIRS), check original application to ensure it is being set.")		
-		return False
-	# Get the list of files
-	logger.write("  - Collecting files from target directory (" + targetDir + ").")
-	fList = sorted(glob.glob(targetDir + "WRFPRS_F*"))
-	logger.write("  - " + str(len(fList)) + " files have been found.")
-	logger.write("Pushing run_plotting_routines() to dask.")
-	plotting_future = dask_client.map(run_plotting_routines, fList)
-	return plotting_future	
+	logger.close()		
 	
 def run_calculation_routines(ncFile_Name):
 	logger = PyPostTools.pyPostLogger()
