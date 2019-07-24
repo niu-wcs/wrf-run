@@ -69,8 +69,8 @@ class ModelData():
 		logger.write("  -> Run Days: " + str(self.runDays))
 		logger.write("  -> Run Hours: " + str(self.runHours))
 		# Add the interval_seconds parameter
-		self.aSet.add_replacementKey("[interval_seconds]", self.modelParms["HourDelta"] * 60 * 60)
-		logger.write("  -> Adding interval_seconds to application settings keys: " + str(self.modelParms["HourDelta"] * 60 * 60))
+		self.aSet.add_replacementKey("[interval_seconds]", modelParms["HourDelta"] * 60 * 60)
+		logger.write("  -> Adding interval_seconds to application settings keys: " + str(modelParms["HourDelta"] * 60 * 60))
 		
 	def fetchFiles(self):
 		model = self.aSet.fetch("modeldata")
