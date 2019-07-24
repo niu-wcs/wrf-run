@@ -121,7 +121,6 @@ class JobSteps:
 		Tools.Process.instance().Lock()
 		self.logger.write("run_preprocessing(): Enter")
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv namelist.wps* " + self.wrfDir + '/' + self.startTime[0:8])
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):

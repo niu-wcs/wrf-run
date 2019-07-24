@@ -29,8 +29,8 @@ class ModelDataParameters():
 			},
 			"NARR": {
 				"VTable": ["Vtable.NARR"]
-				"FileExtentions":, [""],
-				"FGExt": "",
+				"FileExtentions": ["NARR"],
+				"FGExt": "NARR",
 				"HourDelta": 3,
 				"CanDownloadDirectly": False,
 			},
