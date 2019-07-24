@@ -68,12 +68,15 @@ Would store the value of 12 in a parameter named myvar for the file. Any line th
   * runhours: The number of hours to run in addition to rundays (IE: total = 24*rundays + runhours)
   * geogdir: The path to the wrf_geog/ folder stored on your machine
   * tabledir: The path to your shared WRF tables folder stored on your machine
+  * constantsdir: The path to your dataset constants files
   * datadir: The path to where you want GRIB data to be stored, the full path is: datadir/model source/YYYYMMDDHH/
   * wrfdir: The path to where you want model runs to occur on your machine
   * wrfexecutables: The path to where the WRF executables are located (/main/ folder inside the WRF folder)
   * wrfrunfiles: The path to the WRF's /run/ directory
   * wpsexecutables: The path to where the WRF WPS executables are located (Top directory of the /WPS/ folder)
   * uppexecutables: The path the the unipost executables (Not required if not using Unipost)
+  * postdir: The path to the /post/ directory in this package
+  * condainstallation: The path to your Python binary in your anaconda installation (Used for post processing w/ python)
   * modeldata: The data source used in this run (*See the section below on adding model sources if you want to use something other than CFSv2*)
   * run_prerunsteps: A 1/0 flag used to designate if the pre-run steps, including symlinks and directory creations are needed. **Typically, you should leave this as 1 unless debugging errors**
   * run_geogrid: A 1/0 flag used to designate if the geogrid process needs to be run, if you are using the same grid space, run geogrid once and copy the resulting geo_em file to the run_files/ folder, then set the parameter to 0, otherwise geogrid will run.
