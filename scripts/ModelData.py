@@ -25,6 +25,7 @@ class ModelDataParameters():
 				"FileExtentions": ["3D", "FLX"],
 				"FGExt": "\'3D\', \'FLX\'",
 				"HourDelta": 6,
+				"ConstantsFile": "constant_file",
 				"CanDownloadDirectly": True,
 			},
 			"NARR": {
@@ -32,6 +33,7 @@ class ModelDataParameters():
 				"FileExtentions": ["NARR"],
 				"FGExt": "NARR",
 				"HourDelta": 3,
+				"ConstantsFile": "NARR.constants",
 				"CanDownloadDirectly": False,
 			},
 		}	

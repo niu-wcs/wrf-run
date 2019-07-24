@@ -16,6 +16,7 @@ runhours 0
 sourcefile /projects/climate_severe/wrf-run/gnu
 geogdir /projects/climate_severe/WRF/WPS_GEOG
 tabledir /projects/climate_severe/wrf-run/tables
+constantsdir /projects/climate_severe/wrf-run/constants
 datadir /projects/climate_severe/model_data
 wrfdir /projects/climate_severe/runs
 wrfexecutables /projects/climate_severe/WRF/WRF/main/

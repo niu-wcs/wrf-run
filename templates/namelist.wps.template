@@ -32,8 +32,8 @@ out_format = 'WPS',
 prefix = '[ungrib_prefix]',
 /
 &metgrid
-fg_name = [fg_name]
-constants_name = './input_data/constant_file',
+fg_name = '[fg_name]',
+constants_name = '[constants_name]',
 opt_metgrid_tbl_path = '[table_path]/',
 opt_output_from_metgrid_path = '[out_geogrid_path]/',
 io_form_metgrid = 102,

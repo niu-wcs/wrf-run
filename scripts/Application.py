@@ -49,6 +49,7 @@ class Application():
 		#Step 3: Generate run files
 		logger.write(" 3. Generating run files from templates")
 		settings.add_replacementKey("[interval_seconds]", mParms["HourDelta"] * 60 * 60)
+		settings.add_replacementKey("[constants_name]", settings.fetch("constantsdir") + '/' + mParms["ConstantsFile"])
 		tWrite = Template.Template_Writer(settings)
 		if(settings.fetch("run_prerunsteps") == '1'):
 			i = 0
