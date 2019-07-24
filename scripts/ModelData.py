@@ -124,7 +124,7 @@ class ModelData():
 			pass
 		elif(model == "NARR"):
 			for oneDate in date_list:
-				fPath = self.dataDir + '/' + strTime + "/merged_AWIP32." + oneDate
+				fPath = self.dataDir + '/' + strTime + "/merged_AWIP32." + oneDate.strftime('%Y%m%d%H')
 				if not os.path.isfile(fPath):
 					logger.write("  - Error: Missing expected input file (" + fPath + ").")
 					allGood = False
