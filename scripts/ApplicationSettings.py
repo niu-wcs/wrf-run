@@ -52,6 +52,10 @@ class AppSettings():
 			print("Key does not exist")
 			return None    
 			
+	def add_replacementKey(self, key, value):
+		self.replacementKeys[key] = value
+		self.logger.write("Additional replacement key added: " + str(key) + " = " + str(value))
+			
 	def assembleKeys(self):	
 		# Construct the replacement dictionary from the settings
 		self.replacementKeys["[source_file]"] = self.fetch("sourcefile")
