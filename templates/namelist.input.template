@@ -24,7 +24,7 @@
  io_form_input                       = 11,
  io_form_boundary                    = 11,
  io_form_auxinput1                   = 102,
- auxinput1_inname                    = 'met_em,d01.<date>',
+ auxinput1_inname                    = 'met_em.d01.<date>',
  auxhist2_interval                   = 60,
  io_form_auxhist2                    = 11,
  frames_per_auxhist2                 = 1000,
