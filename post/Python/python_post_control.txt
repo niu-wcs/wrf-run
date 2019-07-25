@@ -12,7 +12,7 @@
 # Post-Processing Controls
 save_datafiles_when_done 1 # This will preserve the created data files when done
 create_animated_gifs 1 # Create .GIF images for each?
-gif_timestep 250 # How many miliseconds between each time step?
+gif_timestep 30 # How many frames per second on the image?
 sftp_push_results_when_done 0
 sftp_push_saved_datafile 0
 sftp_server none

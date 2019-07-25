@@ -66,9 +66,9 @@
  /
  
  &physics
- mp_physics                          = 17,
- ra_lw_physics                       = 4,
- ra_sw_physics                       = 4,
+ mp_physics                          = 8,
+ ra_lw_physics                       = 1,
+ ra_sw_physics                       = 1,
  radt                                = 10,
  sf_sfclay_physics                   = 1,
  sf_surface_physics                  = 2,
@@ -81,7 +81,7 @@
  icloud                              = 1,
  surface_input_source                = 1,
  num_soil_layers                     = 4,
- num_land_cat                        = 21,
+ num_land_cat                        = 28,
  sf_urban_physics                    = 0,
  do_radar_ref                        = 1,
  hail_opt                            = 1,
