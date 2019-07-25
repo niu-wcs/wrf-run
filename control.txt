@@ -38,7 +38,7 @@ run_postprocessing 1
 e_we 1150
 e_sn 750
 e_vert 50
-geog_data_res default
+geog_data_res usgs_lakes+30s
 dx_y 4000
 map_proj lambert
 ref_lat 38.5
