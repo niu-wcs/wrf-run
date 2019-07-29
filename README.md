@@ -132,9 +132,9 @@ Start by completing the installation of the WRF model and the WPS programs on yo
 The run time parameters (starttime, rundays, runhours) need to be defined in the control.txt file, remember that runhours is in ADDITION to rundays, so keep that in mind when setting these parameters. You may adjust the nodes and processors settings as necessary, however these have been provided default values based on multiple tests such that you shouldn't have to. Once your control.txt file has been written you may run the python script **run_wrf.py** from the head directory to push the process to the background (Allowing you to safely close an SSH session and let the process completely run), or, if you want the output pushed to your SSH client, you may run **Application.py** in the scripts/ directory (Please note this script will not run in the background, so if you are disconnected, the script will terminate at the position it is at). All logging information will be saved to a log file in the scripts/ directory, and will be moved to a /logs/ folder upon script completion.
   
 ### Adding Model Sources ###
-This script package was written for the CFSv2 forecast system as an input for the WRF model, however the script package is dynamic enough to allow for quick additions of other model sources.
+This script package was written for the CFSv2 forecast system or the North American Regional Reanalysis (NARR) as an input for the WRF model, however the script package is dynamic enough to allow for quick additions of other model sources.
 
-First, you will need to obtain the VTable files for your specific model data source and include these in the directory.
+First, you will need to obtain the VTable files for your specific model data source and include these in the vtables directory in this package.
 
 Second, you'll need to add some basic model information to the *ModelDataParameters* class instance, located near the top of the scripts/ModelData.py file. A dictionary is contained in this class with the following format:
 ```python
@@ -143,11 +143,13 @@ Second, you'll need to add some basic model information to the *ModelDataParamet
 				"FileExtentions": ["3D", "FLX"],
 				"FGExt": "\'3D\', \'FLX\'",
 				"HourDelta": 6,
+				"ConstantsFile": "constant_file",
+				"CanDownloadDirectly": True,				
 			},
 ```
-The name of the dictionary instance should ideally be the model data source. *VTable* is a list instance containing all VTable files contained in the head folder used by this model data source. *FileExtentions* is a list of all file extensions used by the incoming GRIB data, for specific models (IE: CFSv2), multiple files are needed, hence this allows it. *FGExt* is a parameter applied by namelist.wps for the extensions of the ungribbed files used by the metgrid process, make this similar to the GRIB files. Finally *HourDelta* is the amount of hours separating each incoming GRIB file.
+The name of the dictionary instance should ideally be the model data source. *VTable* is a list instance containing all VTable files contained in the head folder used by this model data source. *FileExtentions* is a list of all file extensions used by the incoming GRIB data, for specific models (IE: CFSv2), multiple files are needed, hence this allows it. *FGExt* is a parameter applied by namelist.wps for the extensions of the ungribbed files used by the metgrid process, make this similar to the GRIB files. *HourDelta* is the amount of hours separating each incoming GRIB file. *ConstantsFile* is a point to the associated WRF constants file for the specific dataset (See NARR Constants File for more info). Lastly, *CanDownloadDirectly* is a boolean flag to specify if the script package will be able to fetch the file through simple 'wget' calls, or False if the data will be collected manually.
 
-Next, scroll down to the *ModelData* class and find the pooled_download section. You will need to incorporate an additional if/elif clause for your new model that downloads the model data, here is a sample:
+Next, scroll down to the *ModelData* class and find the pooled_download section. You will need to incorporate an additional if/elif clause for your new model that downloads the model data if it can auto-download the files, here is a sample:
 
 ```python
 		if(model == "CFSv2"):
@@ -165,7 +167,7 @@ Next, scroll down to the *ModelData* class and find the pooled_download section.
 				os.system("wget " + sgrb2link + " -O " + sgrb2writ)	
 ```
 
-Finally, change the modeldata parameter in control.txt to match your model source.
+If your data source does not support auto downloads, the script will check upon running to ensure the needed files are present and abort with an error message if they are not, or in the wrong location. Finally to activate a data set, change the modeldata parameter in control.txt to match your model source.
 
 ### Python Post-Processing ###
 This package contains a basic python post-processing script that incorporates multiple other python packages. If you would like to use the python post-processor you first need to set **post_run_python** to 1 in **control.txt**. This will create a job-script to execute PythonPost.py in parallel using Dask and wrf-python. Controlling the outputs of this are handled by a second control text file located in the Python/ directory.
