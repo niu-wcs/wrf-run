@@ -77,7 +77,8 @@ class Routines(PyPostTools.Singleton):
 				self.winds_levels = self.iterative_add(self.winds_levels, self.pySet.fetch("theta_e_levels"))
 		if(self.pySet.fetch("plot_surface_map_mslp") == '1'
 			or self.pySet.fetch("plot_precipitable_water_with_mslp_contours") == '1'
-			or self.pySet.fetch("plot_surface_omega")):	
+			or self.pySet.fetch("plot_surface_omega") == '1'
+			or self.pySet.fetch("plot_10m_max_winds") == '1'):	
 			self.need_mslp = True
 		if(self.pySet.fetch("plot_simulated_reflectivity") == '1'):
 			self.need_sim_dbz = True

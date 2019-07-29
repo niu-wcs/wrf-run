@@ -7,6 +7,11 @@
 import numpy as np
 import xarray
 
+"""
+	Important Constants
+"""
+G_CONSTANT = 9.81
+
 # K_to_C(): Convert Temperature in Kelvin to Celsius
 def K_to_C(X):
 	return X - 273.15
@@ -30,3 +35,7 @@ def mm_to_in(X):
 # ms_to_kts(): Convert meters per second to knots
 def ms_to_kts(X):
 	return X * 1.94384449
+	
+# Convert PW units of kg m^-2 to inches
+def kgm2_to_in(X):
+	return X * 0.0393701

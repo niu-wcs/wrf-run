@@ -209,7 +209,7 @@ def plot_precipitable_water(ncFile, targetDir, withMSLP = True):
 	
 	titleAdd = ""
 	
-	PW = ncFile["PW"]
+	PW = Conversions.kgm2_to_in(ncFile["PW"])
 	clevs = np.linspace(0, 3, 32)
 	norm = matplotlib.colors.BoundaryNorm(clevs, 32) 
 
@@ -233,7 +233,7 @@ def plot_precipitable_water(ncFile, targetDir, withMSLP = True):
 	plt.close(fig)
 	return True	
 
-def plot_dewpoint_temperature(ncFile, targetDir):
+def plot_dewpoint_temperature(ncFile, targetDir, windScaleFactor = 50):
 	logger = PyPostTools.pyPostLogger()
 	fig, ax, X, Y = prepare_plot_object(ncFile)
 	st, fh, fh_int = getTimeObjects(ncFile)
@@ -256,7 +256,7 @@ def plot_dewpoint_temperature(ncFile, targetDir):
 		to_np(uKT[::windScaleFactor, ::windScaleFactor]), to_np(vKT[::windScaleFactor, ::windScaleFactor]), 
 		transform=ccrs.PlateCarree(), length=6)	
 		
-	plt.title("Surface Dewpoint Temperature ($^\circ$ F), Winds (kts)")
+	plt.title("Surface Dewpoint Temperature ($^\circ$F), Winds (kts)")
 	plt.text(0.02, -0.02, "Forecast Time: " + fh.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
 	plt.text(0.7, -0.02, "Initialized: " + st.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
 	plt.subplots_adjust(bottom = 0.1)
@@ -292,3 +292,181 @@ def plot_surface_omega(ncFile, targetDir):
 	plt.savefig(targetDir + "/sfc_omega_F" + str(fh_int))
 	plt.close(fig)
 	return True		
+	
+def plot_10m_max_winds(ncFile, targetDir, windScaleFactor = 50):
+	logger = PyPostTools.pyPostLogger()
+	fig, ax, X, Y = prepare_plot_object(ncFile)
+	st, fh, fh_int = getTimeObjects(ncFile)
+
+	maxwnd = ncFile["MAX_WIND_SFC"]
+	u = ncFile["SFC_U"]
+	v = ncFile["SFC_V"]	
+	
+	wndKT = Conversions.ms_to_kts(maxwnd)
+	uKT = Conversions.ms_to_kts(u)
+	vKT = Conversions.ms_to_kts(v)	
+	
+	clevs = np.arange(10, 80, 2)
+	smooth_wnd = gaussian_filter(to_np(wndKT), sigma=3)
+	contours = plt.contourf(X, Y, smooth_wnd, clevs, cmap=get_cmap('rainbow'), transform=ccrs.PlateCarree())    
+	cbar = plt.colorbar(ax=ax, orientation="horizontal", pad=.05)
+	cbar.set_label("Wind Speed (Kts)") 	
+	
+	SLP = to_np(ncFile["MSLP"])
+	smooth_slp = gaussian_filter(SLP, sigma=3)
+	levs = np.arange(950, 1050, 4)
+	linesC = plt.contour(X, Y, smooth_slp, levs, colors="black", transform=ccrs.PlateCarree(), linewidths = 1)	
+	plt.clabel(linesC, inline=1, fontsize=10, fmt="%i")		
+	
+	plt.barbs(to_np(X[::windScaleFactor,::windScaleFactor]), to_np(Y[::windScaleFactor,::windScaleFactor]), 
+		to_np(uKT[::windScaleFactor, ::windScaleFactor]), to_np(vKT[::windScaleFactor, ::windScaleFactor]), 
+		transform=ccrs.PlateCarree(), length=6)		
+		
+	plt.title("10m Wax Wind Speed (Kts), MSLP (mb)")
+	plt.text(0.02, -0.02, "Forecast Time: " + fh.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+	plt.text(0.7, -0.02, "Initialized: " + st.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+	plt.subplots_adjust(bottom = 0.1)
+	plt.savefig(targetDir + "/10m_maxwnd_F" + str(fh_int))
+	plt.close(fig)
+	return True		
+
+def plot_upper_lv_winds(ncFile, targetDir, levels, windScaleFactor = 50, withHeights = True):
+	logger = PyPostTools.pyPostLogger()
+	st, fh, fh_int = getTimeObjects(ncFile)
+	
+	for level in levels:
+		fig, ax, X, Y = prepare_plot_object(ncFile)
+		
+		titleAdd = ""
+		
+		u = ncFile["U_" + str(level)]
+		v = ncFile["V_" + str(level)]
+		
+		uKT = Conversions.ms_to_kts(u)
+		vKT = Conversions.ms_to_kts(v)		
+		
+		spd = np.sqrt(uKT*uKT + vKT*vKT)
+		smooth_wnd = gaussian_filter(to_np(spd), sigma=3)
+		
+		if level >= 850:
+			clevs = np.arange(10, 120, 5)
+		elif(level >= 500 and level < 850):
+			clevs = np.arange(25, 180, 5)
+		else:
+			clevs = np.arange(50, 230, 5)
+			
+		contours = plt.contourf(X, Y, smooth_wnd, clevs, cmap=get_cmap('rainbow'), transform=ccrs.PlateCarree())    
+		cbar = plt.colorbar(ax=ax, orientation="horizontal", pad=.05)
+		cbar.set_label("Wind Speed (Kts)")
+
+		plt.barbs(to_np(X[::windScaleFactor,::windScaleFactor]), to_np(Y[::windScaleFactor,::windScaleFactor]), 
+			to_np(uKT[::windScaleFactor, ::windScaleFactor]), to_np(vKT[::windScaleFactor, ::windScaleFactor]), 
+			transform=ccrs.PlateCarree(), length=6)
+
+		if(withHeights == True):
+			z = ncFile["GEOHT_" + str(level)]
+			zDM = z / 10
+			
+			smooth_lines = gaussian_filter(to_np(zDM), sigma=3) 
+			
+			if(level <= 200):
+				cont_levels = np.arange(800., 1600., 6.)
+			elif(level <= 400):
+				cont_levels = np.arange(600., 1200., 6.)
+			elif(level <= 600):
+				cont_levels = np.arange(200., 800., 6.)
+			elif(level <= 800):
+				cont_levels = np.arange(100., 600., 6.)
+			else:
+				cont_levels = np.arange(0., 400., 6.)
+				
+			contours = plt.contour(X, Y, smooth_lines, levels=cont_levels, colors="black", transform=ccrs.PlateCarree())
+			plt.clabel(contours, inline=1, fontsize=10, fmt="%i")
+			
+			titleAdd += ", Geopotential Height (dm)"
+			
+		plt.title(str(level) + "mb Winds (kts)" + titleAdd)
+		plt.text(0.02, -0.02, "Forecast Time: " + fh.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+		plt.text(0.7, -0.02, "Initialized: " + st.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+		plt.subplots_adjust(bottom = 0.1)
+		plt.savefig(targetDir + "/" + str(level) + "winds_F" + str(fh_int))
+		plt.close(fig)
+		
+def plot_theta_e(ncFile, targetDir, levels, withHeights = True, withWinds = True, windScaleFactor = 50):
+	logger = PyPostTools.pyPostLogger()
+	st, fh, fh_int = getTimeObjects(ncFile)
+	
+	for level in levels:
+		fig, ax, X, Y = prepare_plot_object(ncFile)
+		titleAdd = ""
+		clevs = np.arange(240, 380, 5)
+		
+		if(level == 0):
+			# Surface is special in regards to naming and ignoring geo.hgt. argument
+			eth = ncFile["SFC_THETA_E"]
+			contours = plt.contourf(X, Y, eth, clevs, cmap=get_cmap('gist_ncar'), transform=ccrs.PlateCarree())    
+			cbar = plt.colorbar(ax=ax, orientation="horizontal", pad=.05)
+			cbar.set_label("Equivalent Potential Temperature (K)")			
+			
+			if(withWinds):
+				u = ncFile["SFC_U"]
+				v = ncFile["SFC_V"]	
+				uKT = Conversions.ms_to_kts(u)
+				vKT = Conversions.ms_to_kts(v)
+				
+				plt.barbs(to_np(X[::windScaleFactor,::windScaleFactor]), to_np(Y[::windScaleFactor,::windScaleFactor]), 
+					to_np(uKT[::windScaleFactor, ::windScaleFactor]), to_np(vKT[::windScaleFactor, ::windScaleFactor]), 
+					transform=ccrs.PlateCarree(), length=6)
+					
+				titleAdd += ", Winds (Kts)"
+			plt.title("Surface Theta-E (K)" + titleAdd)
+			plt.text(0.02, -0.02, "Forecast Time: " + fh.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+			plt.text(0.7, -0.02, "Initialized: " + st.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+			plt.subplots_adjust(bottom = 0.1)
+			plt.savefig(targetDir + "/ThetaE_SFC_F" + str(fh_int))
+			plt.close(fig)				
+		else:
+			eth = ncFile["THETA_E_" + str(level)]
+			contours = plt.contourf(X, Y, eth, clevs, cmap=get_cmap('gist_ncar'), transform=ccrs.PlateCarree())    
+			cbar = plt.colorbar(ax=ax, orientation="horizontal", pad=.05)
+			cbar.set_label("Equivalent Potential Temperature (K)")		
+
+			if(withHeights == True):
+				z = ncFile["GEOHT_" + str(level)]
+				zDM = z / 10
+				
+				smooth_lines = gaussian_filter(to_np(zDM), sigma=3) 
+				
+				if(level <= 200):
+					cont_levels = np.arange(800., 1600., 6.)
+				elif(level <= 400):
+					cont_levels = np.arange(600., 1200., 6.)
+				elif(level <= 600):
+					cont_levels = np.arange(200., 800., 6.)
+				elif(level <= 800):
+					cont_levels = np.arange(100., 600., 6.)
+				else:
+					cont_levels = np.arange(0., 400., 6.)
+					
+				contours = plt.contour(X, Y, smooth_lines, levels=cont_levels, colors="black", transform=ccrs.PlateCarree())
+				plt.clabel(contours, inline=1, fontsize=10, fmt="%i")
+				
+				titleAdd += ", Geopotential Height (dm)"
+
+			if(withWinds):
+				u = ncFile["U_" + str(level)]
+				v = ncFile["V_" + str(level)]	
+				uKT = Conversions.ms_to_kts(u)
+				vKT = Conversions.ms_to_kts(v)
+				
+				plt.barbs(to_np(X[::windScaleFactor,::windScaleFactor]), to_np(Y[::windScaleFactor,::windScaleFactor]), 
+					to_np(uKT[::windScaleFactor, ::windScaleFactor]), to_np(vKT[::windScaleFactor, ::windScaleFactor]), 
+					transform=ccrs.PlateCarree(), length=6)
+					
+				titleAdd += ", Winds (Kts)"
+			plt.title(str(level) + "mb Theta-E (K)" + titleAdd)
+			plt.text(0.02, -0.02, "Forecast Time: " + fh.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+			plt.text(0.7, -0.02, "Initialized: " + st.strftime("%Y-%m-%d %H:%M UTC"), ha='left', va='center', transform=ax.transAxes)
+			plt.subplots_adjust(bottom = 0.1)
+			plt.savefig(targetDir + "/ThetaE_" + str(level) + "_F" + str(fh_int))
+			plt.close(fig)				

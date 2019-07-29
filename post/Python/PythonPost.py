@@ -19,12 +19,14 @@ import xarray
 import dask.array as da
 from dask.array import map_blocks
 from dask.distributed import Client, progress, metrics, wait
-#from dask_jobqueue import SLURMCluster
 import dask_jobqueue
 from dask_jobqueue import CobaltCluster
 from datetime import datetime
 import tornado.util
 
+"""
+RF: Debug Mode Calls for Dask (Disable on release)
+"""
 import logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -54,7 +56,6 @@ def launch_python_post():
 	logger.write("  - Success!")
 	try:
 		logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
-		#cluster = LocalCluster(n_workers=dask_nodes)
 		cluster = CobaltCluster(processes=1,
 							   memory="100GB",
 							   cores=64,
@@ -81,7 +82,7 @@ def launch_python_post():
 		logger.write("   - " + str(len(fList2)) + " WRFPRS files have been found, calculations are already completed, skipping step.")
 	else:
 		logger.write("   - No.")		
-		logger.write("Pushing run_calculation_routines() to dask.")
+		logger.write(" -> Pushing run_calculation_routines() to dask.")
 		calculation_future = dask_client.map(run_calculation_routines, fList)	
 		wait(calculation_future) 
 	logger.write(" 2. Done.")
@@ -89,7 +90,7 @@ def launch_python_post():
 	logger.write("  - Collecting files from target directory (" + targetDir + ").")
 	fList3 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
 	logger.write("  - " + str(len(fList3)) + " files have been found.")
-	logger.write("Pushing run_plotting_routines() to dask.")
+	logger.write(" -> Pushing run_plotting_routines() to dask.")
 	plotting_future = dask_client.map(run_plotting_routines, fList3)
 	wait(plotting_future)
 	logger.write(" 3. Done.")
@@ -349,12 +350,40 @@ def run_plotting_routines(ncFile_Name):
 		sys.exit("Failed to find environmental variable (TARGETDIR), check original application to ensure it is being set.")		
 		return False
 	# Draw Plots
-	if(_pySet.fetch("plot_surface_map_winds") == '1'):
+	if(_pySet.fetch("plot_surface_map") == '1'):
 		Plotting.plot_surface_map(daskArray, targetDir,
 								  withTemperature = _pySet.fetch("plot_surface_map_temperature") == '1', 
 								  withWinds = _pySet.fetch("plot_surface_map_winds") == '1', 
 								  windScaleFactor = 75, 
-								  withMSLP = _pySet.fetch("plot_surface_map_mslp") == '1')	
+								  withMSLP = _pySet.fetch("plot_surface_map_mslp") == '1')
+	if(_pySet.fetch("plot_simulated_reflectivity") == '1'):
+		Plotting.plot_simulated_reflectivity(daskArray, targetDir)
+	if(_pySet.fetch("plot_precip_type") == '1'):
+		Plotting.plot_precipitation_type(daskArray, targetDir)
+	if(_pySet.fetch("plot_accumulated_precip") == '1'):
+		Plotting.plot_accumulated_precip(daskArray, targetDir)
+	if(_pySet.fetch("plot_accumulated_snowfall") == '1'):
+		Plotting.plot_accumulated_snowfall(daskArray, targetDir)
+	if(_pySet.fetch("plot_precipitable_water") == '1'):
+		Plotting.plot_precipitable_water(daskArray, targetDir, 
+										 withMSLP = _pySet.fetch("plot_precipitable_water_with_mslp_contours") == '1')
+	if(_pySet.fetch("plot_dewpoint_temperature") == '1'):
+		Plotting.plot_dewpoint_temperature(daskArray, targetDir, windScaleFactor = 75)
+	if(_pySet.fetch("plot_surface_omega") == '1'):
+		Plotting.plot_surface_omega(daskArray, targetDir)
+	if(_pySet.fetch("plot_10m_max_winds") == '1'):
+		Plotting.plot_10m_max_winds(daskArray, targetDir, windScaleFactor = 75)
+	if(_pySet.fetch("plot_upper_lv_winds") == '1'):
+		Plotting.plot_upper_lv_winds(daskArray, targetDir, 
+									 _pySet.fetch("upper_winds_levels"), 
+									 windScaleFactor = 75, 
+									 withHeights = _pySet.fetch("plot_upper_lv_winds_withheights") == '1')
+	if(_pySet.fetch("plot_theta_e") == '1'):
+		Plotting.plot_theta_e(daskArray, targetDir, 
+							  _pySet.fetch("theta_e_levels"), 
+							  withHeights = _pySet.fetch("plot_theta_e_heights") == '1', 
+							  withWinds = _pySet.fetch("plot_theta_e_winds") == '1', 
+							  windScaleFactor = 75)
 	return True
 		
 # Run the program.
