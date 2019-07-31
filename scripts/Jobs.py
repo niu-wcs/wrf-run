@@ -78,13 +78,13 @@ class JobSteps:
 				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_metgrid_processors") + '\n')
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hyperthreads_per_core=2\n")
-				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")	
+				target_file.write("export n_hardware_threads_per_core=2\n")
+				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")	
 
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
 				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
 				target_file.write("./geogrid.exe" + '\n')				
 			
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
@@ -142,8 +142,8 @@ class JobSteps:
 				target_file.write("export n_mpi_ranks_per_node=1\n")
 				target_file.write("export n_mpi_ranks=1\n")
 				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hyperthreads_per_core=2\n")
-				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
+				target_file.write("export n_hardware_threads_per_core=2\n")
+				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")				
 				target_file.write("./link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
 				i = 0
 				for ext in mParms["FileExtentions"]:
@@ -152,8 +152,8 @@ class JobSteps:
 					
 					target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
 					target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-					target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
-					target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+					target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
+					target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
 					target_file.write("./ungrib.exe &" + '\n')
 					target_file.write("PID_Ungrib=$!" + '\n')
 					target_file.write("wait $PID_Ungrib" + '\n')
@@ -163,12 +163,12 @@ class JobSteps:
 				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_metgrid_processors") + '\n')
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hyperthreads_per_core=2\n")
-				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")
+				target_file.write("export n_hardware_threads_per_core=2\n")
+				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
 				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
 				target_file.write("./metgrid.exe &" + '\n')
 				target_file.write("PID_Metgrid=$!" + '\n')
 				target_file.write("wait $PID_Metgrid" + "\n\n")	
@@ -178,12 +178,12 @@ class JobSteps:
 				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("num_real_processors") + "\n")
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hyperthreads_per_core=2\n")
-				target_file.write("export n_hyperthreads_skipped_between_ranks=4\n")				
+				target_file.write("export n_hardware_threads_per_core=2\n")
+				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")				
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
 				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hyperthreads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hyperthreads_per_core \\" + '\n')
+				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
+				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
 				target_file.write("./real.exe &" + '\n')
 				target_file.write("PID_Real=$!" + '\n')
 				target_file.write("wait $PID_Real" + "\n\n")				
@@ -239,7 +239,7 @@ class JobSteps:
 							self.logger.write("Log file detected, waiting for completion.")
 							#Now wait for the output file to be completed
 							try:
-								sixthWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS", "retCode": 1},
+								sixthWait = [{"waitCommand": "tail -n 3 output/rsl.out.0000", "contains": "SUCCESS COMPLETE REAL_EM", "retCode": 1},
 											  {"waitCommand": "tail -n 3 output/rsl.error.0000", "contains": "FATAL", "retCode": 2},
 											  {"waitCommand": "tail -n 3 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
 											  {"waitCommand": "tail -n 3 output/rsl.error.0000", "contains": "error", "retCode": 2},]
@@ -419,8 +419,8 @@ class Postprocessing_Steps:
 		upp_job_contents += "export n_mpi_ranks_per_node=32\n"
 		upp_job_contents += "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n"
 		upp_job_contents += "export n_openmp_threads_per_rank=" + self.aSet.fetch("mpi_threads_per_rank") +"\n"
-		upp_job_contents += "export n_hyperthreads_per_core=2\n"
-		upp_job_contents += "export n_hyperthreads_skipped_between_ranks=4\n\n"
+		upp_job_contents += "export n_hardware_threads_per_core=2\n"
+		upp_job_contents += "export n_hardware_threads_skipped_between_ranks=4\n\n"
 
 		upp_job_contents += "cd " + self.aSet.fetch("wrfdir") + '/' + self.aSet.fetch("starttime")[0:8] + "/postprd" + "\n\n"		
 		
@@ -450,8 +450,8 @@ class Postprocessing_Steps:
 				
 				aprun = "aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n'
 				aprun += "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n'
-				aprun += "-d $n_hyperthreads_skipped_between_ranks \\" + '\n'
-				aprun += "-j $n_hyperthreads_per_core \\" + '\n'
+				aprun += "-d $n_hardware_threads_skipped_between_ranks \\" + '\n'
+				aprun += "-j $n_hardware_threads_per_core \\" + '\n'
 				aprun += "./unipost.exe > " + logName + " &\n"
 				aprun += "sleep 5\n"
 				upp_job_contents += "\n" + aprun + '\n\n'
