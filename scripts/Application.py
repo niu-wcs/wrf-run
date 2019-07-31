@@ -29,7 +29,7 @@ class Application():
 			sys.exit("Program failed at step 1, model data source: " + settings.fetch("modeldata") + ", is not defined in the program.")
 		logger.write(" - Settings loaded, model data source " + settings.fetch("modeldata") + " applied to the program.")
 		prc = Cleanup.PostRunCleanup(settings)
-		prc.performClean(cleanAll = False, cleanOutFiles = True, cleanErrorFiles = True, cleanInFiles = True, cleanWRFOut = False, cleanModelData = False)
+		prc.performClean(cleanAll = False, cleanOutFiles = True, cleanErrorFiles = True, cleanInFiles = True, cleanBdyFiles = False, cleanWRFOut = False, cleanModelData = False)
 		mParms = modelParms.fetch()
 		if(settings.fetch("run_prerunsteps") == '1'):
 			Tools.popen(settings, "mkdir " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
@@ -115,7 +115,7 @@ class Application():
 			logger.write(" 5. Post-processing flag disabled, skipping step")
 		#Step 6: Cleanup
 		logger.write(" 6. Cleaning Temporary Files")
-		prc.performClean(cleanAll = False, cleanOutFiles = True, cleanErrorFiles = True, cleanInFiles = True, cleanWRFOut = False, cleanModelData = True)
+		prc.performClean(cleanAll = False, cleanOutFiles = True, cleanErrorFiles = True, cleanInFiles = True, cleanBdyFiles = True, cleanWRFOut = False, cleanModelData = True)
 		logger.write(" 6. Done")		
 		#Done.
 		logger.write("All Steps Completed.")

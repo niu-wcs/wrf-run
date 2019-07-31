@@ -15,7 +15,7 @@ class PostRunCleanup():
 	def __init__(self, settings):
 		self.sObj = settings
 		
-	def performClean(self, cleanAll = True, cleanOutFiles = True, cleanErrorFiles = True, cleanInFiles = True, cleanWRFOut = True, cleanModelData = True):
+	def performClean(self, cleanAll = True, cleanOutFiles = True, cleanErrorFiles = True, cleanBdyFiles = True, cleanInFiles = True, cleanWRFOut = True, cleanModelData = True):
 		sTime = self.sObj.fetch("starttime")
 		dataDir = self.sObj.fetch("datadir") + '/' + self.sObj.fetch("modeldata") + sTime
 		wrfDir = self.sObj.fetch("wrfdir") + '/' + sTime[0:8]
@@ -43,15 +43,16 @@ class PostRunCleanup():
 			Tools.popen(self.sObj, "rm " + wrfDir + "/UNGRIB.e*") #This shouldn't be needed, but in the event we use a job for ungrib.
 			Tools.popen(self.sObj, "rm " + outDir + "/REAL.e*")
 			Tools.popen(self.sObj, "rm " + outDir + "/WRF.e*")	
+		if(cleanBdyFiles == True):
+			Tools.popen(self.sObj, "rm " + outDir + "/met_em*")
+			Tools.popen(self.sObj, "rm " + outDir + "/wrfinput*")
+			Tools.popen(self.sObj, "rm " + outDir + "/wrfbdy*")		
+			Tools.popen(self.sObj, "rm " + outDir + "/geo_em.d01.nc*")
 		if(cleanInFiles == True):
 			Tools.popen(self.sObj, "rm " + wrfDir + "/GRIBFILE.*")
 			Tools.popen(self.sObj, "rm " + wrfDir + "/3D:*")
 			Tools.popen(self.sObj, "rm " + wrfDir + "/FLX:*")
 			Tools.popen(self.sObj, "rm " + outDir + "/FILE:*")
-			Tools.popen(self.sObj, "rm " + outDir + "/met_em*")
-			Tools.popen(self.sObj, "rm " + outDir + "/wrfinput*")
-			Tools.popen(self.sObj, "rm " + outDir + "/wrfbdy*")
-			Tools.popen(self.sObj, "rm " + outDir + "/geo_em.d01.nc")
 			Tools.popen(self.sObj, "rm " + outDir + "/aero*")
 			Tools.popen(self.sObj, "rm " + outDir + "/bulk*")
 			Tools.popen(self.sObj, "rm " + outDir + "/CAM*")
