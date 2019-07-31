@@ -1,11 +1,3 @@
-* Run the following commands prior to performing anything:
-
-module swap PrgEnv-intel PrgEnv-gnu
-module add cmake/3.11.4
-module add gcc/7.3.0
-module add cray-netcdf/4.6.1.2
-module add cray-parallel-netcdf/1.8.1.3
-
 * Directory Structure:
  /projects/climate_severe/ is our project folder. 
  - /WRF/ : This is where all of our WRF stuff (Model / Libraries) are installed
@@ -31,8 +23,87 @@ module add cray-parallel-netcdf/1.8.1.3
    1) make
    2) make install
 
+
+********
+********
+TO COMPILE THE MODEL WITH INTEL, USE THE BELOW STEPS
+********
+********
+
+* First, run the following commands to get the NetCDF modules
+
+module add cray-netcdf/4.6.1.2
+module add cray-parallel-netcdf/1.8.1.4
+
 ==========================================================
-SET THESE FLAGS PRIOR TO COMPILING WRF/WPS/UPP
+SET THESE FLAGS PRIOR TO COMPILING WRF/WPS/UPP ON INTEL
+==========================================================
+
+export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/INTEL/16.0
+export PNETCDF=/opt/cray/pe/parallel-netcdf/1.8.1.4/INTEL/18.0
+export NETCDFPATH=/opt/cray/pe/netcdf/4.6.1.2/INTEL/16.0
+export PNETCDFPATH=/opt/cray/pe/parallel-netcdf/1.8.1.4/INTEL/18.0
+export WRFIO_NCD_LARGE_FILE_SUPPORT=1
+export WRF_DA_CORE=0
+export JASPERLIB=/projects/climate_severe/WRF/Libs/lib
+export JASPERINC=/projects/climate_severe/WRF/Libs/include
+export LD_LIBRARY_PATH=/projects/climate_severe/WRF/Libs:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/cray/pe/gcc-libs/:$LD_LIBRARY_PATH
+export LIBINCLUDE="/projects/climate_severe/WRF/Libs:/projects/climate_severe/WRF/Libs/include":$LIBINCLUDE
+
+==========================================================
+COMPILING WRF (~45m)
+==========================================================
+
+Run ./configure
+
+Select options:
+20
+1
+
+Edit the configure.wrf file:
+- Change mpif90 to ftn
+- Change mpicc to cc
+
+In the ARCHFLAGS section, look for -DPNETCDF, on the following line add:
+–DPNETCDF_QUILT
+
+Run ./compile em_real
+
+-- Note: I noticed in some compiles, that you may get a problem building executables
+    error without any substantial missing library errors. If this is the case, do not
+    run ./clean, simply re-run ./compile em_real and it should work on the second try.
+   If you're still getting errors, then you likely missed a library command, or did
+    something else wrong.
+
+==========================================================
+COMPILING WPS (~5m)
+==========================================================
+
+Run ./configure
+
+Select option 19
+
+Edit the configure.wps file:
+- change DM_FC to ftn (Remove the parameter for -f90 if present)
+- change DM_CC to cc (Remove the parameter for -cc if present)
+
+Run ./compile
+
+********
+********
+TO COMPILE THE MODEL WITH GNU/GCC, USE THE BELOW STEPS
+********
+********
+
+* Run the following commands to switch to GNU
+
+module swap PrgEnv-intel PrgEnv-gnu
+module add cray-netcdf/4.6.1.2
+module add cray-parallel-netcdf/1.8.1.3
+
+==========================================================
+SET THESE FLAGS PRIOR TO COMPILING WRF/WPS/UPP ON GNU
 ==========================================================
 
 export NETCDF=/opt/cray/pe/netcdf/4.6.1.2/GNU/7.1
