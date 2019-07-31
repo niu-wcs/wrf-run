@@ -9,6 +9,10 @@
 * The following directory was then created, and is used to store the compiled libraries.
  /projects/climate_severe/WRF/Libs/
 
+* NOTE!!! If you are installing for GNU, you need to switch your Theta module to GNU with the following
+  command: 
+   module swap PrgEnv-intel PrgEnv-gnu
+
 * Use the following configure commands for each of the below.
  - The versions used are in the parenthesis.
 
