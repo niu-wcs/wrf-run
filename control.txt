@@ -9,10 +9,8 @@
 #    EX: myVariable 12 This is a sample variable
 #    This is also an acceptable format for this file
 #
-# General Parameters
-starttime 2018060200 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
-rundays 1
-runhours 0
+# Application Parameters
+debugmode 0 #Leave this as zero unless debugging the wrf-run package
 sourcefile /projects/climate_severe/wrf-run/gnu
 geogdir /projects/climate_severe/WRF/WPS_GEOG
 tabledir /projects/climate_severe/wrf-run/tables
@@ -25,16 +23,22 @@ wpsexecutables /projects/climate_severe/WRF/WPS/
 uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
 postdir /projects/climate_severe/wrf-run/post
 condainstallation /projects/climate_severe/Python/anaconda/bin/python3.7
+# General Parameters
+starttime 2018052600 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
+rundays 1
+runhours 0
 modeldata CFSv2
 modeldataforecasthour 0
-debugmode 0
-# Job Step Parameters
+# Job Step Flags (1 - On, 0 - Off)
 run_prerunsteps 1 #NOTE: This should ALWAYS be on unless debugging.
 run_geogrid 0
 run_preprocessing_jobs 0
-run_wrf 0
-run_postprocessing 1
-# Model Specific Parameters
+run_wrf 1
+run_postprocessing 0
+post_run_unipost 0
+post_run_python 1
+# Model Specific Parameters (Namelist controls)
+wrf_debug_level 0 #This is the debug_level parm in namelist, set to 0 for none, or 1000 for full.
 e_we 1150
 e_sn 750
 e_vert 50
@@ -49,31 +53,46 @@ stand_lon -98.0
 p_top_requested 1000
 num_metgrid_levels 38
 num_metgrid_soil_levels 4
-# Argonne Specific Parameters
-mpi_ranks_per_node 32
-mpi_threads_per_rank 4
+mp_physics 8
+ra_lw_physics 1
+ra_sw_physics 1
+radt 10
+sf_sfclay_physics 1
+sf_surface_physics 2
+bl_pbl_physics 5
+bldt 0
+cu_physics 0
+cudt 5
+num_soil_layers 4
+num_land_cat 28
+sf_urban_physics 0
+hail_opt 1
+prec_acc_dt 60
 # Geogrid Parameters
 num_geogrid_nodes 8
 geogrid_walltime 30
 # Preprocessing Job Parameters
 num_prerun_nodes 8
-num_metgrid_processors 2
-num_real_processors 2
 prerun_walltime 60
+prerun_mpi_ranks_per_node 32
+prerun_mpi_threads_per_rank 4
 # WRF Parameters
 num_wrf_nodes 128
 wrf_walltime 180
-# WRF Quilt Parameters
-nio_tasks_per_group 16
-nio_groups 2
+# WRF MPI & IO Quilt Parameters
+wrf_openmp_threads_per_rank 8
+wrf_mpi_ranks_per_node 16
+wrf_hardware_threads_per_core 2
+wrf_hardware_threads_skipped_between_ranks 4
+wrf_numtiles 4
+wrf_nio_tasks_per_group 8
+wrf_nio_groups 5
 # Post-Processing Parameters
 # - If using UPP (Unipost) with GRADS, use the below
-post_run_unipost 0
 unipost_out grib2
 num_upp_nodes 128
 upp_ensemble_nodes_per_hour 4
 upp_walltime 60
 # - If using Python, use the below
-post_run_python 1
 num_python_nodes 8
 python_walltime 60

@@ -28,7 +28,7 @@
  auxhist2_interval                   = 60,
  io_form_auxhist2                    = 11,
  frames_per_auxhist2                 = 1000,
- debug_level                         = 0,
+ debug_level                         = [wrf_debug_level],
  nwp_diagnostics                     = 1,
  /
 
@@ -62,30 +62,30 @@
  starting_time_step                   = -1,
  max_time_step                        = -1,
  min_time_step                        = 10,
-
+ numtiles                             = [wrf_numtiles],
  /
  
  &physics
- mp_physics                          = 8,
- ra_lw_physics                       = 1,
- ra_sw_physics                       = 1,
- radt                                = 10,
- sf_sfclay_physics                   = 1,
- sf_surface_physics                  = 2,
- bl_pbl_physics                      = 5,
- bldt                                = 0,
- cu_physics                          = 0,
- cudt                                = 5,
+ mp_physics                          = [mp_physics],
+ ra_lw_physics                       = [ra_lw_physics],
+ ra_sw_physics                       = [ra_sw_physics],
+ radt                                = [radt],
+ sf_sfclay_physics                   = [sf_sfclay_physics],
+ sf_surface_physics                  = [sf_surface_physics],
+ bl_pbl_physics                      = [bl_pbl_physics],
+ bldt                                = [bldt],
+ cu_physics                          = [cu_physics],
+ cudt                                = [cudt],
  isfflx                              = 1,
  ifsnow                              = 1,
  icloud                              = 1,
  surface_input_source                = 1,
- num_soil_layers                     = 4,
- num_land_cat                        = 28,
- sf_urban_physics                    = 0,
+ num_soil_layers                     = [num_soil_layers],
+ num_land_cat                        = [num_land_cat],
+ sf_urban_physics                    = [sf_urban_physics],
  do_radar_ref                        = 1,
- hail_opt                            = 1,
- prec_acc_dt                         = 60,
+ hail_opt                            = [hail_opt],
+ prec_acc_dt                         = [prec_acc_dt],
  /
 
  &fdda
@@ -135,6 +135,6 @@
  /
 
  &namelist_quilt
- nio_tasks_per_group = [nio_tasks_per_group],
- nio_groups = [nio_groups],
+ nio_tasks_per_group = [wrf_nio_tasks_per_group],
+ nio_groups = [wrf_nio_groups],
  /
