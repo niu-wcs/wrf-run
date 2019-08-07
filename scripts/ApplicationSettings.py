@@ -93,6 +93,7 @@ class AppSettings():
 		self.replacementKeys["[wrf_hardware_threads_per_core]"] = self.fetch("wrf_hardware_threads_per_core")
 		self.replacementKeys["[wrf_hardware_threads_skipped_between_ranks]"] = self.fetch("wrf_hardware_threads_skipped_between_ranks")		
 		# Keys for the namelist.input parameters
+		self.replacementKeys["[wrf_debug_level]"] = self.fetch("wrf_debug_level")
 		self.replacementKeys["[e_we]"] = self.fetch("e_we")
 		self.replacementKeys["[e_sn]"] = self.fetch("e_sn")
 		self.replacementKeys["[e_vert]"] = self.fetch("e_vert")
