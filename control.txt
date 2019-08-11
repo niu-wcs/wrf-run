@@ -24,7 +24,7 @@ uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
 postdir /projects/climate_severe/wrf-run/post
 condainstallation /projects/climate_severe/Python/anaconda/bin/python3.7
 # General Parameters
-starttime 2018052600 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
+starttime 2019052600 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
 rundays 2
 runhours 21
 modeldata NARR
@@ -50,7 +50,7 @@ ref_lon -97.0
 truelat1 30.0
 truelat2 60.0
 stand_lon -98.0
-p_top_requested 1000
+p_top_requested 10000
 num_metgrid_levels 38
 num_metgrid_soil_levels 4
 mp_physics 8
