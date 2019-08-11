@@ -25,9 +25,9 @@ postdir /projects/climate_severe/wrf-run/post
 condainstallation /projects/climate_severe/Python/anaconda/bin/python3.7
 # General Parameters
 starttime 2018052600 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
-rundays 1
-runhours 0
-modeldata CFSv2
+rundays 2
+runhours 21
+modeldata NARR
 modeldataforecasthour 0
 # Job Step Flags (1 - On, 0 - Off)
 run_prerunsteps 1 #NOTE: This should ALWAYS be on unless debugging.
@@ -84,8 +84,8 @@ wrf_openmp_threads_per_rank 8
 wrf_mpi_ranks_per_node 16
 wrf_hardware_threads_per_core 2
 wrf_hardware_threads_skipped_between_ranks 4
-wrf_numtiles 4
-wrf_nio_tasks_per_group 8
+wrf_numtiles 8
+wrf_nio_tasks_per_group 16
 wrf_nio_groups 5
 # Post-Processing Parameters
 # - If using UPP (Unipost) with GRADS, use the below
