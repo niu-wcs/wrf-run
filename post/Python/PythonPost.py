@@ -18,11 +18,12 @@ import Plotting
 import xarray
 import dask.array as da
 from dask.array import map_blocks
-from dask.distributed import Client, progress, metrics, wait
-import dask_jobqueue
-from dask_jobqueue import CobaltCluster
+from dask.distributed import Scheduler, Client, progress, metrics, wait
 from datetime import datetime
 import tornado.util
+from tornado.ioloop import IOLoop
+from threading import Thread
+import socket
 
 """
 RF: Debug Mode Calls for Dask (Disable on release)
@@ -33,6 +34,7 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 dask_client = None
 dask_nodes = 0
 dask_threads = 0
+scheduler_port = 12345
 
 def launch_python_post():
 	curDir = os.path.dirname(os.path.abspath(__file__)) 
@@ -54,22 +56,34 @@ def launch_python_post():
 		logger.write("***FAIL*** KeyError encountered while trying to access important environmental variables, abort.")
 		sys.exit("")
 	logger.write("  - Success!")
-	try:
-		logger.write("  - Initializing Dask Client (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
-		cluster = CobaltCluster(processes=1,
-							   memory="100GB",
-							   cores=64,
-							   ncpus=8,
-							   project="climate_severe",
-							   walltime="60",
-							   queue="debug-cache-quad")
-		cluster.scale(1)
-		dask_client = Client(cluster, timeout=60)
-	except tornado.util.TimeoutError:
-		logger.write("  - Failed to initialize dask client, abort.")
-		sys.exit("")
-		return False
+	logger.write("  - Initializing Dask (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	_routines = Routines.Routines()
+	# Start Dask Tasks
+	cLoop = IOLoop.current()
+	t = Thread(target = cLoop.start, daemon = True)
+	t.start()
+	logger.write("   - Tornado IO Loop initialized...")
+	s = Scheduler(loop = cLoop)
+	s.start("tcp://: " + str(scheduler_port))
+	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
+	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port))
+	logger.write("   - Dask Client initialized...")
+	with PyPostTools.cd(curDir):
+		writeFile = PyPostTools.write_job_file(socket.gethostname(), scheduler_port, project_name="climate_severe", queue="debug-cache-quad", nodes=dask_nodes, wall_time=60)
+		if(writeFile == False):
+			dask_client.close()
+			logger.write("   - Failed to write job file, are you missing an important parameter?")
+			sys.exit("")
+			return
+		else:
+			logger.write("   - Dask Worker Job File Written, Submitting to Queue.")
+			Tools.popen("chmod +x dask-worker.job")
+			Tools.popen("qsub dask-worker.job")
+	# Wait here for workers.
+	logger.write("   -> Worker Job submitted to queue, waiting for workers...")
+	while len(dask_client.scheduler_info()['workers']) < 1:
+		time.sleep(2)
+	logger.write("   -> Workers are now connected.")
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")

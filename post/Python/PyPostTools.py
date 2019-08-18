@@ -11,6 +11,32 @@ import datetime
 import time
 import threading
 
+#CD: Current Directory management, see https://stackoverflow.com/a/13197763/7537290 for implementation. This is used to maintain the overall OS CWD while allowing embedded changes.
+class cd:
+    """Context manager for changing the current working directory"""
+    def __init__(self, newPath):
+        self.newPath = os.path.expanduser(newPath)
+
+    def __enter__(self):
+        self.savedPath = os.getcwd()
+        os.chdir(self.newPath)
+
+    def __exit__(self, etype, value, traceback):
+        os.chdir(self.savedPath)
+
+#popen: A wrapped call to the subprocess.popen method to test for the debugging flag.
+class popen:
+	def __init__(self, command):
+		runCmd = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		runCmd.wait()
+		cResult, stderr = runCmd.communicate()
+		cResult = str(cResult)
+		stderr = str(stderr)
+		self.stored = [cResult, stderr]
+			
+	def fetch(self):
+		return self.stored		
+		
 # Thread-Safe Singleton: https://stackoverflow.com/questions/50566934/why-is-this-singleton-implementation-not-thread-safe
 lock = threading.Lock()
 def synchronized(lock):
@@ -57,3 +83,19 @@ class pyPostLogger(Singleton):
 
 	def close(self):
 		self.f.close()
+		
+def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nodes=None, wall_time=None):
+	if(scheduler_port == None or project_name == None or queue == None or nodes == None or wall_time == None):
+		return False
+	with open("dask-worker.job", 'w') as target_file:
+		target_file.write("#!/bin/bash" + '\n')
+		target_file.write("#COBALT -t " + str(wall_time) + '\n')
+		target_file.write("#COBALT -n " + str(nodes) + '\n')
+		target_file.write("#COBALT -A " + str(project_name) + '\n')
+		target_file.write("#COBALT -q " + str(queue) + '\n')
+		target_file.write("#COBALT --attrs mcdram=cache:numa=quad" + '\n' + '\n')
+		for i in range(1, nodes+1):
+			target_file.write("/projects/climate_severe/Python/anaconda/bin/python3.7 -m distributed.cli.dask_worker \\" + '\n')
+			target_file.write(str(host) + ":" + str(scheduler_port) + " --name dask-worker-" + str(i) + "\\" + '\n')
+			target_file.write(" --death-timeout 120" + '\n\n')
+	return True
