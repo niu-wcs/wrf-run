@@ -10,6 +10,7 @@ import os.path
 import datetime
 import time
 import threading
+import subprocess
 
 #CD: Current Directory management, see https://stackoverflow.com/a/13197763/7537290 for implementation. This is used to maintain the overall OS CWD while allowing embedded changes.
 class cd:
