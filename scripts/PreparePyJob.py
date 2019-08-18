@@ -41,7 +41,7 @@ class PreparePyJob:
 		out_job_contents += "export PYTHON_POST_DIR=" + self.wrfOutDir + "/\n"
 		out_job_contents += "export PYTHON_POST_TARG_DIR=" + self.targetDir + "/\n"
 		out_job_contents += "export PYTHON_POST_NODES=" + self.aSet.fetch("num_python_nodes") + "\n"
-		out_job_contents += "export PYTHON_POST_THREADS=" + self.aSet.fetch("mpi_threads_per_rank") + "\n"
+		out_job_contents += "export PYTHON_POST_THREADS=" + self.aSet.fetch("python_threads_per_rank") + "\n"
 		out_job_contents += "export PYTHON_POST_FIRSTTIME=" + self.aSet.fetch("starttime") + "\n"
 		out_job_contents += "export PYTHON_POST_LOG_DIR=" + self.targetDir + "/\n\n"
 		
