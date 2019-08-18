@@ -68,7 +68,7 @@ def launch_python_post():
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
 	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port))
 	logger.write("   - Dask Client initialized...")
-	with PyPostTools.cd(postDir):
+	with PyPostTools.cd(targetDir):
 		writeFile = PyPostTools.write_job_file(socket.gethostname(), scheduler_port, project_name="climate_severe", queue="debug-cache-quad", nodes=dask_nodes, wall_time=60)
 		if(writeFile == False):
 			dask_client.close()
