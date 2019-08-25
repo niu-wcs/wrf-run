@@ -82,52 +82,116 @@ def launch_python_post():
 			PyPostTools.popen("qsub dask-worker.job")
 	# Wait here for workers.
 	logger.write("   -> Worker Job submitted to queue, waiting for workers...")
-	while len(dask_client.scheduler_info()['workers']) < 1:
+	while len(dask_client.scheduler_info()['workers']) < dask_nodes:
 		time.sleep(2)
 	logger.write("   -> Workers are now connected.")
+	logger.write("   - Adding local packages to dask workers")
+	dask_client.upload_file("PyPostTools.py")
+	dask_client.upload_file("ArrayTools.py")
+	dask_client.upload_file("Calculation.py")
+	dask_client.upload_file("ColorMaps.py")
+	dask_client.upload_file("Conversions.py")
+	dask_client.upload_file("Plotting.py")
+	dask_client.upload_file("PyPostSettings.py")
+	dask_client.upload_file("Routines.py")	
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
-	logger.write("  - Collecting files from target directory (" + postDir + ").")
-	fList = sorted(glob.glob(postDir + "wrfout*"))
-	fList2 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
-	logger.write("  - " + str(len(fList)) + " files have been found.")
-	logger.write("  - Checking target directory if this job has been done?")
-	if(len(fList) == len(fList2)):
-		logger.write("   - " + str(len(fList2)) + " WRFPRS files have been found, calculations are already completed, skipping step.")
-	else:
-		logger.write("   - No.")		
-		logger.write(" -> Pushing run_calculation_routines() to dask.")
-		calculation_future = dask_client.map(run_calculation_routines, fList)	
-		wait(calculation_future) 
+	calculation_future = start_calculations(dask_client, _routines)
+	if(calculation_future != None):
+		wait(calculation_future)
+		result_calc = dask_client.gather(calculation_future)[0]
+		if(result_calc != 0):
+			logger.write("***FAIL*** Could not locate environment variables set by the original application (FIRSTTIME), check the logs to ensure it is being done.")
+			logger.close()
+			sys.exit("")
 	logger.write(" 2. Done.")
 	logger.write(" 3. Generating Figures")
 	logger.write("  - Collecting files from target directory (" + targetDir + ").")
 	fList3 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
 	logger.write("  - " + str(len(fList3)) + " files have been found.")
 	logger.write(" -> Pushing run_plotting_routines() to dask.")
-	plotting_future = dask_client.map(run_plotting_routines, fList3)
+	fullDict = _pySet.get_full_dict()
+	plotting_future = start_plotting(dask_client, fullDict)
 	wait(plotting_future)
+	result_plot = dask_client.gather(plotting_future)[0]
+	if(result_plot != 0):
+		logger.write("***FAIL*** Could not locate environment variables set by the original application (TARGETDIR), check the logs to ensure it is being done.")
+		logger.close()
+		sys.exit("")	
 	logger.write(" 3. Done.")
 	logger.write(" 4. Final Steps")
 	
 	logger.write(" 4. Done, Closing Dask Client.")
-	cluster.stop_all_jobs()
-	dask_client.close()
+	dask_client.retire_workers(workers=dask_client.scheduler_info()['workers'], close=True)
+	dask_client.close()	
 	logger.write("All Steps Completed.")
 	logger.write("***SUCCESS*** Program execution complete.")
-	logger.close()		
+	logger.close()
+
+def start_calculations(dask_client, _routines):	
+	logger = PyPostTools.pyPostLogger()
+	try:
+		postDir = os.environ["PYTHON_POST_DIR"]
+		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
+	except KeyError:
+		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
+		logger.close()
+		sys.exit("Failed to find environmental variable (DIRS), check original application to ensure it is being set.")		
+		return -1
+	# Get the list of files
+	logger.write("  - Collecting files from target directory (" + postDir + ").")
+	fList = sorted(glob.glob(postDir + "wrfout*"))
+	logger.write("  - " + str(len(fList)) + " files have been found.")
+	logger.write("  - Checking target directory if this job has been done?")
+	fList2 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
+	if(len(fList) == len(fList2)):
+		logger.write("   - " + str(len(fList2)) + " WRFPRS files have been found, calculations are already completed, skipping step.")
+		return None
+	logger.write("   - No.")
+	logger.write("Pushing run_calculation_routines() to dask.")
+	
+	call_list = [{'filename' : fitem, 'routines' : _routines} for fitem in fList]
+	
+	calculation_future = dask_client.map(run_calculation_routines, call_list)
+	return calculation_future
+	
+def start_plotting(dask_client, fullDict):	
+	logger = PyPostTools.pyPostLogger()
+	try:
+		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
+	except KeyError:
+		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
+		logger.close()
+		sys.exit("Failed to find environmental variable (DIRS), check original application to ensure it is being set.")		
+		return -1
+	# Get the list of files
+	logger.write("  - Collecting files from target directory (" + targetDir + ").")
+	fList = sorted(glob.glob(targetDir + "WRFPRS_F*"))
+	logger.write("  - " + str(len(fList)) + " files have been found.")
+	logger.write("Pushing run_plotting_routines() to dask.")
+	
+	call_list = [{'filename' : fitem, 'settings' : fullDict} for fitem in fList]
+	
+	plotting_future = dask_client.map(run_plotting_routines, call_list)
+	return plotting_future	
 	
 def run_calculation_routines(ncFile_Name):
+	import ArrayTools
+	import Calculation
+	import Routines
+	import PyPostTools
+
+	ncFile_Name = callObject['filename']
+	_routines = callObject['routines']
 	logger = PyPostTools.pyPostLogger()
+	
 	try:
 		start = os.environ["PYTHON_POST_FIRSTTIME"]
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
-		logger.write("***FAIL*** Could not locate environment variables set by the original application (FIRSTTIME), check the logs to ensure it is being done.")
-		logger.close()
-		sys.exit("Failed to find environmental variable (FIRSTTIME), check original application to ensure it is being set.")		
-		return False
+		return -1
+		
 	startTime = datetime.strptime(start, '%Y%m%d%H')
 	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=True)
 	forecastTime_str = ncFile_Name[-19:]
@@ -352,18 +416,21 @@ def run_calculation_routines(ncFile_Name):
 	timeOut = "0" + str(elapsedHours) if elapsedHours < 10 else str(elapsedHours)
 	xrOut.to_netcdf(targetDir + "/WRFPRS_F" + timeOut + ".nc")
 	#Done.
-	return True		
+	return 0		
 	
 def run_plotting_routines(ncFile_Name):
+	import Plotting
+	import PyPostSettings
+	import PyPostTools
+
+	ncFile_Name = callObject['filename']
+	_pySet = callObject['settings']	
 	logger = PyPostTools.pyPostLogger()
-	_pySet = PyPostSettings.PyPostSettings()
+	
 	try:
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
-		logger.write("***FAIL*** Could not locate environment variables set by the original application (TARGETDIR), check the logs to ensure it is being done.")
-		logger.close()
-		sys.exit("Failed to find environmental variable (TARGETDIR), check original application to ensure it is being set.")		
-		return False
+		return -1
 	# Draw Plots
 	if(_pySet.fetch("plot_surface_map") == '1'):
 		Plotting.plot_surface_map(daskArray, targetDir,
@@ -399,7 +466,7 @@ def run_plotting_routines(ncFile_Name):
 							  withHeights = _pySet.fetch("plot_theta_e_heights") == '1', 
 							  withWinds = _pySet.fetch("plot_theta_e_winds") == '1', 
 							  windScaleFactor = 75)
-	return True
+	return 0
 		
 # Run the program.
 if __name__ == "__main__":

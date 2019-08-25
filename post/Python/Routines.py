@@ -60,7 +60,7 @@ class Routines(PyPostTools.Singleton):
 		# Scan each control file option available and set the respective flags.
 		if(self.pySet.fetch("plot_surface_map_temperature") == '1'):
 			self.need_Temp = True
-			self.temp_levels.append(0)
+			self.temp_levels = self.iterative_add(self.temp_levels, [0])
 		if(self.pySet.fetch("plot_surface_map_winds") == '1' 
 			or self.pySet.fetch("plot_surface_rh_and_winds") == '1' 
 			or self.pySet.fetch("plot_upper_lv_winds") == '1'
@@ -68,7 +68,7 @@ class Routines(PyPostTools.Singleton):
 			or self.pySet.fetch("plot_rh_and_wind") == '1'):
 			self.need_winds = True
 			if(self.pySet.fetch("plot_surface_map_winds") == '1'):
-				self.winds_levels.append(0)
+				self.winds_levels = self.iterative_add(self.winds_levels, [0])
 			if(self.pySet.fetch("plot_upper_lv_winds")):
 				self.winds_levels = self.iterative_add(self.winds_levels, self.pySet.fetch("upper_winds_levels"))
 			if(self.pySet.fetch("plot_rh_and_wind")):

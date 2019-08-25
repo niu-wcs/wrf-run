@@ -10,7 +10,6 @@
 import numpy as np
 import dask.array as da
 from wrf.constants import default_fill
-import PyPostTools
 
 #wrapped_destagger() - A wrapper method that handles the wrf-python destagger() function, safe for Dask
 def wrapped_destagger(daskArray, stagger_dim):

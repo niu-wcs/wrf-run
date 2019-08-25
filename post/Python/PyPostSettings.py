@@ -10,11 +10,9 @@ import os
 import PyPostTools
 
 # PyPostSettings: Class responsible for obtaining information from the control file and parsing it to classes that need the information
-class PyPostSettings(PyPostTools.Singleton):
+class PyPostSettings():
 	settings = {}
 	logger = None
-	
-	initialized = False
 	
 	def loadSettings(self):
 		curDir = os.path.dirname(os.path.abspath(__file__))
@@ -57,14 +55,18 @@ class PyPostSettings(PyPostTools.Singleton):
 		try:
 			return self.settings[key]
 		except KeyError:
-			print("Key does not exist")
-			return None    
+			print("Key does not exist (" + str(key) + ")")
+			return None   
+
+	def get_full_dict(self):
+		return self.settings
      
 	def __init__(self):
 		self.logger = PyPostTools.pyPostLogger()
-		if(not self.initialized):
-			if(self.loadSettings() == False):
-				logger.write("***FAIL*** Unable to init PyPostSettings(), python_post_control.txt not found")
-				logger.close()
-				sys.exit("Failed to load settings, please check for python_post_control.txt")
-			self.initialized = True
+		if(self.loadSettings() == False):
+			logger.write("***FAIL*** Unable to init PyPostSettings(), python_post_control.txt not found")
+			logger.close()
+			sys.exit("Failed to load settings, please check for python_post_control.txt")
+			
+	def dump(self):
+		self.logger.write(str(self.settings))

@@ -9,7 +9,6 @@ This python script package automates the entire WRF process for use on cluster b
 Included in this repository is a post-processing solution written in Python 3 as well as a UPP wrapper. If you want to use UPP, you may ignore this section, however, if you plan on using the Python module, you will need three other Python Packages to be installed:
   * wrf-python: https://github.com/NCAR/wrf-python
   * dask: https://github.com/dask/dask
-  * dask-jobqueue: https://github.com/Phantom139/dask-jobqueue (This is a custom fork that has support for Argonne's Theta Machine)
 
 ### Contents ###
 This git repository contains the following subdirectories:
