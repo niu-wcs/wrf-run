@@ -6,7 +6,7 @@
 This python script package automates the entire WRF process for use on cluster based computers (This package automates for Argonne's Theta Cluster). This is a fully self-contained script package that handles the tasks of obtaining the data, running the pre-processing executables, the WRF process, and forking the task to post-processing scripts for visualization.
 
 ### Requirements ###
-Included in this repository is a post-processing solution written in Python 3 as well as a UPP wrapper. If you want to use UPP, you may ignore this section, however, if you plan on using the Python module, you will need three other Python Packages to be installed:
+Included in this repository is a post-processing solution written in Python 3 as well as a UPP wrapper. If you want to use UPP, you may ignore this section, however, if you plan on using the Python module, you will need two other Python Packages to be installed:
   * wrf-python: https://github.com/NCAR/wrf-python
   * dask: https://github.com/dask/dask
 
