@@ -82,7 +82,7 @@ def launch_python_post():
 			PyPostTools.popen("qsub dask-worker.job")
 	# Wait here for workers.
 	logger.write("   -> Worker Job submitted to queue, waiting for workers...")
-	while len(dask_client.scheduler_info()['workers']) < dask_nodes:
+	while len(dask_client.scheduler_info()['workers']) < int(dask_nodes):
 		time.sleep(2)
 	logger.write("   -> Workers are now connected.")
 	logger.write("   - Adding local packages to dask workers")
