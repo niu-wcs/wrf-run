@@ -195,16 +195,13 @@ def run_calculation_routines(callObject):
 		logger.write("Cannot run calculations, missing important information")
 		return -1
 	
-	logger.write("Start.")
 	startTime = datetime.strptime(start, '%Y%m%d%H')
-	logger.write("Open " + str(ncFile_Name))
 	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=True)
 	forecastTime_str = ncFile_Name[-19:]
 	forecastTime = datetime.strptime(forecastTime_str, '%Y-%m-%d_%H_%M_%S')
 	elapsedTime = forecastTime - startTime
 	elapsedHours = elapsedTime.days*24 + elapsedTime.seconds//3600
 	# Grab the vertical interpolation levels
-	logger.write("Fetch verticals.")
 	p_vert = Calculation.get_full_p(daskArray)
 	z_vert = Calculation.get_height(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 	# Our end goal is to create a new xArray saving only what we need to it. Start by creaying a "blank" xarray
@@ -225,7 +222,6 @@ def run_calculation_routines(callObject):
 	# Now, calculate the variables.
 	##
 	## - MSLP
-	logger.write("Calculating variables.")
 	if(_routines.need_mslp):
 		mslp = Calculation.get_slp(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["MSLP"] = (('south_north', 'west_east'), mslp)
