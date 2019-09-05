@@ -239,7 +239,7 @@ def run_calculation_routines(callObject):
 	## - Total Accumulated Precipitation			
 	if(_routines.need_acum_pcp):
 		acum_pcp = Calculation.get_accum_precip(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
-		xrOut["ACUM_PCP"] = (('south_north', 'west_east'), acum_pcp[0])
+		xrOut["ACUM_PCP"] = (('south_north', 'west_east'), acum_pcp)
 		del(acum_pcp)
 	##
 	## - Total Accumulated Snowfall			
