@@ -98,11 +98,9 @@ def launch_python_post():
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
 	calculation_future = start_calculations(dask_client, _routines)
-	logger.write(str(calculation_future))
 	if(calculation_future != None):
 		wait(calculation_future)
 		result_calc = dask_client.gather(calculation_future)[0]
-		logger.write("RESULT: " + str(result_calc))
 		if(result_calc != 0):
 			logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
 			logger.close()
