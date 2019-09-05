@@ -102,7 +102,7 @@ def launch_python_post():
 		wait(calculation_future)
 		result_calc = dask_client.gather(calculation_future)[0]
 		if(result_calc != 0):
-			logger.write("***FAIL*** Could not locate environment variables set by the original application (FIRSTTIME), check the logs to ensure it is being done.")
+			logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
 			logger.close()
 			sys.exit("")
 	logger.write(" 2. Done.")
@@ -116,7 +116,7 @@ def launch_python_post():
 	wait(plotting_future)
 	result_plot = dask_client.gather(plotting_future)[0]
 	if(result_plot != 0):
-		logger.write("***FAIL*** Could not locate environment variables set by the original application (TARGETDIR), check the logs to ensure it is being done.")
+		logger.write("***FAIL*** An error occured in plotting method, check worker logs for more info.")
 		logger.close()
 		sys.exit("")	
 	logger.write(" 3. Done.")
@@ -190,6 +190,7 @@ def run_calculation_routines(callObject):
 		start = os.environ["PYTHON_POST_FIRSTTIME"]
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
+		logger.write("KeyError caught on run_calculation_routines(), could not locate PYTHON_POST_FIRSTTIME or PYTHON_POST_TARG_DIR.")
 		return -1
 		
 	startTime = datetime.strptime(start, '%Y%m%d%H')
@@ -430,6 +431,7 @@ def run_plotting_routines(callObject):
 	try:
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
+		logger.write("KeyError caught on run_plotting_routines(), could not locate PYTHON_POST_TARG_DIR.")
 		return -1
 	# Draw Plots
 	if(_pySet.fetch("plot_surface_map") == '1'):
