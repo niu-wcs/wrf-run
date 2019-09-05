@@ -434,39 +434,39 @@ def run_plotting_routines(callObject):
 		logger.write("Cannot run plotting routines, could not locate target directory.")
 		return -1
 	# Draw Plots
-	if(_pySet.fetch("plot_surface_map") == '1'):
+	if(_pySet["plot_surface_map"] == '1'):
 		Plotting.plot_surface_map(daskArray, targetDir,
-								  withTemperature = _pySet.fetch("plot_surface_map_temperature") == '1', 
-								  withWinds = _pySet.fetch("plot_surface_map_winds") == '1', 
+								  withTemperature = _pySet["plot_surface_map_temperature"] == '1', 
+								  withWinds = _pySet["plot_surface_map_winds"] == '1', 
 								  windScaleFactor = 75, 
-								  withMSLP = _pySet.fetch("plot_surface_map_mslp") == '1')
-	if(_pySet.fetch("plot_simulated_reflectivity") == '1'):
+								  withMSLP = _pySet["plot_surface_map_mslp"] == '1')
+	if(_pySet["plot_simulated_reflectivity"] == '1'):
 		Plotting.plot_simulated_reflectivity(daskArray, targetDir)
-	if(_pySet.fetch("plot_precip_type") == '1'):
+	if(_pySet["plot_precip_type"] == '1'):
 		Plotting.plot_precipitation_type(daskArray, targetDir)
-	if(_pySet.fetch("plot_accumulated_precip") == '1'):
+	if(_pySet["plot_accumulated_precip"] == '1'):
 		Plotting.plot_accumulated_precip(daskArray, targetDir)
-	if(_pySet.fetch("plot_accumulated_snowfall") == '1'):
+	if(_pySet["plot_accumulated_snowfall"] == '1'):
 		Plotting.plot_accumulated_snowfall(daskArray, targetDir)
-	if(_pySet.fetch("plot_precipitable_water") == '1'):
+	if(_pySet["plot_precipitable_water"] == '1'):
 		Plotting.plot_precipitable_water(daskArray, targetDir, 
-										 withMSLP = _pySet.fetch("plot_precipitable_water_with_mslp_contours") == '1')
-	if(_pySet.fetch("plot_dewpoint_temperature") == '1'):
+										 withMSLP = _pySet["plot_precipitable_water_with_mslp_contours"] == '1')
+	if(_pySet["plot_dewpoint_temperature"] == '1'):
 		Plotting.plot_dewpoint_temperature(daskArray, targetDir, windScaleFactor = 75)
-	if(_pySet.fetch("plot_surface_omega") == '1'):
+	if(_pySet["plot_surface_omega"] == '1'):
 		Plotting.plot_surface_omega(daskArray, targetDir)
-	if(_pySet.fetch("plot_10m_max_winds") == '1'):
+	if(_pySet["plot_10m_max_winds"] == '1'):
 		Plotting.plot_10m_max_winds(daskArray, targetDir, windScaleFactor = 75)
-	if(_pySet.fetch("plot_upper_lv_winds") == '1'):
+	if(_pySet["plot_upper_lv_winds"] == '1'):
 		Plotting.plot_upper_lv_winds(daskArray, targetDir, 
-									 _pySet.fetch("upper_winds_levels"), 
+									 _pySet["upper_winds_levels"], 
 									 windScaleFactor = 75, 
-									 withHeights = _pySet.fetch("plot_upper_lv_winds_withheights") == '1')
-	if(_pySet.fetch("plot_theta_e") == '1'):
+									 withHeights = _pySet["plot_upper_lv_winds_withheights"] == '1')
+	if(_pySet["plot_theta_e"] == '1'):
 		Plotting.plot_theta_e(daskArray, targetDir, 
-							  _pySet.fetch("theta_e_levels"), 
-							  withHeights = _pySet.fetch("plot_theta_e_heights") == '1', 
-							  withWinds = _pySet.fetch("plot_theta_e_winds") == '1', 
+							  _pySet["theta_e_levels"], 
+							  withHeights = _pySet["plot_theta_e_heights"] == '1', 
+							  withWinds = _pySet["plot_theta_e_winds"] == '1', 
 							  windScaleFactor = 75)
 	return 0
 		
