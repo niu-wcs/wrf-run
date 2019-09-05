@@ -176,7 +176,7 @@ def start_plotting(dask_client, fullDict):
 	plotting_future = dask_client.map(run_plotting_routines, call_list)
 	return plotting_future	
 	
-def run_calculation_routines(ncFile_Name):
+def run_calculation_routines(callObject):
 	import ArrayTools
 	import Calculation
 	import Routines
@@ -418,7 +418,7 @@ def run_calculation_routines(ncFile_Name):
 	#Done.
 	return 0		
 	
-def run_plotting_routines(ncFile_Name):
+def run_plotting_routines(callObject):
 	import Plotting
 	import PyPostSettings
 	import PyPostTools
