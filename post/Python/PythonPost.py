@@ -134,6 +134,7 @@ def launch_python_post():
 def start_calculations(dask_client, _routines):	
 	logger = PyPostTools.pyPostLogger()
 	try:
+		start = os.environ["PYTHON_POST_FIRSTTIME"]
 		postDir = os.environ["PYTHON_POST_DIR"]
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
@@ -153,7 +154,7 @@ def start_calculations(dask_client, _routines):
 	logger.write("   - No.")
 	logger.write("Pushing run_calculation_routines() to dask.")
 	
-	call_list = [{'filename' : fitem, 'routines' : _routines} for fitem in fList]
+	call_list = [{'filename' : fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines} for fitem in fList]
 	
 	calculation_future = dask_client.map(run_calculation_routines, call_list)
 	return calculation_future
@@ -173,7 +174,7 @@ def start_plotting(dask_client, fullDict):
 	logger.write("  - " + str(len(fList)) + " files have been found.")
 	logger.write("Pushing run_plotting_routines() to dask.")
 	
-	call_list = [{'filename' : fitem, 'settings' : fullDict} for fitem in fList]
+	call_list = [{'filename' : fitem, 'tDir': targetDir, 'settings' : fullDict} for fitem in fList]
 	
 	plotting_future = dask_client.map(run_plotting_routines, call_list)
 	return plotting_future	
@@ -185,14 +186,13 @@ def run_calculation_routines(callObject):
 	import PyPostTools
 
 	ncFile_Name = callObject['filename']
+	start = callObject['start']
+	targetDir = callObject['tDir']
 	_routines = callObject['routines']
 	logger = PyPostTools.pyPostLogger()
 	
-	try:
-		start = os.environ["PYTHON_POST_FIRSTTIME"]
-		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
-	except KeyError:
-		logger.write("KeyError caught on run_calculation_routines(), could not locate PYTHON_POST_FIRSTTIME or PYTHON_POST_TARG_DIR.")
+	if(start == "" or targetDir == ""):
+		logger.write("Cannot run calculations, missing important information")
 		return -1
 	
 	logger.write("Start.")
@@ -432,13 +432,12 @@ def run_plotting_routines(callObject):
 	import PyPostTools
 
 	ncFile_Name = callObject['filename']
-	_pySet = callObject['settings']	
+	_pySet = callObject['settings']
+	targetDir = callObject['tDir']
 	logger = PyPostTools.pyPostLogger()
 	
-	try:
-		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
-	except KeyError:
-		logger.write("KeyError caught on run_plotting_routines(), could not locate PYTHON_POST_TARG_DIR.")
+	if(targetDir == ""):
+		logger.write("Cannot run plotting routines, could not locate target directory.")
 		return -1
 	# Draw Plots
 	if(_pySet.fetch("plot_surface_map") == '1'):
