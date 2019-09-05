@@ -95,8 +95,7 @@ def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nod
 		target_file.write("#COBALT -A " + str(project_name) + '\n')
 		target_file.write("#COBALT -q " + str(queue) + '\n')
 		target_file.write("#COBALT --attrs mcdram=cache:numa=quad" + '\n' + '\n')
-		for i in range(1, int(nodes)+1):
-			target_file.write("/projects/climate_severe/Python/anaconda/bin/python3.7 -m distributed.cli.dask_worker \\" + '\n')
-			target_file.write(str(host) + ":" + str(scheduler_port) + " --name dask-worker-" + str(i) + "\\" + '\n')
-			target_file.write(" --death-timeout 120" + '\n\n')
+		target_file.write("/projects/climate_severe/Python/anaconda/bin/python3.7 -m distributed.cli.dask_worker \\" + '\n')
+		target_file.write(str(host) + ":" + str(scheduler_port) + " --nprocs " + str(nodes) + "\\" + '\n')
+		target_file.write(" --death-timeout 120" + '\n\n')
 	return True
