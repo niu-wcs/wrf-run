@@ -98,9 +98,11 @@ def launch_python_post():
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
 	calculation_future = start_calculations(dask_client, _routines)
+	logger.write(str(calculation_future))
 	if(calculation_future != None):
 		wait(calculation_future)
 		result_calc = dask_client.gather(calculation_future)[0]
+		logger.write("RESULT: " + str(result_calc))
 		if(result_calc != 0):
 			logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
 			logger.close()
@@ -192,14 +194,17 @@ def run_calculation_routines(callObject):
 	except KeyError:
 		logger.write("KeyError caught on run_calculation_routines(), could not locate PYTHON_POST_FIRSTTIME or PYTHON_POST_TARG_DIR.")
 		return -1
-		
+	
+	logger.write("Start.")
 	startTime = datetime.strptime(start, '%Y%m%d%H')
+	logger.write("Open " + str(ncFile_Name))
 	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=True)
 	forecastTime_str = ncFile_Name[-19:]
 	forecastTime = datetime.strptime(forecastTime_str, '%Y-%m-%d_%H_%M_%S')
 	elapsedTime = forecastTime - startTime
 	elapsedHours = elapsedTime.days*24 + elapsedTime.seconds//3600
 	# Grab the vertical interpolation levels
+	logger.write("Fetch verticals.")
 	p_vert = Calculation.get_full_p(daskArray)
 	z_vert = Calculation.get_height(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 	# Our end goal is to create a new xArray saving only what we need to it. Start by creaying a "blank" xarray
@@ -220,6 +225,7 @@ def run_calculation_routines(callObject):
 	# Now, calculate the variables.
 	##
 	## - MSLP
+	logger.write("Calculating variables.")
 	if(_routines.need_mslp):
 		mslp = Calculation.get_slp(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["MSLP"] = (('south_north', 'west_east'), mslp)
@@ -414,6 +420,7 @@ def run_calculation_routines(callObject):
 	## - Done Calculations
 	##
 	# Save our variables to the output file.
+	logger.write("Saving output file.")
 	timeOut = "0" + str(elapsedHours) if elapsedHours < 10 else str(elapsedHours)
 	xrOut.to_netcdf(targetDir + "/WRFPRS_F" + timeOut + ".nc")
 	#Done.
