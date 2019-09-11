@@ -85,7 +85,7 @@ class pyPostLogger(Singleton):
 	def close(self):
 		self.f.close()
 		
-def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nodes=None, wall_time=None):
+def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nodes=None, wall_time=None, nProcs=1):
 	if(scheduler_port == None or project_name == None or queue == None or nodes == None or wall_time == None):
 		return False
 	with open("dask-worker.job", 'w') as target_file:
@@ -95,7 +95,20 @@ def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nod
 		target_file.write("#COBALT -A " + str(project_name) + '\n')
 		target_file.write("#COBALT -q " + str(queue) + '\n')
 		target_file.write("#COBALT --attrs mcdram=cache:numa=quad" + '\n' + '\n')
-		target_file.write("/projects/climate_severe/Python/anaconda/bin/python3.7 -m distributed.cli.dask_worker \\" + '\n')
-		target_file.write(str(host) + ":" + str(scheduler_port) + " --nprocs " + str(nodes) + "\\" + '\n')
-		target_file.write(" --death-timeout 120" + '\n\n')
+		target_file.write("NODES=`cat $COBALT_NODEFILE | wc -l`" + '\n')
+		target_file.write("PROCS=$((NODES * " + str(nProcs) "))" + '\n' + '\n')
+		target_file.write("for host in `uniq $COBALT_NODEFILE`; do" + '\n')
+		target_file.write("   ssh $host launch-worker.sh &" + '\n')
+		target_file.write("done" + '\n')
+		target_file.write("wait")
 	return True
+	
+def write_worker_file(host, scheduler_port=None, nProcs=1):
+	if(scheduler_port == None):
+		return False
+	with open("launch-worker.sh", 'w') as target_file:
+		target_file.write("#!/bin/bash" + '\n')
+		target_file.write("/projects/climate_severe/Python/anaconda/bin/python3.7 -m distributed.cli.dask_worker \\" + '\n')
+		target_file.write(str(host) + ":" + str(scheduler_port) + " --nprocs " + str(nProcs) + "\\" + '\n')
+		target_file.write(" --death-timeout 120" + '\n\n')
+	return True	

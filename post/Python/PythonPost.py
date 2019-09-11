@@ -69,15 +69,18 @@ def launch_python_post():
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
 	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port))
 	logger.write("   - Dask Client initialized...")
+	logger.write("   - Writing Dask Worker Job Files...")
 	with PyPostTools.cd(targetDir):
-		writeFile = PyPostTools.write_job_file(socket.gethostname(), scheduler_port, project_name="climate_severe", queue="debug-cache-quad", nodes=dask_nodes, wall_time=60)
-		if(writeFile == False):
+		writeFile1 = PyPostTools.write_job_file(socket.gethostname(), scheduler_port, project_name="climate_severe", queue="debug-cache-quad", nodes=dask_nodes, wall_time=60, nProcs=1)
+		writeFile2 = PyPostTools.write_worker_file(socket.gethostname(), scheduler_port, nProcs=1)
+		if(writeFile1 == False or writeFile2 == False):
 			dask_client.close()
-			logger.write("   - Failed to write job file, are you missing an important parameter?")
+			logger.write("   - Failed to write job files, are you missing an important parameter?")
 			sys.exit("")
 			return
 		else:
 			logger.write("   - Dask Worker Job File Written, Submitting to Queue.")
+			PyPostTools.popen("chmod +x launch-worker.sh")
 			PyPostTools.popen("chmod +x dask-worker.job")
 			PyPostTools.popen("qsub dask-worker.job")
 	# Wait here for workers.
