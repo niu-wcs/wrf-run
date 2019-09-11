@@ -96,7 +96,7 @@ def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nod
 		target_file.write("#COBALT -q " + str(queue) + '\n')
 		target_file.write("#COBALT --attrs mcdram=cache:numa=quad" + '\n' + '\n')
 		target_file.write("NODES=`cat $COBALT_NODEFILE | wc -l`" + '\n')
-		target_file.write("PROCS=$((NODES * " + str(nProcs) "))" + '\n' + '\n')
+		target_file.write("PROCS=$((NODES * " + str(nProcs) + "))" + '\n' + '\n')
 		target_file.write("for host in `uniq $COBALT_NODEFILE`; do" + '\n')
 		target_file.write("   ssh $host launch-worker.sh &" + '\n')
 		target_file.write("done" + '\n')
