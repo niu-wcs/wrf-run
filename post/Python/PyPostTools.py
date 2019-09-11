@@ -100,7 +100,7 @@ def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nod
 		target_file.write("for host in `uniq $COBALT_NODEFILE`; do" + '\n')
 		target_file.write("   ssh $host launch-worker.sh &" + '\n')
 		target_file.write("done" + '\n')
-		target_file.write("wait")
+		target_file.write("sleep infinity")
 	return True
 	
 def write_worker_file(host, scheduler_port=None, nProcs=1):
