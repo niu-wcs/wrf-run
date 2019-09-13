@@ -224,12 +224,14 @@ def run_calculation_routines(callObject):
 	##
 	## - MSLP
 	if(_routines.need_mslp):
+		logger.write("MSLP - " + str(ncFile_Name))
 		mslp = Calculation.get_slp(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["MSLP"] = (('south_north', 'west_east'), mslp)
 		del(mslp)
 	##
 	## - Simulated Radar Reflectivity			
 	if(_routines.need_sim_dbz):
+		logger.write("SDBZ - " + str(ncFile_Name))
 		dbz = Calculation.get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["DBZ"] = (('south_north', 'west_east'), dbz[0])
 		del(dbz)
@@ -241,30 +243,35 @@ def run_calculation_routines(callObject):
 	##
 	## - Total Accumulated Precipitation			
 	if(_routines.need_acum_pcp):
+		logger.write("APCP - " + str(ncFile_Name))
 		acum_pcp = Calculation.get_accum_precip(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["ACUM_PCP"] = (('south_north', 'west_east'), acum_pcp)
 		del(acum_pcp)
 	##
 	## - Total Accumulated Snowfall			
 	if(_routines.need_acum_sno):
+		logger.write("ASNO - " + str(ncFile_Name))
 		acum_sno = ArrayTools.fetch_variable(daskArray, "SNOWNC")
 		xrOut["ACUM_SNO"] = (('south_north', 'west_east'), acum_sno)
 		del(acum_sno)
 	##
 	## - Precipitable Water			
 	if(_routines.need_prec_wat):
+		logger.write("PWAT - " + str(ncFile_Name))
 		prec_wat = Calculation.get_pw(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["PW"] = (('south_north', 'west_east'), prec_wat)
 		del(prec_wat)
 	##
 	## - Dewpoint Temperature			
 	if(_routines.need_dewpoint):
+		logger.write("TDPT - " + str(ncFile_Name))
 		td = Calculation.get_dewpoint(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["TD"] = (('south_north', 'west_east'), td[0])
 		del(td)
 	##
 	## - Relative Humidity			
-	if(_routines.need_RH):	
+	if(_routines.need_RH):
+		logger.write("RELH - " + str(ncFile_Name))
 		rh = Calculation.get_rh(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		for l in _routines.rh_levels:
 			if(l == 0):
@@ -277,6 +284,7 @@ def run_calculation_routines(callObject):
 	##
 	## - Air Temperature			
 	if(_routines.need_Temp):
+		logger.write("AIRT - " + str(ncFile_Name))
 		tk = Calculation.get_tk(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		for l in _routines.temp_levels:
 			if(l == 0):
@@ -289,6 +297,7 @@ def run_calculation_routines(callObject):
 	##
 	## - U/V Wind Components			
 	if(_routines.need_winds):
+		logger.write("WIND - " + str(ncFile_Name))
 		for l in _routines.winds_levels:
 			# We can handle the 0 as surface here because this function defaults to surface winds when requested_top == 0
 			u, v = Calculation.get_winds_at_level(daskArray, vertical_field=p_vert, requested_top=l)
@@ -301,6 +310,7 @@ def run_calculation_routines(callObject):
 	##
 	## - Equivalent Potential Temperature (Theta_E)					
 	if(_routines.need_theta_e):
+		logger.write("THTE - " + str(ncFile_Name))
 		eth = Calculation.get_eth(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		for l in _routines.theta_e_levels:
 			if(l == 0):
@@ -313,18 +323,21 @@ def run_calculation_routines(callObject):
 	##
 	## - Omega			
 	if(_routines.need_omega):
+		logger.write("OMGA - " + str(ncFile_Name))
 		omega = Calculation.get_omega(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		xrOut["OMEGA"] = (('south_north', 'west_east'), omega[0])
 		del(omega)
 	##
 	## - Max Surface Wind Gust (AFWA Diagnostic)			
 	if(_routines.need_sfc_max_winds):
+		logger.write("MWND - " + str(ncFile_Name))
 		maxWind = ArrayTools.fetch_variable(daskArray, "WSPD10MAX")
 		xrOut["MAX_WIND_SFC"] = (('south_north', 'west_east'), maxWind)
 		del(maxWind)
 	##
 	## - Geopotential Height			
 	if(_routines.need_geoht):
+		logger.write("GHGT - " + str(ncFile_Name))
 		for l in _routines.geoht_levels:
 			z_level = ArrayTools.wrapped_interplevel(z_vert, p_vert, l, omp_threads=dask_threads, num_workers=dask_nodes) 
 			xrOut["GEOHT_" + str(l)] = (('south_north', 'west_east'), z_level[0])
@@ -332,6 +345,7 @@ def run_calculation_routines(callObject):
 	##
 	## - 500 mb Relative Vorticity			
 	if(_routines.need_relvort):
+		logger.write("RLVT - " + str(ncFile_Name))
 		rvo = Calculation.get_rvor(daskArray, omp_threads=dask_threads, num_workers=dask_nodes) 
 		rvo_500 = ArrayTools.wrapped_interplevel(rvo, p_vert, 500, omp_threads=dask_threads, num_workers=dask_nodes) 
 		xrOut["RVO_500"] = (('south_north', 'west_east'), rvo_500[0])
@@ -340,6 +354,7 @@ def run_calculation_routines(callObject):
 	##
 	## - Convective Available Potential Energy (3D) & Convective Inhibition (3D)			
 	if(_routines.need_3d_cape or _routines.need_3d_cin):
+		logger.write("3DCAPE - " + str(ncFile_Name))
 		cape3d = Calculation.get_cape3d(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		cape = cape3d[0]
 		cin = cape3d[1]
@@ -352,7 +367,8 @@ def run_calculation_routines(callObject):
 		del(cin)
 	##
 	## - Maximum Cape (MUCAPE, 2D), Maximum CIN (MUCIN, 2D), Lifting Condensation Level (LCL), Level of Free Convection (LFC)			
-	if(_routines.need_mucape or _routines.need_mucin or _routines.need_lcl or _routines.need_lfc):		
+	if(_routines.need_mucape or _routines.need_mucin or _routines.need_lcl or _routines.need_lfc):
+		logger.write("2DCAPE - " + str(ncFile_Name))
 		cape2d = Calculation.get_cape2d(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 		mucape = cape2d[0]
 		mucin = cape2d[1]
@@ -374,6 +390,7 @@ def run_calculation_routines(callObject):
 	##
 	## - Storm Relative Helicity		
 	if(_routines.need_srh):
+		logger.write("SRH - " + str(ncFile_Name))
 		for l in _routines.srh_levels:
 			srh = Calculation.get_srh(daskArray, top=l, omp_threads=dask_threads, num_workers=dask_nodes)
 			xrOut["SRH_" + str(l)] = (('south_north', 'west_east'), srh)
@@ -381,6 +398,7 @@ def run_calculation_routines(callObject):
 	##
 	## - Updraft Helicity				
 	if(_routines.need_uphel):
+		logger.write("UPHL - " + str(ncFile_Name))
 		if(len(_routines.updft_helcy_levels) % 2 != 0):
 			logger.write("***WARNING*** Error in updraft helicity levels, list must have a divisible number of 2 (values are pairs).")
 		else:
@@ -393,6 +411,7 @@ def run_calculation_routines(callObject):
 	##
 	## - Wind Shear
 	if(_routines.need_shear):	
+		logger.write("WSHR - " + str(ncFile_Name))
 		for l in _routines.shear_levels:			
 			uS, vS, spd = Calculation.get_wind_shear(daskArray, top=l, omp_threads=dask_threads, num_workers=dask_nodes, z=z_vert)
 			xrOut["SHEAR_U_" + str(l)] = (('south_north', 'west_east'), uS[0])
