@@ -60,33 +60,7 @@ class JobSteps:
 		Tools.Process.instance().Lock()
 		self.logger.write("run_geogrid(): Enter")
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
-		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			with open("geogrid.job", 'w') as target_file:
-				target_file.write("#!/bin/bash\n")
-				target_file.write("#COBALT -t " + self.aSet.fetch("geogrid_walltime") + '\n')
-				target_file.write("#COBALT -n " + self.aSet.fetch("num_geogrid_nodes") + '\n')
-				target_file.write("#COBALT -q debug-cache-quad" + '\n')
-				target_file.write("#COBALT -A climate_severe\n\n")
-				
-				target_file.write("source " + self.aSet.fetch("sourcefile") + '\n')
-				target_file.write("ulimit -s unlimited\n\n")	
-
-				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")
-				
-				#RF: New method requires geogrid & metgrid to have same num of procs.
-				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("prerun_mpi_ranks_per_node") + '\n')
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=2\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")	
-
-				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-				target_file.write("./geogrid.exe" + '\n')				
-			
+		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
 			Tools.popen(self.aSet, "qsub geogrid.job -q debug-cache-quad -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
 			# Now wait for the log files
@@ -124,70 +98,7 @@ class JobSteps:
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("headdir") + "vtables/Vtable." + self.aSet.fetch("modeldata") + "* " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "mv namelist.wps* " + self.wrfDir + '/' + self.startTime[0:8])
 		mParms = self.modelParms.fetch()
-		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):
-			with open("prerun.job", 'w') as target_file:
-				target_file.write("#!/bin/bash\n")
-				target_file.write("#COBALT -t " + self.aSet.fetch("prerun_walltime") + '\n')
-				target_file.write("#COBALT -n " + self.aSet.fetch("num_prerun_nodes") + '\n')
-				target_file.write("#COBALT -q debug-cache-quad" + '\n')
-				target_file.write("#COBALT -A climate_severe\n\n")
-				
-				target_file.write("source " + self.aSet.fetch("sourcefile") + '\n')
-				target_file.write("ulimit -s unlimited\n")
-				target_file.write("lfs setstripe -c " + self.aSet.fetch("num_prerun_nodes") + " -S 8m " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")	
-
-				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + "\n\n")
-				
-				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=1\n")
-				target_file.write("export n_mpi_ranks=1\n")
-				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=2\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")				
-				target_file.write("./link_grib.csh " + self.dataDir + '/' + self.startTime + '/' + '\n')
-				i = 0
-				for ext in mParms["FileExtentions"]:
-					target_file.write("cp " + mParms["VTable"][i] + " Vtable" + '\n')
-					target_file.write("cp namelist.wps." + ext + " namelist.wps" + '\n')
-					
-					target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-					target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-					target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-					target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-					target_file.write("./ungrib.exe &" + '\n')
-					target_file.write("PID_Ungrib=$!" + '\n')
-					target_file.write("wait $PID_Ungrib" + '\n')
-					i += 1
-				# The next process is metgrid.
-				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("prerun_mpi_ranks_per_node") + '\n')
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=2\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")
-				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-				target_file.write("./metgrid.exe &" + '\n')
-				target_file.write("PID_Metgrid=$!" + '\n')
-				target_file.write("wait $PID_Metgrid" + "\n\n")	
-				# Finally, run the real.exe process
-				target_file.write("cd " + self.wrfDir + '/' + self.startTime[0:8] + '/' + "output\n\n")
-				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + self.aSet.fetch("prerun_mpi_ranks_per_node") + "\n")
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=" + self.aSet.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=2\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=4\n")				
-				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-				target_file.write("./real.exe &" + '\n')
-				target_file.write("PID_Real=$!" + '\n')
-				target_file.write("wait $PID_Real" + "\n\n")				
-				
+		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x prerun.job")
 			Tools.popen(self.aSet, "qsub prerun.job -q debug-cache-quad -t " + str(self.aSet.fetch("prerun_walltime")) + " -n " + str(self.aSet.fetch("num_prerun_nodes")) + " --mode script")
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
@@ -295,6 +206,7 @@ class JobSteps:
 			# Remove the old log files as these are no longer needed
 			Tools.popen(self.aSet, "rm output/rsl.out.*")
 			Tools.popen(self.aSet, "rm output/rsl.error.*")	
+			# chmod the job and submit
 			Tools.popen(self.aSet, "chmod +x wrf.job")			
 			Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")

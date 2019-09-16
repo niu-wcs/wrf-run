@@ -51,7 +51,7 @@ truelat1 30.0
 truelat2 60.0
 stand_lon -98.0
 p_top_requested 10000
-num_metgrid_levels 38
+num_metgrid_levels 30
 num_metgrid_soil_levels 4
 mp_physics 8
 ra_lw_physics 1
@@ -77,16 +77,14 @@ prerun_walltime 60
 prerun_mpi_ranks_per_node 32
 prerun_mpi_threads_per_rank 4
 # WRF Parameters
-num_wrf_nodes 128
-wrf_walltime 180
+num_wrf_nodes 636
+wrf_walltime 540
 # WRF MPI & IO Quilt Parameters
-wrf_openmp_threads_per_rank 8
-wrf_mpi_ranks_per_node 16
-wrf_hardware_threads_per_core 2
-wrf_hardware_threads_skipped_between_ranks 4
-wrf_numtiles 8
-wrf_nio_tasks_per_group 16
-wrf_nio_groups 5
+wrf_mpi_ranks_per_node 8
+wrf_numtiles 2
+wrf_nio_tasks_per_group 8
+wrf_nio_groups 4
+lfs_stripe_count 32
 # Post-Processing Parameters
 # - If using UPP (Unipost) with GRADS, use the below
 unipost_out grib2

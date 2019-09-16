@@ -78,6 +78,7 @@ class AppSettings():
 		self.replacementKeys["[run_output_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/output"
 		self.replacementKeys["[run_postprd_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/postprd"
 		self.replacementKeys["[data_dir]"] = self.fetch("datadir") + '/' + self.fetch("modeldata") + '/' + self.fetch("starttime")
+		self.replacementKeys["[wrfout_output_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/wrfout"
 		# Keys for templated job files
 		self.replacementKeys["[num_geogrid_nodes]"] = self.fetch("num_geogrid_nodes")
 		self.replacementKeys["[geogrid_walltime]"] = self.fetch("geogrid_walltime")
@@ -89,9 +90,7 @@ class AppSettings():
 		self.replacementKeys["[wrf_nio_groups]"] = self.fetch("wrf_nio_groups")
 		self.replacementKeys["[wrf_numtiles]"] = self.fetch("wrf_numtiles")
 		self.replacementKeys["[wrf_mpi_ranks_per_node]"] = self.fetch("wrf_mpi_ranks_per_node")
-		self.replacementKeys["[wrf_openmp_threads_per_rank]"] = self.fetch("wrf_openmp_threads_per_rank")
-		self.replacementKeys["[wrf_hardware_threads_per_core]"] = self.fetch("wrf_hardware_threads_per_core")
-		self.replacementKeys["[wrf_hardware_threads_skipped_between_ranks]"] = self.fetch("wrf_hardware_threads_skipped_between_ranks")		
+		self.replacementKeys["[lfs_stripe_count]"] = self.fetch("lfs_stripe_count")
 		# Keys for the namelist.input parameters
 		self.replacementKeys["[wrf_debug_level]"] = self.fetch("wrf_debug_level")
 		self.replacementKeys["[e_we]"] = self.fetch("e_we")
