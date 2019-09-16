@@ -149,7 +149,7 @@ class Application():
 				target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=1\n")
+				target_file.write("export n_hardware_threads_per_core=2\n")
 				target_file.write("export n_hardware_threads_skipped_between_ranks=" + settings.fetch("geogrid_mpi_ranks_per_node") + "\n")	
 
 				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
@@ -177,7 +177,7 @@ class Application():
 				target_file.write("export n_mpi_ranks_per_node=1\n")
 				target_file.write("export n_mpi_ranks=1\n")
 				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") + "\n")
-				target_file.write("export n_hardware_threads_per_core=1\n")
+				target_file.write("export n_hardware_threads_per_core=2\n")
 				target_file.write("export n_hardware_threads_skipped_between_ranks=" + settings.fetch("prerun_mpi_threads_per_rank") + "\n")				
 				target_file.write("./link_grib.csh " + settings.fetch("datadir") + '/' + settings.fetch("modeldata") + '/' + settings.fetch("starttime") + '/' + '\n')
 				i = 0
