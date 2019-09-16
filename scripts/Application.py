@@ -63,7 +63,7 @@ class Application():
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
-		if(write_job_files(settings, mParms) == False):
+		if(self.write_job_files(settings, mParms) == False):
 			logger.write(" 3. Failed to generate job files... abort")
 			sys.exit("")
 		logger.write(" 3. Done")
