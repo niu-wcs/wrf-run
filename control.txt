@@ -70,11 +70,12 @@ hail_opt 1
 prec_acc_dt 60
 # Geogrid Parameters
 num_geogrid_nodes 8
+geogrid_mpi_ranks_per_node 8
 geogrid_walltime 30
 # Preprocessing Job Parameters
 num_prerun_nodes 8
 prerun_walltime 60
-prerun_mpi_ranks_per_node 32
+prerun_mpi_ranks_per_node 4
 prerun_mpi_threads_per_rank 4
 # WRF Parameters
 num_wrf_nodes 636

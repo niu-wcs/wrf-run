@@ -146,7 +146,7 @@ class Application():
 				
 				#RF: New method requires geogrid & metgrid to have same num of procs.
 				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("prerun_mpi_ranks_per_node") + '\n')
+				target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
 				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
 				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") +"\n")
 				target_file.write("export n_hardware_threads_per_core=2\n")
