@@ -32,7 +32,7 @@ modeldataforecasthour 0
 # Job Step Flags (1 - On, 0 - Off)
 run_prerunsteps 1 #NOTE: This should ALWAYS be on unless debugging.
 run_geogrid 0
-run_preprocessing_jobs 0
+run_preprocessing_jobs 1
 run_wrf 1
 run_postprocessing 0
 post_run_unipost 0

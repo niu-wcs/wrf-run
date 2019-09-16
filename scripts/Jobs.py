@@ -53,8 +53,7 @@ class JobSteps:
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsexecutables") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		# Finally, move the generated files to the run directory		
-		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		Tools.popen(self.aSet, "mv wrf.job " + self.wrfDir + '/' + self.startTime[0:8])		
+		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")	
 	
 	def run_geogrid(self):
 		Tools.Process.instance().Lock()
