@@ -64,7 +64,7 @@ def launch_python_post():
 	t = Thread(target = cLoop.start, daemon = True)
 	t.start()
 	logger.write("   - Tornado IO Loop initialized...")
-	s = Scheduler(loop = cLoop)
+	s = Scheduler(loop = cLoop, dashboard_address = None)
 	s.start("tcp://: " + str(scheduler_port))
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
 	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port))
