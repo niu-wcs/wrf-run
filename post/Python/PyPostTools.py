@@ -107,5 +107,5 @@ def write_worker_file(host, scheduler_port=None, nProcs=1):
 		target_file.write("export PYTHONPATH=${PYTHONPATH}:/projects/climate_severe/wrf-run/post/Python/" + '\n\n')
 		target_file.write("/projects/climate_severe/Python/anaconda/bin/python3.7 -m distributed.cli.dask_worker \\" + '\n')
 		target_file.write(str(host) + ":" + str(scheduler_port) + " --nprocs " + str(nProcs) + "\\" + '\n')
-		target_file.write(" --death-timeout 120 --no-bokeh --no-dashboard" + '\n\n')
+		target_file.write(" --death-timeout 120 --no-dashboard" + '\n\n')
 	return True	
