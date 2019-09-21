@@ -63,6 +63,8 @@
  max_time_step                        = -1,
  min_time_step                        = 10,
  numtiles                             = [wrf_numtiles],
+ nproc_x                              = [nproc_x],
+ nproc_y                              = [nproc_y],
  /
  
  &physics

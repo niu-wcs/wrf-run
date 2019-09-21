@@ -86,6 +86,7 @@ wrf_numtiles 2
 wrf_nio_tasks_per_group 8
 wrf_nio_groups 4
 lfs_stripe_count 32
+wrf_detect_proc_count 1
 # Post-Processing Parameters
 # - If using UPP (Unipost) with GRADS, use the below
 unipost_out grib2

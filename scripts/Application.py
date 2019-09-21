@@ -39,6 +39,27 @@ class Application():
 			Tools.popen(settings, "mkdir " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/postprd")	
 		else:
 			logger.write(" 1. run_prerunsteps is turned off, directories have not been created")
+		logger.write("  - Checking if WRF Node decomposition is required")
+		if(settings.fetch("wrf_detect_proc_count") == '1'):
+			logger.write("   - Yes.")
+			det = Tools.detect_ideal_processors(int(settings.fetch("e_we")), 
+												int(settings.fetch("e_sn")), 
+												int(settings.fetch("num_wrf_nodes")), 
+												int(settings.fetch("wrf_mpi_ranks_per_node")), 
+												int(settings.fetch("wrf_nio_groups")), 
+												int(settings.fetch("wrf_nio_tasks_per_group")))
+			if(det is None):
+				logger.write(" 1. Failed to find a decomposition given the input settings in control.txt, please adjust your settings")
+				sys.exit("")
+			nproc_x = det[0]
+			nproc_y = det[1]
+			logger.write("   - Found a viable decomposition, X: " + str(nproc_x) + ", Y: " + str(nproc_y) + ".")
+			settings.add_replacementKey("[nproc_x]", str(nproc_x))
+			settings.add_replacementKey("[nproc_y]", str(nproc_y))
+		else:
+			settings.add_replacementKey("[nproc_x]", str("-1"))
+			settings.add_replacementKey("[nproc_y]", str("-1"))		
+			logger.write("   - No.")
 		logger.write(" 1. Done.")
 		#Step 2: Download Data Files
 		logger.write(" 2. Downloading Model Data Files")
@@ -239,7 +260,7 @@ class Application():
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output\n\n")
 				target_file.write("export n_nodes=" + settings.fetch("num_wrf_nodes") + "\n")
 				target_file.write("export n_ranks_per_node=" + settings.fetch("wrf_mpi_ranks_per_node") + "\n")
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n\n")
+				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_ranks_per_node))\n\n")
 				
 				target_file.write("export MPICH_MPIIO_HINTS=\"wrfinput*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",\\\n")
 				target_file.write("wrfbdy*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",wrfout*:striping_factor=" + settings.fetch("lfs_stripe_count") + "\"\n\n")
