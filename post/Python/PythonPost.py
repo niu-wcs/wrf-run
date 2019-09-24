@@ -60,9 +60,11 @@ async def launch_python_post():
 	logger.write("  - Initializing Dask (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	_routines = Routines.Routines()
 	async with Scheduler(port = scheduler_port) as s:
+		s = await s
 		s.start()
 		logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
-		async with Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), asynchronous=True) as dask_client:	
+		async with Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), asynchronous=True) as dask_client:
+			dask_client = await dask_client
 			logger.write("   - Dask Client initialized...")
 			logger.write("   - Writing Dask Worker Job Files...")
 			with PyPostTools.cd(targetDir):
