@@ -22,9 +22,9 @@ from dask.array import map_blocks
 from dask.distributed import Scheduler, Client, progress, metrics, wait
 from datetime import datetime
 import tornado.util
-from tornado.ioloop import IOLoop
 from threading import Thread
 import socket
+import asyncio
 
 """
 RF: Debug Mode Calls for Dask (Disable on release)
@@ -37,7 +37,7 @@ dask_nodes = 0
 dask_threads = 0
 scheduler_port = 12345
 
-def launch_python_post():
+async def launch_python_post():
 	curDir = os.path.dirname(os.path.abspath(__file__)) 
 	logger = PyPostTools.pyPostLogger()
 
@@ -59,75 +59,64 @@ def launch_python_post():
 	logger.write("  - Success!")
 	logger.write("  - Initializing Dask (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	_routines = Routines.Routines()
-	# Start Dask Tasks
-	cLoop = IOLoop.current()
-	t = Thread(target = cLoop.start, daemon = True)
-	t.start()
-	logger.write("   - Tornado IO Loop initialized...")
-	s = Scheduler(loop = cLoop, dashboard_address = None)
-	s.start("tcp://: " + str(scheduler_port))
-	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
-	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port))
-	logger.write("   - Dask Client initialized...")
-	logger.write("   - Writing Dask Worker Job Files...")
-	with PyPostTools.cd(targetDir):
-		writeFile1 = PyPostTools.write_job_file(socket.gethostname(), scheduler_port, project_name="climate_severe", queue="debug-cache-quad", nodes=dask_nodes, wall_time=60, nProcs=1)
-		writeFile2 = PyPostTools.write_worker_file(socket.gethostname(), scheduler_port, nProcs=1)
-		if(writeFile1 == False or writeFile2 == False):
-			dask_client.close()
-			logger.write("   - Failed to write job files, are you missing an important parameter?")
-			sys.exit("")
-			return
-		else:
-			logger.write("   - Dask Worker Job File Written, Submitting to Queue.")
-			PyPostTools.popen("chmod +x launch-worker.sh")
-			PyPostTools.popen("chmod +x dask-worker.job")
-			PyPostTools.popen("qsub dask-worker.job")
-	# Wait here for workers.
-	logger.write("   -> Worker Job submitted to queue, waiting for workers...")
-	while len(dask_client.scheduler_info()['workers']) < int(dask_nodes):
-		time.sleep(2)
-	logger.write("   -> Workers are now connected.")
-	#logger.write("   - Adding local packages to dask workers")
-	#dask_client.upload_file("PyPostTools.py")
-	#dask_client.upload_file("ArrayTools.py")
-	#dask_client.upload_file("Calculation.py")
-	#dask_client.upload_file("ColorMaps.py")
-	#dask_client.upload_file("Conversions.py")
-	#dask_client.upload_file("Plotting.py")
-	#dask_client.upload_file("PyPostSettings.py")
-	#dask_client.upload_file("Routines.py")	
-	logger.write("  - Success!")
-	logger.write(" 1. Done.")
-	logger.write(" 2. Start Post-Processing Calculations")
-	calculation_future = start_calculations(dask_client, _routines, dask_threads)
-	if(calculation_future != None):
-		wait(calculation_future)
-		result_calc = dask_client.gather(calculation_future)[0]
-		if(result_calc != 0):
-			logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
-			logger.close()
-			sys.exit("")
-	logger.write(" 2. Done.")
-	logger.write(" 3. Generating Figures")
-	logger.write("  - Collecting files from target directory (" + targetDir + ").")
-	fList3 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
-	logger.write("  - " + str(len(fList3)) + " files have been found.")
-	logger.write(" -> Pushing run_plotting_routines() to dask.")
-	fullDict = _pySet.get_full_dict()
-	plotting_future = start_plotting(dask_client, fullDict, dask_threads)
-	wait(plotting_future)
-	result_plot = dask_client.gather(plotting_future)[0]
-	if(result_plot != 0):
-		logger.write("***FAIL*** An error occured in plotting method, check worker logs for more info.")
-		logger.close()
-		sys.exit("")	
-	logger.write(" 3. Done.")
-	logger.write(" 4. Final Steps")
-	
-	logger.write(" 4. Done, Closing Dask Client.")
-	dask_client.retire_workers(workers=dask_client.scheduler_info()['workers'], close=True)
-	dask_client.close()	
+	async with Scheduler(port = scheduler_port) as s:
+		s.start()
+		logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
+		async with Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), asynchronous=True) as dask_client:	
+			logger.write("   - Dask Client initialized...")
+			logger.write("   - Writing Dask Worker Job Files...")
+			with PyPostTools.cd(targetDir):
+				writeFile1 = PyPostTools.write_job_file(socket.gethostname(), scheduler_port, project_name="climate_severe", queue="debug-cache-quad", nodes=dask_nodes, wall_time=60, nProcs=1)
+				writeFile2 = PyPostTools.write_worker_file(socket.gethostname(), scheduler_port, nProcs=1)
+				if(writeFile1 == False or writeFile2 == False):
+					dask_client.close()
+					logger.write("   - Failed to write job files, are you missing an important parameter?")
+					sys.exit("")
+					return
+				else:
+					logger.write("   - Dask Worker Job File Written, Submitting to Queue.")
+					PyPostTools.popen("chmod +x launch-worker.sh")
+					PyPostTools.popen("chmod +x dask-worker.job")
+					PyPostTools.popen("qsub dask-worker.job")
+			# Wait here for workers.
+			logger.write("   -> Worker Job submitted to queue, waiting for workers...")
+			while len(dask_client.scheduler_info()['workers']) < int(dask_nodes):
+				time.sleep(2)
+			logger.write("   -> Workers are now connected.")
+			logger.write("  - Success!")
+			logger.write(" 1. Done.")
+			logger.write(" 2. Start Post-Processing Calculations")
+			calculation_future = start_calculations(dask_client, _routines, dask_threads)
+			if(calculation_future != None):
+				wait(calculation_future)
+				result_calc = dask_client.gather(calculation_future)[0]
+				if(result_calc != 0):
+					logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
+					logger.close()
+					sys.exit("")
+			logger.write(" 2. Done.")
+			logger.write(" 3. Generating Figures")
+			logger.write("  - Collecting files from target directory (" + targetDir + ").")
+			fList3 = sorted(glob.glob(targetDir + "WRFPRS_F*"))
+			logger.write("  - " + str(len(fList3)) + " files have been found.")
+			logger.write(" -> Pushing run_plotting_routines() to dask.")
+			fullDict = _pySet.get_full_dict()
+			plotting_future = start_plotting(dask_client, fullDict, dask_threads)
+			wait(plotting_future)
+			result_plot = dask_client.gather(plotting_future)[0]
+			if(result_plot != 0):
+				logger.write("***FAIL*** An error occured in plotting method, check worker logs for more info.")
+				logger.close()
+				sys.exit("")	
+			logger.write(" 3. Done.")
+			logger.write(" 4. Final Steps")
+			
+			logger.write(" 4. Done, Closing Dask Client.")
+			# Close the client object
+			dask_client.retire_workers(workers=dask_client.scheduler_info()['workers'], close=True)
+			dask_client.close()	
+		# Close the scheduler object
+		s.close()
 	logger.write("All Steps Completed.")
 	logger.write("***SUCCESS*** Program execution complete.")
 	logger.close()
@@ -496,4 +485,5 @@ def run_plotting_routines(callObject):
 		
 # Run the program.
 if __name__ == "__main__":
-	launch_python_post()
+	asyncio.get_event_loop().run_until_complete(launch_python_post())
+	#launch_python_post()
