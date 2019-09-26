@@ -95,5 +95,5 @@ upp_ensemble_nodes_per_hour 4
 upp_walltime 60
 # - If using Python, use the below
 num_python_nodes 8
-python_threads_per_rank 8
+python_threads_per_rank 4
 python_walltime 60
