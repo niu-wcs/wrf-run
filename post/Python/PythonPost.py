@@ -67,7 +67,7 @@ def launch_python_post():
 
 	asyncio.gather(f(scheduler_port))
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
-	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port))
+	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), timeout=120)
 	logger.write("   - Dask Client initialized...")
 	logger.write("   - Writing Dask Worker Job Files...")
 	with PyPostTools.cd(targetDir):
