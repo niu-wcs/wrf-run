@@ -47,7 +47,7 @@ class PreparePyJob:
 		
 		out_job_contents += "cd " + self.aSet.fetch("postdir") + "/Python\n\n"
 		
-		out_job_contents += self.aSet.fetch("condainstallation") + " PythonPost.py&\n"
+		out_job_contents += "python PythonPost.py&\n"
 		out_job_contents += "PID_PyPost=$!\n"
 		out_job_contents += "wait $PID_PyPost\n\n"
 		
