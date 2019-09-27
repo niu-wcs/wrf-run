@@ -60,14 +60,14 @@ def launch_python_post():
 	logger.write("  - Initializing Dask (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	_routines = Routines.Routines()
 	logger.write("   - Async IO Loop initialized...")	
-    def f(scheduler_port):
-        async def g(port):
-            s = Scheduler(port=port)
-            await s
-            await s.finished()
-        asyncio.get_event_loop().run_until_complete(g(scheduler_port))
-    # Starts the scheduler in its own process - needed as otherwise it will 
-    # occupy the program and make it do an infinite loop
+	def f(scheduler_port):
+		async def g(port):
+			s = Scheduler(port=port)
+			await s
+			await s.finished()
+		asyncio.get_event_loop().run_until_complete(g(scheduler_port))
+	# Starts the scheduler in its own process - needed as otherwise it will 
+	# occupy the program and make it do an infinite loop
     process = Process(target=f, args=(scheduler_port,))
     process.start()
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
