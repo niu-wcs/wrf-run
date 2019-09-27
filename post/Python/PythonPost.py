@@ -68,8 +68,8 @@ def launch_python_post():
 		asyncio.get_event_loop().run_until_complete(g(scheduler_port))
 	# Starts the scheduler in its own process - needed as otherwise it will 
 	# occupy the program and make it do an infinite loop
-    process = Process(target=f, args=(scheduler_port,))
-    process.start()
+	process = Process(target=f, args=(scheduler_port,))
+	process.start()
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
 	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), timeout=120)
 	logger.write("   - Dask Client initialized...")
