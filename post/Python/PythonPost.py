@@ -24,6 +24,7 @@ from datetime import datetime
 import tornado.util
 import socket
 import asyncio
+from multiprocessing import Process
 
 """
 RF: Debug Mode Calls for Dask (Disable on release)
@@ -59,13 +60,16 @@ def launch_python_post():
 	logger.write("  - Initializing Dask (" + str(dask_nodes) + " Nodes Requested), Collecting routines needed")
 	_routines = Routines.Routines()
 	logger.write("   - Async IO Loop initialized...")	
-	async def f(port):
-		s = Scheduler(port = port)
-		s = await s
-		await s.finished()
-		return 1
-
-	asyncio.gather(f(scheduler_port))
+    def f(scheduler_port):
+        async def g(port):
+            s = Scheduler(port=port)
+            await s
+            await s.finished()
+        asyncio.get_event_loop().run_until_complete(g(scheduler_port))
+    # Starts the scheduler in its own process - needed as otherwise it will 
+    # occupy the program and make it do an infinite loop
+    process = Process(target=f, args=(scheduler_port,))
+    process.start()
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
 	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), timeout=120)
 	logger.write("   - Dask Client initialized...")
@@ -123,6 +127,8 @@ def launch_python_post():
 	logger.write("All Steps Completed.")
 	logger.write("***SUCCESS*** Program execution complete.")
 	logger.close()
+	del dask_client
+	process.terminate()
 
 def start_calculations(dask_client, _routines, dask_threads):	
 	logger = PyPostTools.pyPostLogger()
