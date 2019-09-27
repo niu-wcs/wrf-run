@@ -62,7 +62,7 @@ def launch_python_post():
 	logger.write("   - Async IO Loop initialized...")	
 	def f(scheduler_port):
 		async def g(port):
-			s = Scheduler(port=port)
+			s = Scheduler(port=scheduler_port)
 			await s
 			await s.finished()
 		asyncio.get_event_loop().run_until_complete(g(scheduler_port))
@@ -71,7 +71,12 @@ def launch_python_post():
 	process = Process(target=f, args=(scheduler_port,))
 	process.start()
 	logger.write("   - Dask Scheduler initialized (Port " + str(scheduler_port) + ")...")
-	dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), timeout=120)
+	try:
+		dask_client = Client("tcp://" + socket.gethostname() + ":" + str(scheduler_port), timeout=30)
+	except OSError:
+		logger.write("  <-> Dask Client could not be created, timeout error.")
+		process.terminate()
+		sys.exit()
 	logger.write("   - Dask Client initialized...")
 	logger.write("   - Writing Dask Worker Job Files...")
 	with PyPostTools.cd(targetDir):
