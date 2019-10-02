@@ -36,6 +36,7 @@ class PreparePyJob:
 			return False
 		out_job_contents += "#!/bin/bash\n"
 		out_job_contents += "source " + self.aSet.fetch("sourcefile") + "\n"
+		out_job_contents += "source activate " + self.aSet.fetch("condamodule") + "\n"
 		out_job_contents += "ulimit -s unlimited\n\n"
 		
 		out_job_contents += "export PYTHON_POST_DIR=" + self.wrfOutDir + "/\n"

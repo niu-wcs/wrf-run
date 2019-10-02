@@ -22,7 +22,7 @@ wrfrunfiles /projects/climate_severe/WRF/WRF/run/
 wpsexecutables /projects/climate_severe/WRF/WPS/
 uppexecutables /projects/climate_severe/WRF/UPPV4.0/bin/
 postdir /projects/climate_severe/wrf-run/post
-condainstallation /projects/climate_severe/Python/anaconda/bin/python3.7
+condamodule run-wrf
 # General Parameters
 starttime 2019052600 #starttime: The model initialization time in format YYYYMMDDHH (HH in UTC)
 rundays 2
