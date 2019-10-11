@@ -201,7 +201,7 @@ def run_calculation_routines(callObject):
 		return -1
 	
 	startTime = datetime.strptime(start, '%Y%m%d%H')
-	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=True)
+	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False)
 	forecastTime_str = ncFile_Name[-19:]
 	forecastTime = datetime.strptime(forecastTime_str, '%Y-%m-%d_%H_%M_%S')
 	elapsedTime = forecastTime - startTime
@@ -456,6 +456,8 @@ def run_plotting_routines(callObject):
 	targetDir = callObject['tDir']
 	dask_threads = callObject['dask_threads']
 	logger = PyPostTools.pyPostLogger()
+	
+	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False)
 	
 	if(targetDir == ""):
 		logger.write("Cannot run plotting routines, could not locate target directory.")
