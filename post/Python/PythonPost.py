@@ -100,14 +100,15 @@ def launch_python_post():
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
-	calculation_future = start_calculations(dask_client, _routines, dask_threads)
-	if(calculation_future != None):
-		wait(calculation_future)
-		result_calc = dask_client.gather(calculation_future)[0]
-		if(result_calc != 0):
-			logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
-			logger.close()
-			sys.exit("")
+	start_calculations(dask_client, _routines, dask_threads)
+	#calculation_future = start_calculations(dask_client, _routines, dask_threads)
+	#if(calculation_future != None):
+	#	wait(calculation_future)
+	#	result_calc = dask_client.gather(calculation_future)[0]
+	#	if(result_calc != 0):
+	#		logger.write("***FAIL*** An error occured in calculations method, check worker logs for more info.")
+	#		logger.close()
+	#		sys.exit("")
 	logger.write(" 2. Done.")
 	logger.write(" 3. Generating Figures")
 	logger.write("  - Collecting files from target directory (" + targetDir + ").")
@@ -158,10 +159,13 @@ def start_calculations(dask_client, _routines, dask_threads):
 	logger.write("   - No.")
 	logger.write("Pushing run_calculation_routines() to dask.")
 	
-	call_list = [{'filename' : fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines, 'dask_threads': dask_threads} for fitem in fList]
-	
-	calculation_future = dask_client.map(run_calculation_routines, call_list)
-	return calculation_future
+	#call_list = [{'filename' : fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines, 'dask_threads': dask_threads} for fitem in fList]
+	#calculation_future = dask_client.map(run_calculation_routines, call_list)
+	for fitem in fList:
+		call_obj = [{'filename': fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines, 'dask_threads': dask_threads}]
+		run_calculation_routines(call_obj)
+	return True
+	#return calculation_future
 	
 def start_plotting(dask_client, fullDict, dask_threads):	
 	logger = PyPostTools.pyPostLogger()
