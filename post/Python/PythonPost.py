@@ -162,8 +162,9 @@ def start_calculations(dask_client, _routines, dask_threads):
 	#call_list = [{'filename' : fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines, 'dask_threads': dask_threads} for fitem in fList]
 	#calculation_future = dask_client.map(run_calculation_routines, call_list)
 	for fitem in fList:
-		call_obj = [{'filename': fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines, 'dask_threads': dask_threads}]
-		run_calculation_routines(call_obj)
+		#call_obj = [{'filename': fitem, 'start': start, 'tDir': targetDir, 'routines' : _routines, 'dask_threads': dask_threads}]
+		#run_calculation_routines(call_obj)
+		run_calculation_routines(fitem, start, targetDir, _routines, dask_threads)
 	return True
 	#return calculation_future
 	
@@ -187,17 +188,17 @@ def start_plotting(dask_client, fullDict, dask_threads):
 	plotting_future = dask_client.map(run_plotting_routines, call_list)
 	return plotting_future	
 	
-def run_calculation_routines(callObject):
+def run_calculation_routines(ncFile_Name, start, targetDir, _routines, dask_threads):  #run_calculation_routines(callObject):
 	import ArrayTools
 	import Calculation
 	import Routines
 	import PyPostTools
 
-	ncFile_Name = callObject['filename']
-	start = callObject['start']
-	targetDir = callObject['tDir']
-	_routines = callObject['routines']
-	dask_threads = callObject['dask_threads']
+	#ncFile_Name = callObject['filename']
+	#start = callObject['start']
+	#targetDir = callObject['tDir']
+	#_routines = callObject['routines']
+	#dask_threads = callObject['dask_threads']
 	logger = PyPostTools.pyPostLogger()
 	
 	if(start == "" or targetDir == ""):
