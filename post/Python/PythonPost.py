@@ -100,7 +100,7 @@ def launch_python_post():
 	logger.write("  - Success!")
 	logger.write(" 1. Done.")
 	logger.write(" 2. Start Post-Processing Calculations")
-	start_calculations(dask_client, _routines, dask_threads)
+	start_calculations(dask_client, _routines, dask_threads, process)
 	#calculation_future = start_calculations(dask_client, _routines, dask_threads)
 	#if(calculation_future != None):
 	#	wait(calculation_future)
@@ -116,7 +116,7 @@ def launch_python_post():
 	logger.write("  - " + str(len(fList3)) + " files have been found.")
 	logger.write(" -> Pushing run_plotting_routines() to dask.")
 	fullDict = _pySet.get_full_dict()
-	plotting_future = start_plotting(dask_client, fullDict, dask_threads)
+	plotting_future = start_plotting(dask_client, fullDict, dask_threads, process)
 	wait(plotting_future)
 	result_plot = dask_client.gather(plotting_future)[0]
 	if(result_plot != 0):
@@ -136,13 +136,14 @@ def launch_python_post():
 	del dask_client
 	process.terminate()
 
-def start_calculations(dask_client, _routines, dask_threads):	
+def start_calculations(dask_client, _routines, dask_threads, process):	
 	logger = PyPostTools.pyPostLogger()
 	try:
 		start = os.environ["PYTHON_POST_FIRSTTIME"]
 		postDir = os.environ["PYTHON_POST_DIR"]
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
+		process.terminate()
 		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
 		logger.close()
 		sys.exit("Failed to find environmental variable (DIRS), check original application to ensure it is being set.")		
@@ -168,11 +169,12 @@ def start_calculations(dask_client, _routines, dask_threads):
 	return True
 	#return calculation_future
 	
-def start_plotting(dask_client, fullDict, dask_threads):	
+def start_plotting(dask_client, fullDict, dask_threads, process):	
 	logger = PyPostTools.pyPostLogger()
 	try:
 		targetDir = os.environ["PYTHON_POST_TARG_DIR"]
 	except KeyError:
+		process.terminate()
 		logger.write("***FAIL*** Could not locate environment variables set by the original application (DIRS), check the logs to ensure it is being done.")
 		logger.close()
 		sys.exit("Failed to find environmental variable (DIRS), check original application to ensure it is being set.")		
