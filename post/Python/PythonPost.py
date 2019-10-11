@@ -204,6 +204,8 @@ def run_calculation_routines(callObject):
 		logger.write("Cannot run calculations, missing important information")
 		return -1
 	
+	logger.write("Running calculation routines on " + str(ncFile_Name))
+	
 	startTime = datetime.strptime(start, '%Y%m%d%H')
 	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False)
 	forecastTime_str = ncFile_Name[-19:]
@@ -447,6 +449,7 @@ def run_calculation_routines(callObject):
 	print("Saving output file.")
 	timeOut = "0" + str(elapsedHours) if elapsedHours < 10 else str(elapsedHours)
 	xrOut.to_netcdf(targetDir + "/WRFPRS_F" + timeOut + ".nc")
+	logger.write("Calculations completed, file saved as " + targetDir + "/WRFPRS_F" + timeOut + ".nc")
 	#Done.
 	return 0		
 	
