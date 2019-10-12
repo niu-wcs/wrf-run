@@ -37,17 +37,6 @@ def wrapped_mul(base, prod):
 def wrapped_div(base, div):
 	return base / div
 	
-# Wrapped call for add then divide (Used by p+pb calls)
-def wrapped_add_then_div(base, add, div):
-	return (base + add) / div
-	
-# Wrapped call for add then multiply (Used by p+pb calls)
-def wrapped_add_then_mul(base, add, prod):
-	return (base + add) * prod
-	
-# Wrapped call for magnitude calculation given U & V
-def wrapped_magnitude(U, V):
-    return (U*U + V*V) ** 0.5	
 	
 """
 	This block of code is focused on handling the "gather" routines for specific variables
@@ -184,8 +173,10 @@ def pvo_wrap(u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads=1)
 def get_full_p(daskArray, omp_threads=1, num_workers=1):
     p = fetch_variable(daskArray, "P")
     pb = fetch_variable(daskArray, "PB")
-    
-    full_p = map_blocks(wrapped_add_then_div, p, pb, 100, dtype=p.dtype)
+	
+	total_p = map_blocks(wrapped_add, p, pb)
+	full_p = map_blocks(wrapped_div, total_p, 100)
+
     return full_p.compute(num_workers=num_workers)
 
 def get_winds_at_level(daskArray, vertical_field=None, requested_top=0., omp_threads=1, num_workers=1):
@@ -218,7 +209,7 @@ def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
 	uS = map_blocks(wrapped_sub, ut, u0) #ut - u0
 	vS = map_blocks(wrapped_sub, vt, v0) #vt - v0   
 
-	speed = map_blocks(wrapped_magnitude, uS, vS) #da.sqrt(uS*uS + vS*vS)
+	speed = da.sqrt(uS*uS + vS*vS)
 
 	del(z)
 	del(u0)
