@@ -171,9 +171,14 @@ def pvo_wrap(u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads=1)
 	 -> These are wrapped calls of the original g_func* methods in the wrf-python library
 """
 def get_full_p(daskArray, omp_threads=1, num_workers=1):
+	logger = PyPostTools.pyPostLogger()
+
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
 
+	logger.write("   > DEBUG: p: \n" + str(p) + " \n")
+	logger.write("   > DEBUG: pb: \n" + str(pb) + "\n")
+	
 	total_p = map_blocks(wrapped_add, p, pb, dtype=p.dtype)
 	full_p = map_blocks(wrapped_div, total_p, 100, dtype=p.dtype)
 
