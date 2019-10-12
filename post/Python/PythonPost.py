@@ -211,7 +211,7 @@ def run_calculation_routines(ncFile_Name, start, targetDir, _routines, dask_thre
 	
 	startTime = datetime.strptime(start, '%Y%m%d%H')
 	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False, combine='by_coords')
-	logger.write("  > DEBUG: ncFile Opened")
+	logger.write("  > DEBUG: ncFile Opened\n\n" + str(daskArray) + "\n\n")
 	forecastTime_str = ncFile_Name[-19:]
 	forecastTime = datetime.strptime(forecastTime_str, '%Y-%m-%d_%H_%M_%S')
 	elapsedTime = forecastTime - startTime
