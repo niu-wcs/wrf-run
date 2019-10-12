@@ -219,7 +219,9 @@ def run_calculation_routines(ncFile_Name, start, targetDir, _routines, dask_thre
 	# Grab the vertical interpolation levels
 	logger.write("  > DEBUG: Fetch vertical interpolation levels")
 	p_vert = Calculation.get_full_p(daskArray)
+	logger.write("  > DEBUG: P:\n" + str(p_vert) + "\n")
 	z_vert = Calculation.get_height(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
+	logger.write("  > DEBUG: Z:\n" + str(z_vert) + "\n")
 	logger.write("  > DEBUG: Done.")
 	# Our end goal is to create a new xArray saving only what we need to it. Start by creaying a "blank" xarray
 	logger.write("  > DEBUG: Create new xarray dataset object")
