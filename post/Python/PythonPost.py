@@ -218,7 +218,7 @@ def run_calculation_routines(ncFile_Name, start, targetDir, _routines, dask_thre
 	elapsedHours = elapsedTime.days*24 + elapsedTime.seconds//3600
 	# Grab the vertical interpolation levels
 	logger.write("  > DEBUG: Fetch vertical interpolation levels")
-	p_vert = Calculation.get_full_p(daskArray)
+	p_vert = Calculation.get_full_p(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 	logger.write("  > DEBUG: P:\n" + str(p_vert) + "\n")
 	z_vert = Calculation.get_height(daskArray, omp_threads=dask_threads, num_workers=dask_nodes)
 	logger.write("  > DEBUG: Z:\n" + str(z_vert) + "\n")
