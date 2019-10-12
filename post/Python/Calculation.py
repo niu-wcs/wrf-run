@@ -15,6 +15,7 @@ from dask.array import map_blocks
 from wrf import Constants, ConversionFactors
 from wrf.constants import default_fill
 from ArrayTools import wrapped_destagger, wrapped_either, wrapped_lat_varname, wrapped_lon_varname, wrapped_interplevel, fetch_variable
+import PyPostTools
 		
 """
 	This block contains simple wrappers for basic mathematical operations, this is needed to support
