@@ -210,7 +210,7 @@ def run_calculation_routines(ncFile_Name, start, targetDir, _routines, dask_thre
 	logger.write("Running calculation routines on " + str(ncFile_Name))
 	
 	startTime = datetime.strptime(start, '%Y%m%d%H')
-	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False)
+	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False, combine='by_coords')
 	logger.write("  > DEBUG: ncFile Opened")
 	forecastTime_str = ncFile_Name[-19:]
 	forecastTime = datetime.strptime(forecastTime_str, '%Y-%m-%d_%H_%M_%S')
@@ -474,7 +474,7 @@ def run_plotting_routines(callObject):
 	dask_threads = callObject['dask_threads']
 	logger = PyPostTools.pyPostLogger()
 	
-	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False)
+	daskArray = xarray.open_mfdataset(ncFile_Name, parallel=False, combine='by_coords')
 	
 	if(targetDir == ""):
 		logger.write("Cannot run plotting routines, could not locate target directory.")

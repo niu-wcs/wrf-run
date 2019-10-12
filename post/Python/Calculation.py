@@ -174,8 +174,8 @@ def get_full_p(daskArray, omp_threads=1, num_workers=1):
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
 
-	total_p = map_blocks(wrapped_add, p, pb)
-	full_p = map_blocks(wrapped_div, total_p, 100)
+	total_p = map_blocks(wrapped_add, p, pb, dtype=p.dtype)
+	full_p = map_blocks(wrapped_div, total_p, 100, dtype=p.dtype)
 
 	return full_p.compute(num_workers=num_workers)
 
@@ -206,8 +206,8 @@ def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
 	u0, v0 = get_winds_at_level(daskArray, omp_threads=omp_threads, num_workers=num_workers)
 	ut, vt = get_winds_at_level(daskArray, z, top, omp_threads=omp_threads, num_workers=num_workers)
 
-	uS = map_blocks(wrapped_sub, ut, u0) #ut - u0
-	vS = map_blocks(wrapped_sub, vt, v0) #vt - v0   
+	uS = map_blocks(wrapped_sub, ut, u0, dtype=u0.dtype) #ut - u0
+	vS = map_blocks(wrapped_sub, vt, v0, dtype=v0.dtype) #vt - v0   
 
 	speed = da.sqrt(uS*uS + vS*vS)
 
