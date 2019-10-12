@@ -172,12 +172,12 @@ def pvo_wrap(u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads=1)
 """
 def get_full_p(daskArray, omp_threads=1, num_workers=1):
     p = fetch_variable(daskArray, "P")
-    pb = fetch_variable(daskArray, "PB")
-	
+	pb = fetch_variable(daskArray, "PB")
+
 	total_p = map_blocks(wrapped_add, p, pb)
 	full_p = map_blocks(wrapped_div, total_p, 100)
 
-    return full_p.compute(num_workers=num_workers)
+	return full_p.compute(num_workers=num_workers)
 
 def get_winds_at_level(daskArray, vertical_field=None, requested_top=0., omp_threads=1, num_workers=1):
     varname = wrapped_either(daskArray, ("U", "UU"))
