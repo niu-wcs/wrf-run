@@ -171,21 +171,16 @@ def pvo_wrap(u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads=1)
 	This block of code handles the multiprocessed variable calculation routines.
 	 -> These are wrapped calls of the original g_func* methods in the wrf-python library
 """
-def get_full_p(daskArray, omp_threads=1, num_workers=1):
-	logger = PyPostTools.pyPostLogger()
-
+def get_full_p(daskArray):
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
-
-	logger.write("   > DEBUG: p: \n" + str(p) + " \n")
-	logger.write("   > DEBUG: pb: \n" + str(pb) + "\n")
 	
 	total_p = map_blocks(wrapped_add, p, pb, dtype=p.dtype)
 	full_p = map_blocks(wrapped_div, total_p, 100, dtype=p.dtype)
 
-	return full_p.compute(num_workers=num_workers)
+	return full_p
 
-def get_winds_at_level(daskArray, vertical_field=None, requested_top=0., omp_threads=1, num_workers=1):
+def get_winds_at_level(daskArray, vertical_field=None, requested_top=0., omp_threads=1):
     varname = wrapped_either(daskArray, ("U", "UU"))
     uS = fetch_variable(daskArray, varname)
     u = wrapped_destagger(uS, -1)
@@ -201,16 +196,16 @@ def get_winds_at_level(daskArray, vertical_field=None, requested_top=0., omp_thr
     if(requested_top == 0.):
         return u[0], v[0]
     else:
-        uLev = wrapped_interplevel(u, vertical_field, requested_top, omp_threads=omp_threads, num_workers=num_workers)
-        vLev = wrapped_interplevel(v, vertical_field, requested_top, omp_threads=omp_threads, num_workers=num_workers)
+        uLev = wrapped_interplevel(u, vertical_field, requested_top, omp_threads=omp_threads)
+        vLev = wrapped_interplevel(v, vertical_field, requested_top, omp_threads=omp_threads)
         return uLev, vLev
 
-def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
+def get_wind_shear(daskArray, top=6000.0, omp_threads=1, z=None):
 	if(len(z) == 0):
-		z = get_height(daskArray, omp_threads=omp_threads, num_workers=num_workers)
+		z = get_height(daskArray, omp_threads=omp_threads)
 
-	u0, v0 = get_winds_at_level(daskArray, omp_threads=omp_threads, num_workers=num_workers)
-	ut, vt = get_winds_at_level(daskArray, z, top, omp_threads=omp_threads, num_workers=num_workers)
+	u0, v0 = get_winds_at_level(daskArray, omp_threads=omp_threads)
+	ut, vt = get_winds_at_level(daskArray, z, top, omp_threads=omp_threads)
 
 	uS = map_blocks(wrapped_sub, ut, u0, dtype=u0.dtype) #ut - u0
 	vS = map_blocks(wrapped_sub, vt, v0, dtype=v0.dtype) #vt - v0   
@@ -223,19 +218,19 @@ def get_wind_shear(daskArray, top=6000.0, omp_threads=1, num_workers=1, z=None):
 	del(ut)
 	del(vt)
 
-	uComp = uS.compute(num_workers=num_workers)
-	vComp = vS.compute(num_workers=num_workers)
-	sComp = speed.compute(num_workers=num_workers)
+	uComp = uS
+	vComp = vS
+	sComp = speed
 
 	return uComp, vComp, sComp
 
-def get_theta(daskArray, omp_threads=1, num_workers=1):
+def get_theta(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	full_t = map_blocks(wrapped_add, t, Constants.T_BASE, omp_threads, dtype=t.dtype)
 	
-	return full_t.compute(num_workers=num_workers)
+	return full_t
 
-def get_tk(daskArray, omp_threads, num_workers=1):
+def get_tk(daskArray, omp_threads):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
@@ -249,9 +244,9 @@ def get_tk(daskArray, omp_threads, num_workers=1):
 	del(pb)
 	
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
-	return tk.compute(num_workers=num_workers)
+	return tk
 
-def get_tv(daskArray, omp_threads=1, num_workers=1):
+def get_tv(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
@@ -267,9 +262,9 @@ def get_tv(daskArray, omp_threads=1, num_workers=1):
 	
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
 	tv = map_blocks(tv_wrap, tk, qv, omp_threads, dtype=dtype)
-	return tv.compute(num_workers=num_workers)	
+	return tv
 	
-def get_eth(daskArray, omp_threads=1, num_workers=1):
+def get_eth(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
@@ -287,9 +282,9 @@ def get_eth(daskArray, omp_threads=1, num_workers=1):
 	del(full_t)
 
 	eth = map_blocks(eth_wrap, qv, tk, full_p, omp_threads, dtype=dtype)
-	return eth.compute(num_workers=num_workers)
+	return eth
 	
-def get_tw(daskArray, omp_threads=1, num_workers=1):
+def get_tw(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
@@ -305,9 +300,9 @@ def get_tw(daskArray, omp_threads=1, num_workers=1):
 	
 	tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
 	tw = map_blocks(wetbulb_wrap, tk, qv, omp_threads, dtype=dtype)
-	return tw.compute(num_workers=num_workers)
+	return tw
 	
-def get_cape3d(daskArray, omp_threads=1, num_workers=1):	
+def get_cape3d(daskArray, omp_threads=1):	
     missing = default_fill(np.float64)
 
     t = fetch_variable(daskArray, "T")
@@ -347,10 +342,9 @@ def get_cape3d(daskArray, omp_threads=1, num_workers=1):
     ter_follow = 1
 
     cape_cin = map_blocks(cape_wrap, p_hpa, tk, qv, z, ter, psfc_hpa, missing, i3dflag, ter_follow, omp_threads, dtype=dtype)
-    comp = cape_cin.compute(num_workers=num_workers)
-
-    return comp
+    return cape_cin
 	
+# RF: TO-DO find a way to remove the compute() call inside the function, then remove num_workers from parm list.
 def get_cape2d(daskArray, omp_threads=1, num_workers=1):	
 	missing = default_fill(np.float64)
 
@@ -410,7 +404,7 @@ def get_cape2d(daskArray, omp_threads=1, num_workers=1):
 
 	return npma.masked_values(result, missing)
 	
-def get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=1, num_workers=1):
+def get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=1):
     t = fetch_variable(daskArray, "T")
     p = fetch_variable(daskArray, "P")
     pb = fetch_variable(daskArray, "PB")
@@ -442,9 +436,9 @@ def get_dbz(daskArray, use_varint=False, use_liqskin=False, omp_threads=1, num_w
     del(pb)
 
     dbz = map_blocks(dbz_wrap, full_p, tk, qv, qr, qs, qgraup, sn0, ivarint, iliqskin, omp_threads, dtype=dtype)
-    return dbz.compute(num_workers=num_workers)
+    return dbz
 
-def get_dewpoint(daskArray, omp_threads=1, num_workers=1):
+def get_dewpoint(daskArray, omp_threads=1):
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
 	qvapor = fetch_variable(daskArray, "QVAPOR", include_meta=True)
@@ -460,9 +454,9 @@ def get_dewpoint(daskArray, omp_threads=1, num_workers=1):
 	qvapor = qvapor.where(qvapor >= 0, 0)
 	
 	td = map_blocks(td_wrap, full_p_div, qvapor.data, omp_threads, dtype=dtype)
-	return td.compute(num_workers=num_workers)
+	return td
 	
-def get_geoht(daskArray, height=True, msl=True, omp_threads=1, num_workers=1):
+def get_geoht(daskArray, height=True, msl=True, omp_threads=1):
 	varname = wrapped_either(daskArray, ("PH", "GHT"))
 	if varname == "PH":
 		ph = fetch_variable(daskArray, "PH")
@@ -480,7 +474,7 @@ def get_geoht(daskArray, height=True, msl=True, omp_threads=1, num_workers=1):
 	if height:
 		if msl:
 			mslh = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)
-			return mslh.compute(num_workers=num_workers)
+			return mslh
 		else:
 			# Due to broadcasting with multifile/multitime, the 2D terrain
 			# array needs to be reshaped to a 3D array so the right dims
@@ -491,17 +485,17 @@ def get_geoht(daskArray, height=True, msl=True, omp_threads=1, num_workers=1):
 
 			mslh = map_blocks(wrapped_div, geopt_f, Constants.G, dtype=dtype)
 			mslh_f = map_blocks(wrapped_sub, mslh, hgt, dtype=dtype)
-			return mslh_f.compute(num_workers=num_workers)
+			return mslh_f
 	else:
-		return geopt_f.compute(num_workers=num_workers)	
+		return geopt_f
 
-def get_height(daskArray, msl=True, omp_threads=1, num_workers=1):
-	return get_geoht(daskArray, height=True, msl=msl, omp_threads=omp_threads, num_workers=num_workers)
+def get_height(daskArray, msl=True, omp_threads=1):
+	return get_geoht(daskArray, height=True, msl=msl, omp_threads=omp_threads)
 	
-def get_height_agl(daskArray, omp_threads=1, num_workers=1):
-	return get_geoht(daskArray, height=True, msl=False, omp_threads=omp_threads, num_workers=num_workers)
+def get_height_agl(daskArray, omp_threads=1):
+	return get_geoht(daskArray, height=True, msl=False, omp_threads=omp_threads)
 	
-def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
+def get_srh(daskArray, top=3000.0, omp_threads=1):
     lat_VN = wrapped_lat_varname(daskArray, stagger=None)
     lats = fetch_variable(daskArray, lat_VN)
 
@@ -536,9 +530,9 @@ def get_srh(daskArray, top=3000.0, omp_threads=1, num_workers=1):
     del(z)
 
     srh = map_blocks(srh_wrap, u1, v1, z1, hgt, lats, top, omp_threads, dtype=dtype)
-    return srh.compute(num_workers=num_workers)
+    return srh
 	
-def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1):
+def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1):
     wstag = fetch_variable(daskArray, "W")
     ph = fetch_variable(daskArray, "PH")
     phb = fetch_variable(daskArray, "PHB")
@@ -567,9 +561,9 @@ def get_udhel(daskArray, bottom=2000.0, top=5000.0, omp_threads=1, num_workers=1
     del(geopt)
 
     udhel = map_blocks(udhel_wrap, zp, mapfct, u, v, wstag, dx, dy, bottom, top, omp_threads, dtype=dtype)
-    return udhel.compute(num_workers=num_workers)
+    return udhel
 	
-def get_omega(daskArray, omp_threads=1, num_workers=1):
+def get_omega(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	w = fetch_variable(daskArray, "W")
@@ -589,15 +583,15 @@ def get_omega(daskArray, omp_threads=1, num_workers=1):
 	del(full_t)
 
 	omega = map_blocks(omega_wrap, qv, tk, wa, full_p, omp_threads, dtype=dtype)
-	return omega.compute(num_workers=num_workers)
+	return omega
 	
-def get_accum_precip(daskArray, omp_threads=1, num_workers=1):
+def get_accum_precip(daskArray, omp_threads=1):
 	rainc = fetch_variable(daskArray, "RAINC")
 	rainnc = fetch_variable(daskArray, "RAINNC")	
 	rainsum = map_blocks(wrapped_add, rainc, rainnc, dtype=rainc.dtype)
-	return rainsum.compute(num_workers=num_workers)
+	return rainsum
 	
-def get_pw(daskArray, omp_threads=1, num_workers=1):
+def get_pw(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
@@ -623,9 +617,9 @@ def get_pw(daskArray, omp_threads=1, num_workers=1):
 	del(tk)
 
 	pw = map_blocks(pw_wrap, full_p, tv, qv, ht, omp_threads, dtype=dtype)
-	return pw.compute(num_workers=num_workers)
+	return pw
 	
-def get_rh(daskArray, omp_threads=1, num_workers=1):
+def get_rh(daskArray, omp_threads=1):
 	t = fetch_variable(daskArray, "T")
 	p = fetch_variable(daskArray, "P")
 	pb = fetch_variable(daskArray, "PB")
@@ -645,9 +639,9 @@ def get_rh(daskArray, omp_threads=1, num_workers=1):
 	del(full_t)
 	
 	rh = map_blocks(rh_wrap, qvapor.data, full_p, tk, omp_threads, dtype=dtype)
-	return rh.compute(num_workers=num_workers)
+	return rh
 	
-def get_slp(daskArray, omp_threads=1, num_workers=1):
+def get_slp(daskArray, omp_threads=1):
     t = fetch_variable(daskArray, "T")
     p = fetch_variable(daskArray, "P")
     pb = fetch_variable(daskArray, "PB")
@@ -674,11 +668,11 @@ def get_slp(daskArray, omp_threads=1, num_workers=1):
 
     tk = map_blocks(tk_wrap, full_p, full_t, omp_threads, dtype=dtype)
     slp = map_blocks(slp_wrap, destag_ph, tk, full_p, qvapor.data, omp_threads, dtype=dtype)
-    slp_calc = slp.compute(num_workers=num_workers)
+    slp_calc = slp
 
     return slp_calc
 	
-def get_avo(daskArray, omp_threads=1, num_workers=1):
+def get_avo(daskArray, omp_threads=1):
 	u = fetch_variable(daskArray, "U")
 	v = fetch_variable(daskArray, "V")
 	msfu = fetch_variable(daskArray, "MAPFAC_U")
@@ -692,9 +686,9 @@ def get_avo(daskArray, omp_threads=1, num_workers=1):
 	dtype = u.dtype
 
 	avo = map_blocks(avo_wrap, u, v, msfu, msfv, msfm, cor, dx, dy, omp_threads, dtype=dtype)
-	return avo.compute(num_workers=num_workers)
+	return avo
 	
-def get_rvor(daskArray, omp_threads=1, num_workers=1):
+def get_rvor(daskArray, omp_threads=1):
 	u = fetch_variable(daskArray, "U")
 	v = fetch_variable(daskArray, "V")
 	msfu = fetch_variable(daskArray, "MAPFAC_U")
@@ -710,9 +704,9 @@ def get_rvor(daskArray, omp_threads=1, num_workers=1):
 	avo = map_blocks(avo_wrap, u, v, msfu, msfv, msfm, cor, dx, dy, omp_threads, dtype=dtype)
 	rvor = map_blocks(wrapped_sub, avo, cor, dtype=dtype)
 
-	return rvor.compute(num_workers=num_workers)
+	return rvor
 	
-def get_pvo(daskArray, omp_threads=1, num_workers=1):
+def get_pvo(daskArray, omp_threads=1):
 	u = fetch_variable(daskArray, "U")
 	v = fetch_variable(daskArray, "V")
 	t = fetch_variable(daskArray, "T")
@@ -736,4 +730,4 @@ def get_pvo(daskArray, omp_threads=1, num_workers=1):
 	del(pb)
 
 	pvo = map_blocks(pvo_wrap, u, v, full_t, full_p, msfu, msfv, msfm, cor, dx, dy, omp_threads, dtype=dtype)
-	return pvo.compute(num_workers=num_workers)
+	return pvo

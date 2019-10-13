@@ -8,8 +8,28 @@
 #  as the original wrf-python implementation
 
 import numpy as np
+import xarray
 import dask.array as da
 from wrf.constants import default_fill
+
+#make_dataset() - A useful tool to create an empty xarray dataset from set parameters
+def make_dataset(daskArray, start, elapsedHours):
+	xrOut = xarray.Dataset()
+	# Start with important attributes
+	xrOut.attrs["MOAD_CEN_LAT"] = daskArray.MOAD_CEN_LAT
+	xrOut.attrs["CEN_LON"] = daskArray.CEN_LON
+	xrOut.attrs["TRUELAT1"] = daskArray.TRUELAT1
+	xrOut.attrs["TRUELAT2"] = daskArray.TRUELAT2
+	xrOut.attrs["MAP_PROJ"] = daskArray.MAP_PROJ
+	xrOut.attrs["DX"] = daskArray.DX
+	xrOut.attrs["DY"] = daskArray.DY
+	xrOut.attrs["STARTTIME"] = start
+	xrOut.attrs["FORECASTHOUR"] = elapsedHours	
+	# Copy map information first
+	xrOut.coords["XLAT"] = (('south_north', 'west_east'), daskArray["XLAT"][0])
+	xrOut.coords["XLONG"] = (('south_north', 'west_east'), daskArray["XLONG"][0])	
+	
+	return xrOut
 
 #wrapped_destagger() - A wrapper method that handles the wrf-python destagger() function, safe for Dask
 def wrapped_destagger(daskArray, stagger_dim):
@@ -62,7 +82,7 @@ def wrapped_interpz3d_lev2d(field3d, z, lev2d, missingval, outview=None, omp_thr
 
 	return result
 	
-def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float64), omp_threads=1, num_workers=1):
+def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float64), omp_threads=1):
     from wrf.extension import omp_set_num_threads
     import dask.array.ma as ma
     from dask.array import map_blocks
@@ -86,7 +106,7 @@ def wrapped_interplevel(field3d, vert, desiredlev, missing=default_fill(np.float
 
     #TODO: Fill this
     masked = ma.masked_values(result, missing)
-    return masked.compute(num_workers=num_workers)
+    return masked
             
 # Wrapped version of _lat_varname
 def wrapped_lat_varname(daskArray, stagger):
