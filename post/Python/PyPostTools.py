@@ -95,10 +95,15 @@ def write_job_file(host, scheduler_port=None, project_name=None, queue=None, nod
 		target_file.write("#COBALT -A " + str(project_name) + '\n')
 		target_file.write("#COBALT -q " + str(queue) + '\n')
 		target_file.write("#COBALT --attrs mcdram=cache:numa=quad" + '\n' + '\n')
-		target_file.write("aprun -n ${COBALT_JOBSIZE} -N " + str(nProcs) + " -d " + str(nThreads) + " -j 1 ./launch-worker.sh")
+		target_file.write("source activate run-wrf\n")
+		target_file.write("ulimit -c unlimited\n")
+		target_file.write("export PYTHONPATH=${PYTHONPATH}:/projects/climate_severe/wrf-run/post/Python/" + '\n\n')		
+		target_file.write("aprun -n ${COBALT_JOBSIZE} -N " + str(nProcs) + " -d " + str(nThreads) + " -j 1 dask-worker " + str(host) + ":" + str(scheduler_port) + " \\" + "\n")
+		target_file.write(" --nprocs " + str(nProcs) + " --nthreads " + str(nThreads) + " --death-timeout 180 --no-dashboard" + "\n")
 	return True
 	
 ### NOTE: This will eventually need a re-write to support alternate directories.
+"""
 def write_worker_file(host, scheduler_port=None, nProcs=1, nThreads=1):
 	if(scheduler_port == None):
 		return False
@@ -111,3 +116,4 @@ def write_worker_file(host, scheduler_port=None, nProcs=1, nThreads=1):
 		target_file.write(str(host) + ":" + str(scheduler_port) + " --nprocs " + str(nProcs) + " --nthreads " + str(nThreads) + "\\" + '\n')
 		target_file.write(" --death-timeout 180 --no-dashboard" + '\n\n')
 	return True	
+"""
