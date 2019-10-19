@@ -82,9 +82,9 @@ prerun_mpi_threads_per_rank 1
 num_wrf_nodes 256
 wrf_walltime 360
 # WRF MPI & IO Quilt Parameters
-wrf_mpi_ranks_per_node 64
+wrf_mpi_ranks_per_node 32
 wrf_numtiles 2
-wrf_nio_tasks_per_group 9
+wrf_nio_tasks_per_group 16
 wrf_nio_groups 4
 lfs_stripe_count 64
 wrf_detect_proc_count 1
