@@ -102,6 +102,8 @@ class Application():
 			logger.write("  4.a. Geogrid flag is not set, skipping step")
 		logger.write("  4.a. Done")
 		logger.write("  4.b. Running pre-processing executables")
+		if(settings.fetch("use_io_vars") == '1'):
+			Tools.popen("cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")		
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 		if(settings.fetch("run_preprocessing_jobs") == '1'):
 			if(jobs.run_preprocessing() == False):
@@ -113,8 +115,6 @@ class Application():
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 		logger.write("  4.b. Done")
 		logger.write("  4.c. Running WRF Model")
-		if(settings.fetch("use_io_vars") == '1'):
-			Tools.popen("cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")
 		logger.write("   4.c. > Updating settings for nproc_x/nproc_y")
 		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.
 		Tools.popen(settings, "rm namelist.input")
