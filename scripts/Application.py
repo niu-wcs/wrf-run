@@ -117,10 +117,10 @@ class Application():
 		logger.write("  4.c. Running WRF Model")
 		logger.write("   4.c. > Updating settings for nproc_x/nproc_y")
 		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.
-		Tools.popen(settings, "rm namelist.input")
 		settings.add_replacementKey("[nproc_x]", str(save_nproc_x))
 		settings.add_replacementKey("[nproc_y]", str(save_nproc_y))
-		tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")		
+		tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")	
+		Tools.popen(settings, "mv namelist.input " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/namelist.input")
 		logger.write("   4.c. > Starting wrf.exe job process")
 		if(settings.fetch("run_wrf") == '1'):
 			if(jobs.run_wrf() == False):
