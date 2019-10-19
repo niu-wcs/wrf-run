@@ -38,18 +38,19 @@ run_postprocessing 0
 post_run_unipost 0
 post_run_python 1
 # Model Specific Parameters (Namelist controls)
+use_io_vars 1
 wrf_debug_level 0 #This is the debug_level parm in namelist, set to 0 for none, or 1000 for full.
-e_we 1150
-e_sn 750
-e_vert 50
-geog_data_res usgs_lakes+30s
-dx_y 4000
+e_we 1400
+e_sn 900
+e_vert 45
+geog_data_res modis_15s+modis_fpar+modis_lai+30s
+dx_y 3750
 map_proj lambert
 ref_lat 38.5
-ref_lon -97.0
-truelat1 30.0
-truelat2 60.0
-stand_lon -98.0
+ref_lon -97.5
+truelat1 38.5
+truelat2 38.5
+stand_lon -97.5
 p_top_requested 10000
 num_metgrid_levels 30
 num_metgrid_soil_levels 4
@@ -64,28 +65,28 @@ bldt 0
 cu_physics 0
 cudt 5
 num_soil_layers 4
-num_land_cat 28
+num_land_cat 20
 sf_urban_physics 0
 hail_opt 1
 prec_acc_dt 60
 # Geogrid Parameters
-num_geogrid_nodes 8
-geogrid_mpi_ranks_per_node 4
+num_geogrid_nodes 2
+geogrid_mpi_ranks_per_node 64
 geogrid_walltime 30
 # Preprocessing Job Parameters
-num_prerun_nodes 8
+num_prerun_nodes 2
 prerun_walltime 60
-prerun_mpi_ranks_per_node 4
-prerun_mpi_threads_per_rank 4
+prerun_mpi_ranks_per_node 64
+prerun_mpi_threads_per_rank 1
 # WRF Parameters
-num_wrf_nodes 636
-wrf_walltime 540
+num_wrf_nodes 256
+wrf_walltime 360
 # WRF MPI & IO Quilt Parameters
-wrf_mpi_ranks_per_node 8
+wrf_mpi_ranks_per_node 64
 wrf_numtiles 2
-wrf_nio_tasks_per_group 8
+wrf_nio_tasks_per_group 9
 wrf_nio_groups 4
-lfs_stripe_count 32
+lfs_stripe_count 64
 wrf_detect_proc_count 1
 # Post-Processing Parameters
 # - If using UPP (Unipost) with GRADS, use the below

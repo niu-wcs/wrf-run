@@ -122,6 +122,7 @@ class AppSettings():
 		self.replacementKeys["[sf_urban_physics]"] = self.fetch("sf_urban_physics")
 		self.replacementKeys["[hail_opt]"] = self.fetch("hail_opt")
 		self.replacementKeys["[prec_acc_dt]"] = self.fetch("prec_acc_dt")
+		self.replacementKeys["[io_vars]"] = "iofields_filename                   = 'IO_VARS.txt',\n" if self.fetch("use_io_vars") == "1" else ""
 	 
 	def replace(self, inStr):
 		if not inStr:

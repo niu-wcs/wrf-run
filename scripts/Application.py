@@ -40,6 +40,8 @@ class Application():
 		else:
 			logger.write(" 1. run_prerunsteps is turned off, directories have not been created")
 		logger.write("  - Checking if WRF Node decomposition is required")
+		save_nproc_x = -1
+		save_nproc_y = -1
 		if(settings.fetch("wrf_detect_proc_count") == '1'):
 			logger.write("   - Yes.")
 			det = Tools.detect_ideal_processors(int(settings.fetch("e_we")), 
@@ -51,14 +53,10 @@ class Application():
 			if(det is None):
 				logger.write(" 1. Failed to find a decomposition given the input settings in control.txt, please adjust your settings")
 				sys.exit("")
-			nproc_x = det[0]
-			nproc_y = det[1]
-			logger.write("   - Found a viable decomposition, X: " + str(nproc_x) + ", Y: " + str(nproc_y) + ".")
-			settings.add_replacementKey("[nproc_x]", str(nproc_x))
-			settings.add_replacementKey("[nproc_y]", str(nproc_y))
+			save_nproc_x = det[0]
+			save_nproc_y = det[1]
+			logger.write("   - Found a viable decomposition, X: " + str(save_nproc_x) + ", Y: " + str(save_nproc_y) + ".")
 		else:
-			settings.add_replacementKey("[nproc_x]", str("-1"))
-			settings.add_replacementKey("[nproc_y]", str("-1"))		
 			logger.write("   - No.")
 		logger.write(" 1. Done.")
 		#Step 2: Download Data Files
@@ -81,6 +79,9 @@ class Application():
 				if(i == 0):
 					Tools.popen(settings, "cp namelist.wps." + ext + " namelist.wps.geogrid")
 				i += 1
+			# RF 10/19: real.exe requires nproc_x/nproc_y to be -1, update the settings
+			settings.add_replacementKey("[nproc_x]", str("-1"))
+			settings.add_replacementKey("[nproc_y]", str("-1"))				
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
@@ -111,7 +112,16 @@ class Application():
 			logger.write("  4.b. run_preprocessing_jobs is turned off, skiping this step")
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 		logger.write("  4.b. Done")
-		logger.write("  4.c. Running WRF Model")		
+		logger.write("  4.c. Running WRF Model")
+		if(settings.fetch("use_io_vars") == '1'):
+			Tools.popen("cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")
+		logger.write("   4.c. > Updating settings for nproc_x/nproc_y")
+		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.
+		Tools.popen(settings, "rm namelist.input")
+		settings.add_replacementKey("[nproc_x]", str(save_nproc_x))
+		settings.add_replacementKey("[nproc_y]", str(save_nproc_y))
+		tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")		
+		logger.write("   4.c. > Starting wrf.exe job process")
 		if(settings.fetch("run_wrf") == '1'):
 			if(jobs.run_wrf() == False):
 				logger.write("   4.c. Error at WRF.exe")
