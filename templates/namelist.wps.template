@@ -7,6 +7,7 @@ interval_seconds = [interval_seconds],
 io_form_geogrid = 102,
 opt_output_from_geogrid_path ='[out_geogrid_path]/',
 active_grid = .true.,
+nocolons = .true.
 /
 &geogrid
 parent_id = 1,
