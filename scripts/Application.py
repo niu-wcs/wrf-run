@@ -103,7 +103,7 @@ class Application():
 		logger.write("  4.a. Done")
 		logger.write("  4.b. Running pre-processing executables")
 		if(settings.fetch("use_io_vars") == '1'):
-			Tools.popen("cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")		
+			Tools.popen(settings, "cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")		
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 		if(settings.fetch("run_preprocessing_jobs") == '1'):
 			if(jobs.run_preprocessing() == False):
