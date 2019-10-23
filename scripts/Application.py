@@ -81,7 +81,9 @@ class Application():
 				i += 1
 			# RF 10/19: real.exe requires nproc_x/nproc_y to be -1, update the settings
 			settings.add_replacementKey("[nproc_x]", str("-1"))
-			settings.add_replacementKey("[nproc_y]", str("-1"))				
+			settings.add_replacementKey("[nproc_y]", str("-1"))
+			settings.add_replacementKey("[io_form_input]", str("11"))
+			settings.add_replacementKey("[io_form_boundary]", str("11"))			
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
@@ -119,6 +121,8 @@ class Application():
 		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.
 		settings.add_replacementKey("[nproc_x]", str(save_nproc_x))
 		settings.add_replacementKey("[nproc_y]", str(save_nproc_y))
+		settings.add_replacementKey("[io_form_input]", str("2"))
+		settings.add_replacementKey("[io_form_boundary]", str("2"))
 		tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")	
 		Tools.popen(settings, "mv namelist.input " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/namelist.input")
 		logger.write("   4.c. > Starting wrf.exe job process")
