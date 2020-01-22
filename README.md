@@ -40,7 +40,7 @@ This git repository contains the following subdirectories:
 	* ApplicationSettings.py: Classes used to apply program settings via control.txt
 	* Cleanup.py: Classes and methods used to clean output files and logs after program completion
 	* Jobs.py: Classes and methods used to submit and monitor WRF jobs to clusters
-	* Logging: Singleton class instance that handles logging the program process to a text file
+	* Logging.py: Singleton class instance that handles logging the program process to a text file
 	* ModelData.py: Classes and methods used to manage various data sources for the model
 	* PreparePyJob.py: Class instance used to construct and monitor the Python Post-Processing job
 	* Scheduler.py: Class definition for different job scheduler systems and the required bash flags and job script format
@@ -56,7 +56,7 @@ In this (main) directory, you will find:
   * control.txt: A newline terminated text file that sets various parameters on the script (See below section on control.txt)
   * README.md: You're reading it!
   
-Additionally, you will need to define a directory inside the repository directory called run_files. The only thing that need to go in this directory is any geo_em files created by geogrid if you are planning on using a "fixed domain". If you plan on changing domains often, this step is not required.
+Additionally, you will need to define a directory inside the repository directory called run_files. The only thing that needs to go in this directory is any geo_em files created by geogrid if you are planning on using a "fixed domain". If you plan on changing domains often, this step is not required.
   
 ### Control.txt ###
 control.txt is a newline terminated text file which contains important parameters needed to run this script. The control.txt file MUST be located in the same directory as the run_wrf.py script file in order for the script to run. The format of this file is simple:
@@ -69,7 +69,7 @@ EX: myvar 12
 
 Would store the value of 12 in a parameter named myvar for the file. Any line that begins with a pound sign (#) is treated as a comment line. These variables are all defined in the AppSettings() class, but for simplicity, here is a list of the parameters accepted by control.txt
 
-These first parameters define program specific settings and define your WRF directories. For help installing the WRF model, please se the included TXT file on installation:
+These first parameters define program specific settings and define your WRF directories. For help installing the WRF model, please see the included TXT file on installation:
   * debugmode: Setting this variable to 1 will not run any commands, but instead print the commands to the console for debugging / testing purposes. Typically, leave this as 0.
   * jobscheduler: Which job scheduler your system is using.
   * accountname: Your account/project name on your HPC system.
@@ -93,9 +93,7 @@ These next parameters define which WRF steps to run, and define some basic WRF p
   * modeldata: The data source used in this run (*See the section below on adding model sources if you want to use something other than CFSv2 or NARR*)
   * run_prerunsteps: A 1/0 flag used to designate if the pre-run steps, including symlinks and directory creations are needed. **Typically, you should leave this as 1 unless debugging errors**
   * run_geogrid: A 1/0 flag used to designate if the geogrid process needs to be run, if you are using the same grid space, run geogrid once and copy the resulting geo_em file to the run_files/ folder, then set the parameter to 0, otherwise geogrid will run.
-  * run_ungrib: A 1/0 flag used to designate if the ungrib process needs to be run, only turn off if you are debugging a latter step
-  * run_metgrid: A 1/0 flag used to designate if the metgrid process needs to be run, only turn off if you are debugging a latter step
-  * run_real: A 1/0 flag used to designate if the real process needs to be run, only turn off if you are debugging a latter step
+  * run_preprocessing_jobs: A 1/0 flag used to designate if WPS preprocessing needs to be run (This includes ungrib, metgrid, and real)
   * run_wrf: A 1/0 flag used to designate if the WRF process needs to be run, only turn off if you are debugging a latter step
   * run_postprocessing: This 1/0 flag enables post-processing after the WRF run is completed. At the moment we only support unipost, however a flag for python is included if you would like to make some edits to Jobs.py  
   * post_run_unipost: Set this flag to 1 if you wish to use UPP to post-process
@@ -166,9 +164,9 @@ If you would like to add more options, you will need to do three things:
   3. Add your new key and default value to control.txt
   
 ### How to use this program ###
-Start by completing the installation of the WRF model and the WPS programs on your cluster. Once completed, edit the control.txt file to point to the correct directories (These variables in control.txt are **wrfexecutables**, **wrfrunfiles**, and **wpsexecutables**). Then, you need to define the directory parameters (geogdir, tabledir, and wrfdir). By default, this script package is equipped to run WRF using CFSv2 data, however you may add other sources if you please (See the section below titled Adding Model Sources).
+Start by completing the installation of the WRF model and the WPS programs on your cluster. Once completed, edit the control.txt file to point to the correct directories (These variables in control.txt are **wrfexecutables**, **wrfrunfiles**, and **wpsexecutables**). Then, you need to define the directory parameters (geogdir, tabledir, and wrfdir). By default, this script package is equipped to run WRF using CFSv2 (NARR Support is also included, but must be set in control.txt) data, however you may add other sources if you please (See the section below titled Adding Model Sources).
 
-The run time parameters (starttime, rundays, runhours) need to be defined in the control.txt file, remember that runhours is in ADDITION to rundays, so keep that in mind when setting these parameters. You may adjust the nodes and processors settings as necessary, however these have been provided default values based on multiple tests such that you shouldn't have to. Once your control.txt file has been written you may run the python script **run_wrf.py** from the head directory to push the process to the background (Allowing you to safely close an SSH session and let the process completely run), or, if you want the output pushed to your SSH client, you may run **Application.py** in the scripts/ directory (Please note this script will not run in the background, so if you are disconnected, the script will terminate at the position it is at). All logging information will be saved to a log file in the scripts/ directory, and will be moved to a /logs/ folder upon script completion.
+The run time parameters (starttime, rundays, runhours) need to be defined in the control.txt file, remember that runhours is in ADDITION to rundays, so keep that in mind when setting these parameters. It is recommended to run multiple "test jobs" using different node/processor count settings to find the ideal times on your HPC system, there are numerous papers in the body of literature you may investigate to get an idea on good starting points. Once your control.txt file has been written you may run the python script **run_wrf.py** from the head directory to push the process to the background (Allowing you to safely close an SSH session and let the process completely run), or, if you want the output pushed to your SSH client, you may run **Application.py** in the scripts/ directory (Please note this script will not run in the background, so if you are disconnected, the script will terminate at the position it is at). All logging information will be saved to a log file in the scripts/ directory, and will be moved to a /logs/ folder upon script completion.
   
 ### Adding Model Sources ###
 This script package was written for the CFSv2 forecast system or the North American Regional Reanalysis (NARR) as an input for the WRF model, however the script package is dynamic enough to allow for quick additions of other model sources.
