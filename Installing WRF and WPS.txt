@@ -1,3 +1,168 @@
+***************************************************************
+***************************************************************
+***************************************************************
+   Notes on Installing on ANL's LCRC Cluster
+***************************************************************
+***************************************************************
+***************************************************************
+* Directory Structure:
+ /lcrc/project/ACPC/ is the main project folder.
+ - WRF/ : Contains all WRF related files
+  - constants/ : Contains WRF constant files
+  - data/ : Contains input model data
+  - geogrid_files/ : Contains saved geo_em files for domains
+  - libs/ : Contains WRF library files
+  - tables/ : Contains WRF tables (GEO/MET)
+  - vtables/ : Contains incoming vtables
+  - wps_geog/ : Contains WPS geography files
+  - wrf-model/ : Contains the WRF model itself
+
+* How to compile the libraries:
+ ** I used the intel 17.04 compiler suite to compile my libraries using the MPI headers, this requires a .bashrc file with the following:
+
+module load intel/17.0.4-74uvhji
+module load intel-mpi/2017.3-dfphq6k
+
+export CC=mpiicc
+export CXX=mpiicpc
+export F77=mpiifort
+export FC=mpiifort
+export MPICXX=mpiicc
+export MIPF77=mpiifort
+export MPICC=mpiicc
+export MPIFC=mpiifort
+
+ ** It is also beneficial to define ahead of time a variable to store the library path to cut down on the command line:
+
+export WRF_LIBS=/lcrc/project/ACPC/WRF/libs
+export LD_LIBRARY_PATH=/lcrc/project/ACPC/WRF/libs:$LD_LIBRARY_PATH 
+
+* Use the following configure commands for each of the below, the order and version of each library is presented:
+
+-  zlib (1.2.11): ./configure --prefix=$WRF_LIBS
+-  szip (2.1.1) ./configure --prefix=$WRF_LIBS
+-  jpeg (v.6b) ./configure --prefix=$WRF_LIBS
+-  png (1.6.36) ./configure --prefix=$WRF_LIBS
+-  jasper (1.900.1) ./configure --prefix=$WRF_LIBS
+
+* Build each of these libraries using the following command after ./configure completes:
+
+ make
+ make check
+ make install
+
+* Once these libraries have compiled, you can build netCDF and the respective parallel libraries:
+
+- HDF5 (1.10.6)
+- Parallel NetCDF (1.12.1)
+- NetCDF-C (4.7.3)
+- NetCDF-Fortran (4.5.2)
+
+-> Instructions for each are now presented, follow in the exact order shown.
+
+* For HDF5:
+
+ export LIB="-lz"
+ 
+ ./configure --prefix=$WRF_LIBS --enable-parallel --enable-fortran
+
+ make
+ make check
+ make install
+
+ *** NOTE: This library can take upwards of 30 - 45 minutes to fully compile, make sure after ./configure completes, you see that the parallel
+            HDF5 headers are enabled. If you do not see PHDF5 enabled, please go back and check your modules loaded and the settings on the
+            above compilers.
+
+* For PNetCDF:
+
+ ./configure --prefix=$WRF_LIBS --enable-shared
+
+ make 
+ make check
+ make install
+
+ *** NOTE: Some of the "checks" will fail, this is expected behavior and can be safely ignored
+
+* For NetCDF-C:
+
+ ./configure --prefix=$WRF_LIBS --enable-pnetcdf --enable-parallel-tests --disable-dap
+
+ make
+ make check
+ make install
+
+ *** NOTE: Pay close attention when the 'make check' is running the parallel tests. These should all pass or XFAIL (expected fail). If something
+            goes wrong during this test, there is likely a problem with either your PHDF5 compilation, or your pNetCDF compilation. In this case
+            go back and check the compile logs of these for errors.
+
+* For NetCDF-Fortran:
+
+ ./configure --prefix=$WRF_LIBS --disable-fortran-type-check --enable-parallel-tests
+
+ make
+ make check
+ make install
+
+ -> In the current release of NetCDF-Fortran, there is a fortran error in one of the parallel test files, you will need to edit the check file 
+     to fix this before running the test (I don't remember which one, but the error was there was a print line with no variables printed, you can
+     safely comment this line out)
+
+==========================================================
+COMPILING WRF (~45m)
+==========================================================
+
+Set the following environment vars:
+
+export PNETCDF=$WRF_LIBS
+export HDF5=$WRF_LIBS
+export PHDF5=$WRF_LIBS
+
+If you want WRF to generate GRIB2 output files you'll need to also set:
+export JASPERLIB=/lcrc/project/ACPC/WRF/libs/lib
+export JASPERINC=/lcrc/project/ACPC/WRF/libs/include
+
+Run ./configure
+
+Select options:
+15
+1
+
+Edit the configure.wrf file:
+- set DM_FC to use the mpiifort compiler
+- set DM_CC to ise the mpiicc compiler
+
+In the ARCHFLAGS section, look for -DPNETCDF, on the following line add:
+–DPNETCDF_QUILT
+
+Run ./compile em_real
+
+-- If you encounter any errors, they are likely missing library paths or incorrect flags,
+    in this case check your configure.wrf file to make sure it's pointing to the correct
+    directory.
+
+==========================================================
+COMPILING WPS (~5m)
+==========================================================
+
+Run ./configure
+
+Select option 19
+
+Edit the configure.wps file:
+- set DM_FC to use the mpiifort compiler
+- set DM_CC to ise the mpiicc compiler
+
+Run ./compile
+
+***************************************************************
+***************************************************************
+***************************************************************
+   Notes on Installing on ANL's Theta
+***************************************************************
+***************************************************************
+***************************************************************
+
 * Directory Structure:
  /projects/climate_severe/ is our project folder. 
  - /WRF/ : This is where all of our WRF stuff (Model / Libraries) are installed

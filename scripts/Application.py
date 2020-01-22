@@ -9,6 +9,7 @@ import os
 import datetime
 import ApplicationSettings
 import ModelData
+import Scheduler
 import Cleanup
 import Template
 import Jobs
@@ -26,6 +27,9 @@ class Application():
 		logger.write(" 1. Loading program settings, Performing pre-run directory creations and loading ANL modules")
 		settings = ApplicationSettings.AppSettings()
 		modelParms = ModelData.ModelDataParameters(settings.fetch("modeldata"))
+		scheduleParms = Scheduler.Scheduler_Settings(settings.fetch("jobscheduler"))
+		if not scheduleParms.validScheduler():
+			sys.exit("Program failed at step 1, job scheduler: " + settings.fetch("jobscheduler") + ", is not defined in the program".)	
 		if not modelParms.validModel():
 			sys.exit("Program failed at step 1, model data source: " + settings.fetch("modeldata") + ", is not defined in the program.")
 		logger.write(" - Settings loaded, model data source " + settings.fetch("modeldata") + " applied to the program.")
@@ -166,7 +170,7 @@ class Application():
 		logger.write("  -> Writing job files")
 		with Tools.cd(settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8]):
 			# Write geogrid.job
-			logger.write("  -- writting geogrid.job")
+			logger.write("  -- writing geogrid.job")
 			with open("geogrid.job", 'w') as target_file:
 				target_file.write("#!/bin/bash\n")
 				target_file.write("#COBALT -t " + settings.fetch("geogrid_walltime") + '\n')
