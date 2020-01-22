@@ -1,9 +1,16 @@
-# WRF on Theta @ Argonne #
+# WRF-Run #
 ## Dpt. Geographic & Atmospheric Sciences ##
 ## By: Robert C. Fritzen ##
 
 ### Introduction ###
-This python script package automates the entire WRF process for use on cluster based computers (This package automates for Argonne's Theta Cluster). This is a fully self-contained script package that handles the tasks of obtaining the data, running the pre-processing executables, the WRF process, and forking the task to post-processing scripts for visualization.
+This python script package automates the entire WRF process for use on cluster based computers. This is a fully self-contained script package that handles the tasks of obtaining the data, running the pre-processing executables, the WRF process, and forking the task to post-processing scripts for visualization.
+
+This package has been tested on multiple environments with different scheduling systems, notes are shown below:
+ * Argonne's Theta (COBALT): Fully Supported
+ * Argonne's LCRC (SLURM): Limited Support
+ * NIU's Gaea (PBS): Limited Support
+ 
+Systems listed as "Limited Support" are currently being worked on to bring it up to full support.
 
 ### Requirements ###
 Included in this repository is a post-processing solution written in Python 3 as well as a UPP wrapper. If you want to use UPP, you may ignore this section, however, if you plan on using the Python module, you will need two other Python Packages to be installed:
@@ -36,6 +43,7 @@ This git repository contains the following subdirectories:
 	* Logging: Singleton class instance that handles logging the program process to a text file
 	* ModelData.py: Classes and methods used to manage various data sources for the model
 	* PreparePyJob.py: Class instance used to construct and monitor the Python Post-Processing job
+	* Scheduler.py: Class definition for different job scheduler systems and the required bash flags and job script format
 	* Template.py: Classes and methods used to modify and write template files
 	* Tools.py: Extra classes and methods used as support tools for the program
 	* Wait.py: Classes and methods used to hold the main thread until conditions are met
@@ -61,12 +69,12 @@ EX: myvar 12
 
 Would store the value of 12 in a parameter named myvar for the file. Any line that begins with a pound sign (#) is treated as a comment line. These variables are all defined in the AppSettings() class, but for simplicity, here is a list of the parameters accepted by control.txt
 
+These first parameters define program specific settings and define your WRF directories. For help installing the WRF model, please se the included TXT file on installation:
   * debugmode: Setting this variable to 1 will not run any commands, but instead print the commands to the console for debugging / testing purposes. Typically, leave this as 0.
-  * starttime: The initialization time for the first forecast hour, the format is YYYYMMDDHH
-  * rundays: The number of days to run the model after initialization
-  * runhours: The number of hours to run in addition to rundays (IE: total = 24*rundays + runhours)
-  * geogdir: The path to the wrf_geog/ folder stored on your machine
-  * tabledir: The path to your shared WRF tables folder stored on your machine
+  * jobscheduler: Which job scheduler your system is using.
+  * sourcefile: For systems that do not use the .bashrc file, you may define a file path that contains your relevant EXPORT and module calls here
+  * geogdir: The path to your WPS geography files stored on your machine
+  * tabledir: The path to your shared WRF tables folder stored on your machine (Soon to be deprecated)
   * constantsdir: The path to your dataset constants files
   * datadir: The path to where you want GRIB data to be stored, the full path is: datadir/model source/YYYYMMDDHH/
   * wrfdir: The path to where you want model runs to occur on your machine
@@ -75,8 +83,13 @@ Would store the value of 12 in a parameter named myvar for the file. Any line th
   * wpsexecutables: The path to where the WRF WPS executables are located (Top directory of the /WPS/ folder)
   * uppexecutables: The path the the unipost executables (Not required if not using Unipost)
   * postdir: The path to the /post/ directory in this package
-  * condainstallation: The path to your Python binary in your anaconda installation (Used for post processing w/ python)
-  * modeldata: The data source used in this run (*See the section below on adding model sources if you want to use something other than CFSv2*)
+  * condamodule: Which anaconda module you would like to load for post processing (Only used if you are using the python post-processing solution, see notes below)
+
+These next parameters define which WRF steps to run, and define some basic WRF parameters to use:
+  * starttime: The initialization time for the first forecast hour, the format is YYYYMMDDHH
+  * rundays: The number of days to run the model after initialization
+  * runhours: The number of hours to run in addition to rundays (IE: total = 24*rundays + runhours)
+  * modeldata: The data source used in this run (*See the section below on adding model sources if you want to use something other than CFSv2 or NARR*)
   * run_prerunsteps: A 1/0 flag used to designate if the pre-run steps, including symlinks and directory creations are needed. **Typically, you should leave this as 1 unless debugging errors**
   * run_geogrid: A 1/0 flag used to designate if the geogrid process needs to be run, if you are using the same grid space, run geogrid once and copy the resulting geo_em file to the run_files/ folder, then set the parameter to 0, otherwise geogrid will run.
   * run_ungrib: A 1/0 flag used to designate if the ungrib process needs to be run, only turn off if you are debugging a latter step
@@ -84,24 +97,12 @@ Would store the value of 12 in a parameter named myvar for the file. Any line th
   * run_real: A 1/0 flag used to designate if the real process needs to be run, only turn off if you are debugging a latter step
   * run_wrf: A 1/0 flag used to designate if the WRF process needs to be run, only turn off if you are debugging a latter step
   * run_postprocessing: This 1/0 flag enables post-processing after the WRF run is completed. At the moment we only support unipost, however a flag for python is included if you would like to make some edits to Jobs.py  
-  * mpi_ranks_per_node: The number of MPI ranks (Processors) to run for each task, by default this is set to 32.
-  * num_geogrid_nodes: The number of CPU nodes to use in the geogrid process
-  * geogrid_walltime: The maximum wall time to be required by the geogrid process
-  * num_prerun_nodes: The number of nodes to run for the prerun job (Ungrib, Metgrid, and Real)
-  * num_metgrid_processors: The number of CPU processors to use specifically for metgrid
-  * num_real_processors: The number of CPU processors to use specifically for the real.exe process
-  * prerun_walltime: The maximum wall time to be required by the prerun job (Remember this accounts for Ungrib, Metgrid, and Real, please set accordingly)
-  * num_wrf_nodes: The number of CPU nodes to use in the WRF process
-  * wrf_walltime: The maximum wall time to be required by the WRF process  
   * post_run_unipost: Set this flag to 1 if you wish to use UPP to post-process
   * post_run_python: Set this flag to 1 if you wish to use Python to post-process
-  * unipost_out: A textual flag to indicate whether UPP should export to GRIB or GRIB2, the two choices are grib and grib2
-  * num_upp_nodes: The number of CPU nodes to use in the UPP process
-  * upp_ensemble_nodes_per_hour: UPP is broken into an ensemble job, this is the number of nodes from the num_upp_nodes to allocate to each individial task at any given time
-  * upp_walltime: The maximum wall time to be required by the UPP process
-  
-Additionally, inside the control.txt is support for some of the WRF namelist options, the current supported namelist options are as follows:
 
+Also defined in control.txt is support for some of the WRF namelist options, the current supported namelist options are as follows:
+  * use_io_vars: If you would like to use the IO_VARS WRF option (See the section titled IO_VARS below)
+  * wrf_debug_level: The debug level of the WRF model (Default 0, set to powers of 10 for increasing debug output in your WRF logs)
   * e_we: The number of grid spaces in the X direction
   * e_sn: The number of grid spaces in the Y direction
   * e_vert: The number of grid spaces in the Z (Vertical) direction
@@ -116,8 +117,46 @@ Additionally, inside the control.txt is support for some of the WRF namelist opt
   * p_top_requested: The defined "top" of the atmosphere (In pascals) to use in the model (This will be the highest vertical level)
   * num_metgrid_levels: The number of vertical levels to use for the metgrid process (Dependent on your input data)
   * num_metgrid_soil_levels: The number of soil levels to use for the metgrid process (Dependent on both the input data, and selected microphysics schemes)
-  * nio_tasks_per_group: WRF Namelist option, the number of MPI tasks to direct to file I/O
-  * nio_groups: WRF Namelist option, the number of nodes to direct to file I/O  
+  * mp_physics: Which microphysics scheme you would like to use in the model (See: https://esrl.noaa.gov/gsd/wrfportal/namelist_input_options.html)
+  * ra_lw_physics: Which longwave radiation physics scheme you would like to use in the model
+  * ra_sw_physics: Which shortwave radation physics scheme you would like to use in the model
+  * radt: The number of minutes in your model run between radiation physics calls
+  * sf_sfclay_physics: Surface layer clay physics option
+  * sf_surface_physics: Land-surface option (Dependent on num_soil_layers)
+  * bl_pbl_physics: Boundary layer physics option
+  * bldt: The number of minutes in your model run between boundary layer physics calls (Set to 0 to run at each step)
+  * cu_physics: Convective parameterization scheme (Note: If you are at or below a convective resolving horizontal resolution (dx_y ~ 4KM), set this to 0)
+  * cudt: The number of minutes in your model run between convective parameterization calls.
+  * num_soil_layers: Number of soil layers in the land surface model (Dependent on sf_surface_physics)
+  * num_land_cat: The number of land categories in the input surface data (Dependent on geog_data_res)
+  * sf_urban_physics: Urban physics scheme to set in the model
+  * hail_opt: Hail switch for WDM6 and Morrison schemes
+  * prec_acc_dt: How many minutes between accumulated precipitation calls in your outputs
+  
+The following parameters in the control file define job specific settings that should be altered based on the system you are running on and performance testing of WRF:
+  * num_geogrid_nodes: The number of CPU nodes to use in the geogrid process
+  * geogrid_mpi_ranks_per_node: The number of MPI ranks to assign per geogrid node (This is the number of processors per node)
+  * geogrid_walltime: The maximum wall time to be required by the geogrid process defined in minutes
+  * num_prerun_nodes: The number of CPU nodes to use for the prerun job (ungrib / metgrid / real)
+  * prerun_mpi_ranks_per_node: The number of MPI ranks to assign per node for the prerun job (NOTE: If you are using parallel IO this should be identical to geogrid_mpi_ranks_per_node)
+  * prerun_walltime: The maximum wall time to be required by the prerun job (In minutes)
+  * num_wrf_nodes: The number of nodes to run for the WRF job
+  * wrf_walltime: The maximum wall time to be required by the WRF job (In minutes)
+  * wrf_mpi_ranks_per_node: The number of MPI ranks to assign per node for the WRF job (This is also PPN)
+  * wrf_numtiles: The numtiles parameter for WRF, this is for patch based processing and may aid with performance times in some cases, use multiples of 2
+  * wrf_nio_tasks_per_group: The number of MPI rasks to direct to file I/O (NOTE: ONLY USE THIS IF YOUR SYSTEM SUPPORTS QUILTING FILES, IE: LUSTRE FILE SYSTEM)
+  * wrf_nio_groups: The number of nodes in the WRF job to direct to file I/O (NOTE: ONLY USE THIS IF YOUR SYSTEM SUPPORTS QUILTING FILES)
+  * lfs_stripe_count: The stripe count to assign to WRF output files, used for quilting to improve I/O on supported systems.
+  * wrf_detect_proc_count: A 1/0 flag which identifies if the program should assign nproc_x and nproc_y based on Balle and Johnsen, 2016 findings
+
+The last batch on control parameters are for post-processing options:
+  * unipost_out: The file type to generate from unipost (GRIB or GRIB2)
+  * num_upp_nodes: The number of CPU nodes to use in your unipost job
+  * upp_ensemble_nodes_per_hour: How many nodes should be split from the total node count for each output file (Should be divisible by num_upp_nodes)
+  * upp_walltime: The maximum wall time to be required by your unipost job (In minutes)
+  * num_python_nodes: The number of CPU nodes to use in your python job
+  * python_threads_per_rank: The number of MPI ranks to assign per python node (PPN)
+  * python_walltime: The maximum wall time to be required by your python job (In minutes)  
   
 If you would like to add more options, you will need to do three things:
 
@@ -167,6 +206,26 @@ Next, scroll down to the *ModelData* class and find the pooled_download section.
 ```
 
 If your data source does not support auto downloads, the script will check upon running to ensure the needed files are present and abort with an error message if they are not, or in the wrong location. Finally to activate a data set, change the modeldata parameter in control.txt to match your model source.
+
+### IO_VARS ###
+This script package has limited support for post-processing using the IO_VARS file option in WRF (iofields_filename namelist option). This namelist option allows your wrfout files to be significantly truncated to only contain pertinant output fields to significantly cut down on both file I/O times and compute times in your model.
+
+An example line of IO_VARS.txt follows:
+
++:h:5:REFD_COM
+
+The format of each line is as such:
+
+  * +: This says to "add" the following to the respective file, using '-' would be a remove call
+  * h: This says the target is a history output stream (wrfout, auxhistory, etc)
+  * 5: This is the target stream for the history file (This would be auxhistory5)
+  * REFD_COM: This is the target field to be added/removed.
+  
+You can combine multiple fields in a single line as well:
+
+-:h:5:XLAT,XLONG,HGT,LANDMASK
+
+This would remove XLAT, XLONG, HGT, and LANDMASK from the auxhistory5 output.
 
 ### Python Post-Processing ###
 This package contains a basic python post-processing script that incorporates multiple other python packages. If you would like to use the python post-processor you first need to set **post_run_python** to 1 in **control.txt**. This will create a job-script to execute PythonPost.py in parallel using Dask and wrf-python. Controlling the outputs of this are handled by a second control text file located in the Python/ directory.
