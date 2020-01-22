@@ -1,5 +1,5 @@
 # WRF-Run #
-## Dpt. Geographic & Atmospheric Sciences ##
+## Dpt. Geographic & Atmospheric Sciences - [NIU WCS](https://wcs.niu.edu/) ##
 ## By: Robert C. Fritzen ##
 
 ### Introduction ###
