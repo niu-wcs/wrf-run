@@ -91,7 +91,7 @@ class Application():
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
-		if(self.write_job_files(settings, mParms) == False):
+		if(self.write_job_files(settings, mParms, scheduleParms) == False):
 			logger.write(" 3. Failed to generate job files... abort")
 			sys.exit("")
 		logger.write(" 3. Done")
@@ -165,125 +165,148 @@ class Application():
 		logger.write("Program execution complete.")
 		logger.close()
 		
-	def write_job_files(self, settings, mParms):
+	def write_job_files(self, settings, mParms, scheduleParms):
 		logger = Tools.loggedPrint.instance()
 		logger.write("  -> Writing job files")
 		with Tools.cd(settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8]):
 			# Write geogrid.job
 			logger.write("  -- writing geogrid.job")
 			with open("geogrid.job", 'w') as target_file:
-				target_file.write("#!/bin/bash\n")
-				target_file.write("#COBALT -t " + settings.fetch("geogrid_walltime") + '\n')
-				target_file.write("#COBALT -n " + settings.fetch("num_geogrid_nodes") + '\n')
-				target_file.write("#COBALT -q debug-cache-quad" + '\n')
-				target_file.write("#COBALT -A climate_severe\n\n")
-				
+				target_file.write(scheduleParms.fetch()["header-type"] + '\n')
+				if scheduleParms.fetch()["header-jobname"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobname"] + " WRF_GEOGRID" + '\n')
+				if scheduleParms.fetch()["header-account"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
+				if scheduleParms.fetch()["header-nodes"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + " " + settings.fetch("num_geogrid_nodes") + '\n')
+				if scheduleParms.fetch()["header-tasks"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + " " + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
+				if scheduleParms.fetch()["header-jobtime"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + " " + scheduleParms.convert_to_timestring(settings.fetch("geogrid_walltime")) + '\n')
+				if scheduleParms.fetch()["header-jobqueue"] is not None:
+					# RF: Eventually I may change this for different schedulers, but for now this is fine.
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " debug-cache-quad")
+
 				target_file.write("source " + settings.fetch("sourcefile") + '\n')
 				target_file.write("ulimit -s unlimited\n\n")	
 
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "\n\n")
 				
-				#RF: New method requires geogrid & metgrid to have same num of procs.
-				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=2\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=1\n")	
-
-				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-				target_file.write("./geogrid.exe" + '\n')
+				if scheduleParms.fetch()["extra-exports"] is not None:
+					# COBALT has some extra job related parameters to set.
+					settings.add_replacementKey("[ranks_per_node]", settings.fetch("geogrid_mpi_ranks_per_node"))
+					settings.add_replacementKey("[omp_threads_per_rank]", settings.fetch("prerun_mpi_threads_per_rank"))
+					settings.add_replacementKey("[threads_per_core]", 2)
+					settings.add_replacementKey("[threads_skipped_per_rank]", 1)
+					target_file.write(settings.replace(scheduleParms.fetch()["extra-exports"]))
+				
+				target_file.write("\n")
+				settings.add_replacementKey("[total_processors]", int(settings.fetch("geogrid_mpi_ranks_per_node")) * int(settings.fetch("num_geogrid_nodes")))
+				target_file.write(scheduleParms.fetch()["subcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./geogrid.exe" + '\n')
 			logger.write("  -- Done")
 			# Write prerun.job
 			logger.write("  -- writting prerun.job")
 			with open("prerun.job", 'w') as target_file:
-				target_file.write("#!/bin/bash\n")
-				target_file.write("#COBALT -t " + settings.fetch("prerun_walltime") + '\n')
-				target_file.write("#COBALT -n " + settings.fetch("num_prerun_nodes") + '\n')
-				target_file.write("#COBALT -q debug-cache-quad" + '\n')
-				target_file.write("#COBALT -A climate_severe\n\n")
+				target_file.write(scheduleParms.fetch()["header-type"] + '\n')
+				if scheduleParms.fetch()["header-jobname"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobname"] + " WRF_PREPROCESSING" + '\n')
+				if scheduleParms.fetch()["header-account"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
+				if scheduleParms.fetch()["header-nodes"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + " " + settings.fetch("num_prerun_nodes") + '\n')
+				if scheduleParms.fetch()["header-tasks"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + " " + settings.fetch("prerun_mpi_ranks_per_node") + '\n')
+				if scheduleParms.fetch()["header-jobtime"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + " " + scheduleParms.convert_to_timestring(settings.fetch("prerun_walltime")) + '\n')
+				if scheduleParms.fetch()["header-jobqueue"] is not None:
+					# RF: Eventually I may change this for different schedulers, but for now this is fine.
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " debug-cache-quad")
 				
 				target_file.write("source " + settings.fetch("sourcefile") + '\n')
 				target_file.write("ulimit -s unlimited\n")
-				target_file.write("lfs setstripe -c " + settings.fetch("lfs_stripe_count") + " " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "output\n\n")	
-
+				if int(settings.fetch("lfs_stripe_count")) > 0:
+					target_file.write("lfs setstripe -c " + settings.fetch("lfs_stripe_count") + " " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "output\n\n")	
+					
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "\n\n")
 				
-				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=1\n")
-				target_file.write("export n_mpi_ranks=1\n")
-				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") + "\n")
-				target_file.write("export n_hardware_threads_per_core=2\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=1\n")				
+				if scheduleParms.fetch()["extra-exports"] is not None:
+					# COBALT has some extra job related parameters to set.
+					settings.add_replacementKey("[ranks_per_node]", settings.fetch("prerun_mpi_ranks_per_node"))
+					settings.add_replacementKey("[omp_threads_per_rank]", settings.fetch("prerun_mpi_threads_per_rank"))
+					settings.add_replacementKey("[threads_per_core]", 2)
+					settings.add_replacementKey("[threads_skipped_per_rank]", settings.fetch("prerun_mpi_threads_per_rank"))
+					target_file.write(settings.replace(scheduleParms.fetch()["extra-exports"]))
+					
 				target_file.write("./link_grib.csh " + settings.fetch("datadir") + '/' + settings.fetch("modeldata") + '/' + settings.fetch("starttime") + '/' + '\n')
 				i = 0
 				for ext in mParms["FileExtentions"]:
 					target_file.write("cp " + mParms["VTable"][i] + " Vtable" + '\n')
 					target_file.write("cp namelist.wps." + ext + " namelist.wps" + '\n')
 					
-					target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-					target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-					target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-					target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-					target_file.write("./ungrib.exe &" + '\n')
+					settings.add_replacementKey("[total_processors]", "1")
+					if settings.fetch("jobscheduler") == "COBALT":
+						# For ungrib we reduce the node count to 1 each, this needs to be reset in the env vars here.
+						target_file.write("export n_mpi_ranks=1\nexport n_mpi_ranks_per_node=1\n")
+					target_file.write(scheduleParms.fetch()["subcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./ungrib.exe &" + '\n')
 					target_file.write("PID_Ungrib=$!" + '\n')
 					target_file.write("wait $PID_Ungrib" + '\n')
 					i += 1
-				# The next process is metgrid.
-				target_file.write("\nexport n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("prerun_mpi_ranks_per_node") + '\n')
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=1\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=1\n")
-				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-				target_file.write("./metgrid.exe &" + '\n')
+				# The next process is metgrid.			
+				settings.add_replacementKey("[total_processors]", int(settings.fetch("prerun_mpi_ranks_per_node")) * int(settings.fetch("num_prerun_nodes")))
+				
+				target_file.write("\n")
+				if settings.fetch("jobscheduler") == "COBALT":
+					# If we set the MPI stuff on COBALT, reset it back to what we expect here.
+					target_file.write("export n_mpi_ranks=$COBALT_JOBSIZE\n")
+					target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("prerun_mpi_ranks_per_node") + "\n")				
+				target_file.write(scheduleParms.fetch()["subcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./metgrid.exe &" + '\n')
 				target_file.write("PID_Metgrid=$!" + '\n')
 				target_file.write("wait $PID_Metgrid" + "\n\n")	
 				# Finally, run the real.exe process
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "output\n\n")
-				target_file.write("export n_nodes=$COBALT_JOBSIZE\n")
-				target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("prerun_mpi_ranks_per_node") + "\n")
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n")
-				target_file.write("export n_openmp_threads_per_rank=" + settings.fetch("prerun_mpi_threads_per_rank") +"\n")
-				target_file.write("export n_hardware_threads_per_core=1\n")
-				target_file.write("export n_hardware_threads_skipped_between_ranks=1\n")				
-				target_file.write("aprun -n $n_mpi_ranks -N $n_mpi_ranks_per_node \\" + '\n')
-				target_file.write("--env OMP_NUM_THREADS=$n_openmp_threads_per_rank -cc depth \\" + '\n')
-				target_file.write("-d $n_hardware_threads_skipped_between_ranks \\" + '\n')
-				target_file.write("-j $n_hardware_threads_per_core \\" + '\n')
-				target_file.write("./real.exe &" + '\n')
+				target_file.write(scheduleParms.fetch()["subcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./real.exe &" + '\n')
 				target_file.write("PID_Real=$!" + '\n')
 				target_file.write("wait $PID_Real" + "\n\n")
 			logger.write("  -- Done")	
 			# Write wrf.job
 			logger.write("  -- writting wrf.job")
 			with open("wrf.job", 'w') as target_file:		
-				target_file.write("#!/bin/bash\n")
-				target_file.write("#COBALT -t " + settings.fetch("wrf_walltime") + '\n')
-				target_file.write("#COBALT -n " + settings.fetch("num_wrf_nodes") + '\n')
-				target_file.write("#COBALT -q default" + '\n')
-				target_file.write("#COBALT -A climate_severe\n\n")
+				target_file.write(scheduleParms.fetch()["header-type"] + '\n')
+				if scheduleParms.fetch()["header-jobname"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobname"] + " WRF_MODEL" + '\n')
+				if scheduleParms.fetch()["header-account"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
+				if scheduleParms.fetch()["header-nodes"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + " " + settings.fetch("num_wrf_nodes") + '\n')
+				if scheduleParms.fetch()["header-tasks"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + " " + settings.fetch("wrf_mpi_ranks_per_node") + '\n')
+				if scheduleParms.fetch()["header-jobtime"] is not None:
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + " " + scheduleParms.convert_to_timestring(settings.fetch("wrf_walltime")) + '\n')
+				if scheduleParms.fetch()["header-jobqueue"] is not None:
+					# RF: Eventually I may change this for different schedulers, but for now this is fine.
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " default")
 
 				target_file.write("source " + settings.fetch("sourcefile") + '\n')
 				target_file.write("ulimit -s unlimited\n")
-				target_file.write("lfs setstripe -c " + settings.fetch("lfs_stripe_count") + " " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "wrfout\n\n")	
+				if int(settings.fetch("lfs_stripe_count")) > 0:
+					target_file.write("lfs setstripe -c " + settings.fetch("lfs_stripe_count") + " " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "wrfout\n\n")	
 
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output\n\n")
-				target_file.write("export n_nodes=" + settings.fetch("num_wrf_nodes") + "\n")
-				target_file.write("export n_ranks_per_node=" + settings.fetch("wrf_mpi_ranks_per_node") + "\n")
-				target_file.write("export n_mpi_ranks=$(($n_nodes * $n_ranks_per_node))\n\n")
+
+				if scheduleParms.fetch()["extra-exports"] is not None:
+					# COBALT has some extra job related parameters to set.
+					settings.add_replacementKey("[ranks_per_node]", settings.fetch("wrf_mpi_ranks_per_node"))
+					settings.add_replacementKey("[omp_threads_per_rank]", 1)
+					settings.add_replacementKey("[threads_per_core]", 2)
+					settings.add_replacementKey("[threads_skipped_per_rank]", 1)
+					target_file.write(settings.replace(scheduleParms.fetch()["extra-exports"]))
 				
-				target_file.write("export MPICH_MPIIO_HINTS=\"wrfinput*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",\\\n")
-				target_file.write("wrfbdy*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",wrfout*:striping_factor=" + settings.fetch("lfs_stripe_count") + "\"\n\n")
+				if int(settings.fetch("lfs_stripe_count")) > 0:
+					target_file.write("export MPICH_MPIIO_HINTS=\"wrfinput*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",\\\n")
+					target_file.write("wrfbdy*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",wrfout*:striping_factor=" + settings.fetch("lfs_stripe_count") + "\"\n\n")
 				
-				target_file.write("aprun -n $n_mpi_ranks -d 1 -j 1 --cc depth -e OMP_NUM_THREADS=1 ./wrf.exe")		
+				settings.add_replacementKey("[total_processors]", int(settings.fetch("wrf_mpi_ranks_per_node")) * int(settings.fetch("num_wrf_nodes")))
+				target_file.write(scheduleParms.fetch()["subcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./wrf.exe" + '\n')	
 			logger.write("  -- Done")
 		logger.write("  -> All file write operations complete")	
 		return True

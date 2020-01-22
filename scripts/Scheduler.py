@@ -4,6 +4,8 @@
 #
 # Contains methods to generate different job-scripts based on the scheduling system
 
+from datetime import timedelta
+
 # Scheduler_Settings: Class responsible for storing the information about different schedulers
 class Scheduler_Settings:
 	stored_table = {}
@@ -29,7 +31,8 @@ class Scheduler_Settings:
 								 "export n_hardware_threads_skipped_between_ranks=[threads_skipped_per_rank]",
 				"time-format": "minutes",
 				"subcmd": "aprun",
-				"subargs": "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank --cc depth \\\n" +
+				"subargs": "-n $n_mpi_ranks -N $n_mpi_ranks_per_node \\\n" +
+						   "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank --cc depth \\\n" +
 						   "-d $n_hardware_threads_skipped_between_ranks \\\n" +
 						   "-j $n_hardware_threads_per_core",
 			},
@@ -71,3 +74,13 @@ class Scheduler_Settings:
 	
 	def fetch(self):
 		return self.stored_table[self.scheduler]
+		
+	def convert_to_timestring(self, min):
+		if (self.fetch()["time-format"] == "timestring"):
+			delta = timedelta(minutes = min)
+			outTime = '%02d:%02d:%02d' % (delta.days*24 + delta.seconds // 3600, (delta.seconds % 3600) // 60, delta.seconds % 60)
+			return outTime
+		elif (self.fetch()["time-format"] == "minutes"):
+			return min
+		else:
+			return None

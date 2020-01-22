@@ -72,6 +72,7 @@ Would store the value of 12 in a parameter named myvar for the file. Any line th
 These first parameters define program specific settings and define your WRF directories. For help installing the WRF model, please se the included TXT file on installation:
   * debugmode: Setting this variable to 1 will not run any commands, but instead print the commands to the console for debugging / testing purposes. Typically, leave this as 0.
   * jobscheduler: Which job scheduler your system is using.
+  * accountname: Your account/project name on your HPC system.
   * sourcefile: For systems that do not use the .bashrc file, you may define a file path that contains your relevant EXPORT and module calls here
   * geogdir: The path to your WPS geography files stored on your machine
   * tabledir: The path to your shared WRF tables folder stored on your machine (Soon to be deprecated)
@@ -146,7 +147,7 @@ The following parameters in the control file define job specific settings that s
   * wrf_numtiles: The numtiles parameter for WRF, this is for patch based processing and may aid with performance times in some cases, use multiples of 2
   * wrf_nio_tasks_per_group: The number of MPI rasks to direct to file I/O (NOTE: ONLY USE THIS IF YOUR SYSTEM SUPPORTS QUILTING FILES, IE: LUSTRE FILE SYSTEM)
   * wrf_nio_groups: The number of nodes in the WRF job to direct to file I/O (NOTE: ONLY USE THIS IF YOUR SYSTEM SUPPORTS QUILTING FILES)
-  * lfs_stripe_count: The stripe count to assign to WRF output files, used for quilting to improve I/O on supported systems.
+  * lfs_stripe_count: The stripe count to assign to WRF output files, used for quilting to improve I/O on supported systems (Set to 0 to disable this in the program).
   * wrf_detect_proc_count: A 1/0 flag which identifies if the program should assign nproc_x and nproc_y based on Balle and Johnsen, 2016 findings
 
 The last batch on control parameters are for post-processing options:
