@@ -65,6 +65,7 @@ class JobSteps:
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
 			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " geogrid.job " + self.scheduleParms.fetch()["cmdline"], storeOutput = False)
+			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			# Now wait for the log files
 			try:
 				firstWait = [{"waitCommand": "(ls geogrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
