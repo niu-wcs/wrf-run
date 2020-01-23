@@ -21,32 +21,48 @@ def detect_ideal_processors(grid_x, grid_y, nodes, procs_per_node, wrf_io_groups
 	
 	total_nodes = nodes * procs_per_node
 	io_procs = wrf_io_groups * wrf_io_procs
-
-	remaining = total_nodes - io_procs	
-
-	found = False
-	foundIO = False
-
-	for i in range(1, (int)(grid_x / 10)+1):
-		for j in range(1, (int)(grid_y / 10)+1):
-			if(i * j == remaining):
-				if((grid_x / i > 10) and (grid_y / j > 10)):
-					if(i < smallest_x):
-						smallest_x = i
-						biggest_y_pair = j
-						# Check for good IO
-						if(biggest_y_pair % wrf_io_procs == 0):
-							smallest_x_io = i
-							biggest_y_io = j
-							foundIO = True
-					found = True
-	if foundIO:
-		return ((smallest_x_io, biggest_y_io))
-	else:
+	
+	if io_procs == 0:
+		found = False
+		
+		for i in range(1, (int)(grid_x / 10)+1):
+			for j in range(1, (int)(grid_y / 10)+1):
+				if(i * j == total_nodes):
+					if((grid_x / i > 10) and (grid_y / j > 10)):
+						if(i < smallest_x):
+							smallest_x = i
+							biggest_y_pair = j
+						found = True
 		if found:
 			return ((smallest_x, biggest_y_pair))
 		else:
 			return None
+	else:
+		remaining = total_nodes - io_procs	
+
+		found = False
+		foundIO = False
+
+		for i in range(1, (int)(grid_x / 10)+1):
+			for j in range(1, (int)(grid_y / 10)+1):
+				if(i * j == remaining):
+					if((grid_x / i > 10) and (grid_y / j > 10)):
+						if(i < smallest_x):
+							smallest_x = i
+							biggest_y_pair = j
+							# Check for good IO
+							if(biggest_y_pair % wrf_io_procs == 0):
+								smallest_x_io = i
+								biggest_y_io = j
+								foundIO = True
+						found = True
+		if foundIO:
+			return ((smallest_x_io, biggest_y_io))
+		else:
+			if found:
+				return ((smallest_x, biggest_y_pair))
+			else:
+				return None
 
 #CD: Current Directory management, see https://stackoverflow.com/a/13197763/7537290 for implementation. This is used to maintain the overall OS CWD while allowing embedded changes.
 class cd:
