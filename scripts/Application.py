@@ -29,7 +29,7 @@ class Application():
 		modelParms = ModelData.ModelDataParameters(settings.fetch("modeldata"))
 		scheduleParms = Scheduler.Scheduler_Settings(settings.fetch("jobscheduler"))
 		if not scheduleParms.validScheduler():
-			sys.exit("Program failed at step 1, job scheduler: " + settings.fetch("jobscheduler") + ", is not defined in the program".)	
+			sys.exit("Program failed at step 1, job scheduler: " + settings.fetch("jobscheduler") + ", is not defined in the program.")	
 		if not modelParms.validModel():
 			sys.exit("Program failed at step 1, model data source: " + settings.fetch("modeldata") + ", is not defined in the program.")
 		logger.write(" - Settings loaded, model data source " + settings.fetch("modeldata") + " applied to the program.")

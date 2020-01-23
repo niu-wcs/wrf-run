@@ -169,7 +169,7 @@ Start by completing the installation of the WRF model and the WPS programs on yo
 The run time parameters (starttime, rundays, runhours) need to be defined in the control.txt file, remember that runhours is in ADDITION to rundays, so keep that in mind when setting these parameters. It is recommended to run multiple "test jobs" using different node/processor count settings to find the ideal times on your HPC system, there are numerous papers in the body of literature you may investigate to get an idea on good starting points. Once your control.txt file has been written you may run the python script **run_wrf.py** from the head directory to push the process to the background (Allowing you to safely close an SSH session and let the process completely run), or, if you want the output pushed to your SSH client, you may run **Application.py** in the scripts/ directory (Please note this script will not run in the background, so if you are disconnected, the script will terminate at the position it is at). All logging information will be saved to a log file in the scripts/ directory, and will be moved to a /logs/ folder upon script completion.
   
 ### Adding Model Sources ###
-This script package was written for the CFSv2 forecast system or the North American Regional Reanalysis (NARR) as an input for the WRF model, however the script package is dynamic enough to allow for quick additions of other model sources.
+This script package was written for the Climate Forecast System version 2.0 (CFSv2) forecast system or the North American Regional Reanalysis (NARR) as input for the WRF model, however the script package is dynamic enough to allow for quick additions of other model sources.
 
 First, you will need to obtain the VTable files for your specific model data source and include these in the vtables directory in this package.
 
@@ -205,6 +205,8 @@ Next, scroll down to the *ModelData* class and find the pooled_download section.
 ```
 
 If your data source does not support auto downloads, the script will check upon running to ensure the needed files are present and abort with an error message if they are not, or in the wrong location. Finally to activate a data set, change the modeldata parameter in control.txt to match your model source.
+
+I highly recommend that if you are successful in getting a new data source to be compatable with this script package to **send in a pull request** containing your updated ModelData.py file such that others can take advantage of your findings!
 
 ### IO_VARS ###
 This script package has limited support for post-processing using the IO_VARS file option in WRF (iofields_filename namelist option). This namelist option allows your wrfout files to be significantly truncated to only contain pertinant output fields to significantly cut down on both file I/O times and compute times in your model.
