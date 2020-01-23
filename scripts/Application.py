@@ -187,8 +187,8 @@ class Application():
 					# RF: Eventually I may change this for different schedulers, but for now this is fine.
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " debug-cache-quad")
 
-				target_file.write("source " + settings.fetch("sourcefile") + '\n')
-				target_file.write("ulimit -s unlimited\n\n")	
+				target_file.write("\n\nsource " + settings.fetch("sourcefile") + '\n')
+				target_file.write("ulimit -s unlimited\n")	
 
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "\n\n")
 				
@@ -222,12 +222,12 @@ class Application():
 					# RF: Eventually I may change this for different schedulers, but for now this is fine.
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " debug-cache-quad")
 				
-				target_file.write("source " + settings.fetch("sourcefile") + '\n')
+				target_file.write("\n\nsource " + settings.fetch("sourcefile") + '\n')
 				target_file.write("ulimit -s unlimited\n")
 				if int(settings.fetch("lfs_stripe_count")) > 0:
 					target_file.write("lfs setstripe -c " + settings.fetch("lfs_stripe_count") + " " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "output\n\n")	
 					
-				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "\n\n")
+				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "\n")
 				
 				if scheduleParms.fetch()["extra-exports"] is not None:
 					# COBALT has some extra job related parameters to set.
@@ -286,12 +286,12 @@ class Application():
 					# RF: Eventually I may change this for different schedulers, but for now this is fine.
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " default")
 
-				target_file.write("source " + settings.fetch("sourcefile") + '\n')
+				target_file.write("\n\nsource " + settings.fetch("sourcefile") + '\n')
 				target_file.write("ulimit -s unlimited\n")
 				if int(settings.fetch("lfs_stripe_count")) > 0:
 					target_file.write("lfs setstripe -c " + settings.fetch("lfs_stripe_count") + " " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "wrfout\n\n")	
 
-				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output\n\n")
+				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output\n")
 
 				if scheduleParms.fetch()["extra-exports"] is not None:
 					# COBALT has some extra job related parameters to set.
