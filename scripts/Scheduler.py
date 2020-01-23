@@ -29,8 +29,10 @@ class Scheduler_Settings:
 								 "export n_openmp_threads_per_rank=[omp_threads_per_rank]\n" +
 								 "export n_hardware_threads_per_core=[threads_per_core]\n" +
 								 "export n_hardware_threads_skipped_between_ranks=[threads_skipped_per_rank]",
+				"cmdline": "--mode script",
 				"time-format": "minutes",
-				"subcmd": "aprun",
+				"subcmd": "qsub",
+				"runcmd": "aprun",
 				"subargs": "-n $n_mpi_ranks -N $n_mpi_ranks_per_node \\\n" +
 						   "--env OMP_NUM_THREADS=$n_openmp_threads_per_rank --cc depth \\\n" +
 						   "-d $n_hardware_threads_skipped_between_ranks \\\n" +
@@ -47,8 +49,10 @@ class Scheduler_Settings:
 				"header-jobtime": "-l walltime",
 				"header-jobqueue": None,
 				"extra-exports": None,
+				"cmdline": "",
 				"time-format": "timestring",
-				"subcmd": "mpirun",
+				"subcmd": "qsub",				
+				"runcmd": "mpirun",
 				"subargs": "-n [total_processors]",
 			},
 
@@ -62,8 +66,10 @@ class Scheduler_Settings:
 				"header-jobtime": "--time",
 				"header-jobqueue": None,
 				"extra-exports": None,
+				"cmdline": "",
 				"time-format": "timestring",
 				"subcmd": "sbatch",
+				"runcmd": "srun",
 				"subargs": "-n [total_processors]"
 			},	
 

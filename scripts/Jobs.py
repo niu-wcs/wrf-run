@@ -14,6 +14,7 @@ import math
 from multiprocessing.pool import ThreadPool
 import ApplicationSettings
 import ModelData
+import Scheduler
 import Tools
 import Wait
 import Template
@@ -24,14 +25,16 @@ class JobSteps:
 	logger = None
 	aSet = None
 	modelParms = None
+	scheduleParms = None
 	startTime = ""
 	dataDir = ""
 	wrfDir = ""
 
-	def __init__(self, settings, modelParms):
+	def __init__(self, settings, modelParms, scheduleParms):
 		self.aSet = settings
 		self.logger = Tools.loggedPrint.instance()
 		self.modelParms = modelParms
+		slef.scheduleParms = scheduleParms
 		self.dataDir = settings.fetch("datadir") + '/' + settings.fetch("modeldata")
 		self.wrfDir = settings.fetch("wrfdir")
 		self.startTime = settings.fetch("starttime")
@@ -61,7 +64,7 @@ class JobSteps:
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
-			Tools.popen(self.aSet, "qsub geogrid.job -q debug-cache-quad -t " + str(self.aSet.fetch("geogrid_walltime")) + " -n " + str(self.aSet.fetch("num_geogrid_nodes")) + " --mode script")
+			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " geogrid.job " + self.scheduleParms.fetch()["cmdline"])
 			# Now wait for the log files
 			try:
 				firstWait = [{"waitCommand": "(ls geogrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
@@ -99,7 +102,7 @@ class JobSteps:
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x prerun.job")
-			Tools.popen(self.aSet, "qsub prerun.job -q debug-cache-quad -t " + str(self.aSet.fetch("prerun_walltime")) + " -n " + str(self.aSet.fetch("num_prerun_nodes")) + " --mode script")
+			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " prerun.job " + self.scheduleParms.fetch()["cmdline"])
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			# Now wait for the log files
 			try:
@@ -207,7 +210,7 @@ class JobSteps:
 			Tools.popen(self.aSet, "rm output/rsl.error.*")	
 			# chmod the job and submit
 			Tools.popen(self.aSet, "chmod +x wrf.job")			
-			Tools.popen(self.aSet, "qsub wrf.job -t " + str(self.aSet.fetch("wrf_walltime")) + " -n " + str(self.aSet.fetch("num_wrf_nodes")) + " --mode script")
+			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " wrf.job " + self.scheduleParms.fetch()["cmdline"])
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
