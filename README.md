@@ -7,7 +7,7 @@ This python script package automates the entire WRF process for use on cluster b
 
 This package has been tested on multiple environments with different scheduling systems, notes are shown below:
  * Argonne's Theta (COBALT): Fully Supported
- * Argonne's LCRC (SLURM): Limited Support
+ * Argonne's LCRC (SLURM): Fully Supported
  * NIU's Gaea (PBS): Limited Support
  
 Systems listed as "Limited Support" are currently being worked on to bring it up to full support.
@@ -71,7 +71,7 @@ Would store the value of 12 in a parameter named myvar for the file. Any line th
 
 These first parameters define program specific settings and define your WRF directories. For help installing the WRF model, please see the included TXT file on installation:
   * debugmode: Setting this variable to 1 will not run any commands, but instead print the commands to the console for debugging / testing purposes. Typically, leave this as 0.
-  * jobscheduler: Which job scheduler your system is using.
+  * jobscheduler: Which job scheduler your system is using, see the below section on **job schedulers** for details on adding more. (Currently available are COBALT, SLURM, and PBS)
   * accountname: Your account/project name on your HPC system.
   * sourcefile: For systems that do not use the .bashrc file, you may define a file path that contains your relevant EXPORT and module calls here
   * geogdir: The path to your WPS geography files stored on your machine
@@ -207,6 +207,46 @@ Next, scroll down to the *ModelData* class and find the pooled_download section.
 If your data source does not support auto downloads, the script will check upon running to ensure the needed files are present and abort with an error message if they are not, or in the wrong location. Finally to activate a data set, change the modeldata parameter in control.txt to match your model source.
 
 I highly recommend that if you are successful in getting a new data source to be compatable with this script package to **send in a pull request** containing your updated ModelData.py file such that others can take advantage of your findings!
+
+### Job Schedulers ###
+This script package is designed to be used on high-performance computing environments (HPC) that employ resource management tools to allocate work across nodes. In order to use these systems you must have an account / project allocation on the system and have a basic understanding of how to submit jobs on these systems ([Here is an example page](https://www.lcrc.anl.gov/for-users/using-lcrc/running-jobs/running-jobs-on-bebop/) from Argonne's LCRC System).
+
+At the moment, this package can submit jobs to the COBALT and SLURM job schedulers (Fully tested) and the PBS scheduler (Needs testing). The definitions for the schedulers are defined in Scheduler.py and controlled by the **jobscheduler** option in control.txt. If you would like to add support for another job scheduling system you will need to edit Scheduler.py to add your scheduler and the respective options. Here is an example block from the SLURM scheduler:
+
+```python
+			"SLURM": {
+				"header-type": "#!/bin/bash",
+				"header-tag": "#SBATCH",
+				"header-jobname": "--job-name",
+				"header-account": "--account",
+				"header-nodes": "--nodes",
+				"header-tasks": "--ntasks-per-node",
+				"header-jobtime": "--time",
+				"header-jobqueue": None,
+				"extra-exports": None,
+				"cmdline": "",
+				"time-format": "timestring",
+				"subcmd": "sbatch",
+				"runcmd": "srun",
+				"subargs": "-n [total_processors]"
+			},	
+```
+
+Here's what each of these dictionary entries control:
+  * header-type: This defined what type of file you are in, as far as I'm aware, most if not all of these should be BASH files and use *#!/bin/bash*
+  * header-tag: Each job scheduler has a list of definition lines at the top of the file that begins with a tag (IE: #COBALT blah=value), this defines that tag
+  * header-jobname: If your scheduler supports naming a job, this defines the variable name for the job name, use **None** here if it does not.
+  * header-account: This defined the account/project statement, unless you are running your own cluster this should be defined on each. If not needed, use **None**.
+  * header-nodes: This definition specifies the node argument
+  * header-tasks: This definition specifies the tasks per node (Also called processors or PPN) argument
+  * header-jobtime: This specifies the argument for the wall clock argument.
+  * header-jobqueue: If your cluster requires usage of different queues, this is where you define that parameter.
+  * extra-exports: This is a specialized line that tells the script it needs to add a batch of lines below the header for export statements, see the COBALT example in Application.py for more details.
+  * cmdline: This controls any additional command line arguments required after job submission commands for your scheduler.
+  * time-format: This is either minutes (Single integer) or timestring (HH:MM:SS). If your scheduler needs something else, please get in touch with me and I'll show you how to get your method installed.
+  * subcmd: This is the job submission command (What is called from the command line to push your job to the queue)
+  * runcmd: This is the command inside your jobscript to start your executable
+  * subargs: This is additional arguments sent to the runcmd. [total_processors] is a template that is nodes * PPN. You may add others as needed, see Application.py for more info.
 
 ### IO_VARS ###
 This script package has limited support for post-processing using the IO_VARS file option in WRF (iofields_filename namelist option). This namelist option allows your wrfout files to be significantly truncated to only contain pertinant output fields to significantly cut down on both file I/O times and compute times in your model.
