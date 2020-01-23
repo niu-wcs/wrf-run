@@ -64,7 +64,7 @@ class JobSteps:
 		Tools.popen(self.aSet, "mv namelist.wps.geogrid " + self.wrfDir + '/' + self.startTime[0:8] + "/namelist.wps")
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x geogrid.job")
-			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " geogrid.job " + self.scheduleParms.fetch()["cmdline"])
+			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " geogrid.job " + self.scheduleParms.fetch()["cmdline"], storeOutput = False)
 			# Now wait for the log files
 			try:
 				firstWait = [{"waitCommand": "(ls geogrid.log* && echo \"yes\") || echo \"no\"", "contains": "yes", "retCode": 1}]
@@ -102,7 +102,7 @@ class JobSteps:
 		mParms = self.modelParms.fetch()
 		with Tools.cd(self.wrfDir + '/' + self.startTime[0:8]):				
 			Tools.popen(self.aSet, "chmod +x prerun.job")
-			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " prerun.job " + self.scheduleParms.fetch()["cmdline"])
+			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " prerun.job " + self.scheduleParms.fetch()["cmdline"], storeOutput = False)
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			# Now wait for the log files
 			try:
@@ -210,7 +210,7 @@ class JobSteps:
 			Tools.popen(self.aSet, "rm output/rsl.error.*")	
 			# chmod the job and submit
 			Tools.popen(self.aSet, "chmod +x wrf.job")			
-			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " wrf.job " + self.scheduleParms.fetch()["cmdline"])
+			Tools.popen(self.aSet, self.scheduleParms.fetch()["subcmd"] + " wrf.job " + self.scheduleParms.fetch()["cmdline"], storeOutput = False)
 			self.logger.write("Job has been submitted to the queue, waiting for log file to appear.")
 			if(self.aSet.fetch("debugmode") == '1'):
 				self.logger.write("Debug mode is active, skipping")
