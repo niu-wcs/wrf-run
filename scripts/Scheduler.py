@@ -77,7 +77,7 @@ class Scheduler_Settings:
 		
 	def convert_to_timestring(self, min):
 		if (self.fetch()["time-format"] == "timestring"):
-			delta = timedelta(minutes = min)
+			delta = timedelta(minutes = int(min))
 			outTime = '%02d:%02d:%02d' % (delta.days*24 + delta.seconds // 3600, (delta.seconds % 3600) // 60, delta.seconds % 60)
 			return outTime
 		elif (self.fetch()["time-format"] == "minutes"):
