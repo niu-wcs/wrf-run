@@ -34,7 +34,7 @@ class JobSteps:
 		self.aSet = settings
 		self.logger = Tools.loggedPrint.instance()
 		self.modelParms = modelParms
-		slef.scheduleParms = scheduleParms
+		self.scheduleParms = scheduleParms
 		self.dataDir = settings.fetch("datadir") + '/' + settings.fetch("modeldata")
 		self.wrfDir = settings.fetch("wrfdir")
 		self.startTime = settings.fetch("starttime")
