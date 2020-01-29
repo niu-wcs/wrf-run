@@ -73,6 +73,13 @@ class Application():
 		logger.write(" 2. Done")
 		#Step 3: Generate run files
 		logger.write(" 3. Generating job files and creating templated files")
+		# Check if we are using LFS / quilting
+		if(int(settings.fetch("wrf_nio_groups")) * int(settings.fetch("wrf_nio_tasks_per_group")) == 0):
+			settings.add_replacementKey("[io_form_geogrid]", 2)
+			settings.add_replacementKey("[io_form_metgrid]", 2)
+		else:
+			settings.add_replacementKey("[io_form_geogrid]", 102)
+			settings.add_replacementKey("[io_form_metgrid]", 102)			
 		settings.add_replacementKey("[interval_seconds]", mParms["HourDelta"] * 60 * 60)
 		settings.add_replacementKey("[constants_name]", settings.fetch("constantsdir") + '/' + mParms["ConstantsFile"])
 		tWrite = Template.Template_Writer(settings)
@@ -123,6 +130,21 @@ class Application():
 		logger.write("  4.c. Running WRF Model")
 		logger.write("   4.c. > Updating settings for nproc_x/nproc_y")
 		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.
+		if(int(settings.fetch("wrf_nio_groups")) * int(settings.fetch("wrf_nio_tasks_per_group")) == 0):
+			# We use parallel netCDF for everything
+			settings.add_replacementKey("[io_form_history]", str("11"))
+			settings.add_replacementKey("[io_form_restart]", str("11"))
+			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist23]", str("11"))		
+		else:
+			settings.add_replacementKey("[io_form_history]", str("102"))
+			settings.add_replacementKey("[io_form_restart]", str("11"))
+			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist23]", str("11"))		
 		settings.add_replacementKey("[nproc_x]", str(save_nproc_x))
 		settings.add_replacementKey("[nproc_y]", str(save_nproc_y))
 		settings.add_replacementKey("[io_form_input]", str("2"))
