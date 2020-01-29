@@ -157,7 +157,7 @@ class JobSteps:
 								sixthWait = [{"waitCommand": "tail -n 3 output/rsl.out.0000", "contains": "SUCCESS COMPLETE REAL_EM", "retCode": 1},
 											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "FATAL CALLED", "retCode": 2},
 											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "FATAL", "retCode": 2},
-											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "RUNTIME", "retCode": 2}
+											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "RUNTIME", "retCode": 2},
 											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
 											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "error", "retCode": 2},
 											  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "ERROR", "retCode": 2},]
@@ -234,7 +234,7 @@ class JobSteps:
 				secondWait = [{"waitCommand": "tail -n 1 output/rsl.out.0000", "contains": "SUCCESS COMPLETE WRF", "retCode": 1},
 							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "FATAL CALLED", "retCode": 2},
 							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "FATAL", "retCode": 2},
-							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "RUNTIME", "retCode": 2}
+							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "RUNTIME", "retCode": 2},
 							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "runtime", "retCode": 2},
 							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "error", "retCode": 2},
 							  {"waitCommand": "tail -n 5 output/rsl.error.0000", "contains": "ERROR", "retCode": 2},]
