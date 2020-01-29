@@ -96,7 +96,7 @@ class popen:
 				self.stored = [cResult, stderr]
 				loggedPrint.instance().write("popen(" + command + "): " + self.stored[0] + ", " + self.stored[1])
 			else:
-				runcmd = subprocess.Popen(command, shell=False, stdin=None, stdout=None, stderr=None)
+				runcmd = subprocess.Popen(command, shell=True, stdin=None, stdout=None, stderr=None)
 				loggedPrint.instance().write("popen(" + command + "): Command fired with no return")
 			
 	def fetch(self):
