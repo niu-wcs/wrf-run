@@ -83,6 +83,23 @@ class Application():
 		settings.add_replacementKey("[interval_seconds]", mParms["HourDelta"] * 60 * 60)
 		settings.add_replacementKey("[constants_name]", settings.fetch("constantsdir") + '/' + mParms["ConstantsFile"])
 		tWrite = Template.Template_Writer(settings)
+		# RF: Additional namelist settings based on IO selections
+		if(int(settings.fetch("wrf_nio_groups")) * int(settings.fetch("wrf_nio_tasks_per_group")) == 0):
+			# We use parallel netCDF for everything
+			settings.add_replacementKey("[io_form_history]", str("11"))
+			settings.add_replacementKey("[io_form_restart]", str("11"))
+			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist23]", str("11"))		
+		else:
+			settings.add_replacementKey("[io_form_history]", str("102"))
+			settings.add_replacementKey("[io_form_restart]", str("11"))
+			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
+			settings.add_replacementKey("[io_form_auxhist23]", str("11"))			
+		# end
 		if(settings.fetch("run_prerunsteps") == '1'):
 			i = 0
 			for ext in mParms["FileExtentions"]:
@@ -129,22 +146,7 @@ class Application():
 		logger.write("  4.b. Done")
 		logger.write("  4.c. Running WRF Model")
 		logger.write("   4.c. > Updating settings for nproc_x/nproc_y")
-		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.
-		if(int(settings.fetch("wrf_nio_groups")) * int(settings.fetch("wrf_nio_tasks_per_group")) == 0):
-			# We use parallel netCDF for everything
-			settings.add_replacementKey("[io_form_history]", str("11"))
-			settings.add_replacementKey("[io_form_restart]", str("11"))
-			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
-			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
-			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
-			settings.add_replacementKey("[io_form_auxhist23]", str("11"))		
-		else:
-			settings.add_replacementKey("[io_form_history]", str("102"))
-			settings.add_replacementKey("[io_form_restart]", str("11"))
-			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
-			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
-			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
-			settings.add_replacementKey("[io_form_auxhist23]", str("11"))		
+		# RF 10/19: Now nuke the real.exe namelist file and load in the wrf settings, then run.	
 		settings.add_replacementKey("[nproc_x]", str(save_nproc_x))
 		settings.add_replacementKey("[nproc_y]", str(save_nproc_y))
 		settings.add_replacementKey("[io_form_input]", str("2"))
