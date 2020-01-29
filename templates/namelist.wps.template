@@ -26,7 +26,7 @@ truelat1 = [truelat1],
 truelat2 = [truelat2],
 stand_lon = [stand_lon],
 geog_data_path = '[geog_path]/',
-opt_geogrid_tbl_path = '[table_path]/',
+opt_geogrid_tbl_path = '[geogrid_table_path]/',
 /
 &ungrib
 out_format = 'WPS',
@@ -35,7 +35,7 @@ prefix = '[ungrib_prefix]',
 &metgrid
 fg_name = '[fg_name]',
 constants_name = '[constants_name]',
-opt_metgrid_tbl_path = '[table_path]/',
+opt_metgrid_tbl_path = '[metgrid_table_path]/',
 opt_output_from_metgrid_path = '[out_geogrid_path]/',
 io_form_metgrid = 102,
 /

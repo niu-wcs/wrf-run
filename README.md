@@ -75,13 +75,12 @@ These first parameters define program specific settings and define your WRF dire
   * accountname: Your account/project name on your HPC system.
   * sourcefile: For systems that do not use the .bashrc file, you may define a file path that contains your relevant EXPORT and module calls here
   * geogdir: The path to your WPS geography files stored on your machine
-  * tabledir: The path to your shared WRF tables folder stored on your machine (Soon to be deprecated)
   * constantsdir: The path to your dataset constants files
   * datadir: The path to where you want GRIB data to be stored, the full path is: datadir/model source/YYYYMMDDHH/
   * wrfdir: The path to where you want model runs to occur on your machine
   * wrfexecutables: The path to where the WRF executables are located (/main/ folder inside the WRF folder)
   * wrfrunfiles: The path to the WRF's /run/ directory
-  * wpsexecutables: The path to where the WRF WPS executables are located (Top directory of the /WPS/ folder)
+  * wpsdirectory: The path to your WPS (WRF Preprocessing System) directory
   * uppexecutables: The path the the unipost executables (Not required if not using Unipost)
   * postdir: The path to the /post/ directory in this package
   * condamodule: Which anaconda module you would like to load for post processing (Only used if you are using the python post-processing solution, see notes below)
