@@ -77,9 +77,9 @@ class ModelData():
 		dirPath = self.dataDir + '/' + str(self.startTime.strftime('%Y%m%d%H'))
 		logger = Tools.loggedPrint.instance()
 		
-		enddate = self.startTime + datetime.timedelta(days=int(self.runDays), hours=int(self.runHours))
+		enddate = (self.startTime + datetime.timedelta(hours=int(self.dataForecastHour))) + datetime.timedelta(days=int(self.runDays), hours=int(self.runHours))
 		dates = []
-		current = self.startTime
+		current = (self.startTime + datetime.timedelta(hours=int(self.dataForecastHour)))
 		while current <= enddate:
 			dates.append(current)
 			current += datetime.timedelta(hours=mParms["HourDelta"])	
