@@ -110,8 +110,9 @@ class Application():
 			# RF 10/19: real.exe requires nproc_x/nproc_y to be -1, update the settings
 			settings.add_replacementKey("[nproc_x]", str("-1"))
 			settings.add_replacementKey("[nproc_y]", str("-1"))
-			settings.add_replacementKey("[io_form_input]", str("11"))
-			settings.add_replacementKey("[io_form_boundary]", str("11"))			
+			# RF 2/12: For real.exe, these need to be 2, WRF can use 11
+			settings.add_replacementKey("[io_form_input]", str("2"))
+			settings.add_replacementKey("[io_form_boundary]", str("2"))			
 			tWrite.generateTemplatedFile(settings.fetch("headdir") + "templates/namelist.input.template", "namelist.input")
 		else:
 			logger.write(" 3. run_prerunsteps is turned off, template files have not been created")
