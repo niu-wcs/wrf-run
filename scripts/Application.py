@@ -210,8 +210,8 @@ class Application():
 					+ settings.fetch("num_geogrid_nodes") 
 					+ ":" + scheduleParms.fetch()["header-tasks"] 
 					+ scheduleParms.fetch()["header-sep"] 
-					+ settings.fetch("geogrid_mpi_ranks_per_node")
-				elif(scheduleParms.fetch().getScheduler() != "PBS"):
+					+ settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
+				else:
 					if scheduleParms.fetch()["header-nodes"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_geogrid_nodes") + '\n')
 					if scheduleParms.fetch()["header-tasks"] is not None:
@@ -256,8 +256,8 @@ class Application():
 					+ settings.fetch("num_prerun_nodes") 
 					+ ":" + scheduleParms.fetch()["header-tasks"] 
 					+ scheduleParms.fetch()["header-sep"] 
-					+ settings.fetch("prerun_mpi_ranks_per_node")
-				elif(scheduleParms.fetch().getScheduler() != "PBS"):					
+					+ settings.fetch("prerun_mpi_ranks_per_node") + '\n')
+				else:					
 					if scheduleParms.fetch()["header-nodes"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_prerun_nodes") + '\n')
 					if scheduleParms.fetch()["header-tasks"] is not None:
@@ -331,8 +331,8 @@ class Application():
 					+ settings.fetch("num_wrf_nodes") + ":" 
 					+ scheduleParms.fetch()["header-tasks"] 
 					+ scheduleParms.fetch()["header-sep"] 
-					+ settings.fetch("wrf_mpi_ranks_per_node")
-				elif(scheduleParms.fetch().getScheduler() != "PBS"):					
+					+ settings.fetch("wrf_mpi_ranks_per_node") + '\n')
+				else:					
 					if scheduleParms.fetch()["header-nodes"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_wrf_nodes") + '\n')
 					if scheduleParms.fetch()["header-tasks"] is not None:
