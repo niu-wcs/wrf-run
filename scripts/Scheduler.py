@@ -46,7 +46,7 @@ class Scheduler_Settings:
 				"header-jobname": "-N",
 				"header-account": "-A",
 				"header-nodes": "-l nodes",
-				"header-tasks": "-l ppn",
+				"header-tasks": "ppn",
 				"header-jobtime": "-l walltime",
 				"header-jobqueue": None,
 				"header-sep": "=",
