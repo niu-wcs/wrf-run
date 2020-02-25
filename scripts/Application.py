@@ -201,15 +201,16 @@ class Application():
 				if scheduleParms.fetch()["header-jobname"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobname"] + " WRF_GEOGRID" + '\n')
 				if scheduleParms.fetch()["header-account"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')		
+					
 				if scheduleParms.fetch().getScheduler() == "PBS":
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_geogrid_nodes") + ":" + 
-						scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("geogrid_mpi_ranks_per_node")
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_geogrid_nodes") + ":" + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("geogrid_mpi_ranks_per_node")
 				else:
 					if scheduleParms.fetch()["header-nodes"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_geogrid_nodes") + '\n')
 					if scheduleParms.fetch()["header-tasks"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
+
 				if scheduleParms.fetch()["header-jobtime"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + scheduleParms.fetch()["header-sep"] + scheduleParms.convert_to_timestring(settings.fetch("geogrid_walltime")) + '\n')
 				if scheduleParms.fetch()["header-jobqueue"] is not None:
@@ -242,8 +243,7 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')
 				if scheduleParms.fetch().getScheduler() == "PBS":
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_prerun_nodes") + ":" + 
-						scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("prerun_mpi_ranks_per_node")
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_prerun_nodes") + ":" + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("prerun_mpi_ranks_per_node")
 				else:					
 					if scheduleParms.fetch()["header-nodes"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_prerun_nodes") + '\n')
@@ -310,8 +310,7 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')
 				if scheduleParms.fetch().getScheduler() == "PBS":
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_wrf_nodes") + ":" + 
-						scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("wrf_mpi_ranks_per_node")
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_wrf_nodes") + ":" + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("wrf_mpi_ranks_per_node")
 				else:					
 					if scheduleParms.fetch()["header-nodes"] is not None:
 						target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_wrf_nodes") + '\n')
