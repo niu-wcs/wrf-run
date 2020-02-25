@@ -203,7 +203,7 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')		
 					
-				if scheduleParms.fetch().getScheduler() == "PBS":
+				if(scheduleParms.fetch().getScheduler() == "PBS"):
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " 
 					+ scheduleParms.fetch()["header-nodes"] 
 					+ scheduleParms.fetch()["header-sep"] 
@@ -249,7 +249,7 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')
 
-				if scheduleParms.fetch().getScheduler() == "PBS":
+				if(scheduleParms.fetch().getScheduler() == "PBS"):
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " 
 					+ scheduleParms.fetch()["header-nodes"] 
 					+ scheduleParms.fetch()["header-sep"] 
@@ -324,7 +324,7 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')
 					
-				if scheduleParms.fetch().getScheduler() == "PBS":
+				if(scheduleParms.fetch().getScheduler() == "PBS"):
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " 
 					+ scheduleParms.fetch()["header-nodes"] 
 					+ scheduleParms.fetch()["header-sep"] 
