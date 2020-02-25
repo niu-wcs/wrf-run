@@ -23,6 +23,7 @@ class Scheduler_Settings:
 				"header-tasks": None,
 				"header-jobtime": "-t",
 				"header-jobqueue": "-q",
+				"header-sep": " ",
 				"extra-exports": "export n_nodes=$COBALT_JOBSIZE\n" +
 				                 "export n_mpi_ranks_per_node=[ranks_per_node]\n" +
 								 "export n_mpi_ranks=$(($n_nodes * $n_mpi_ranks_per_node))\n" +
@@ -48,6 +49,7 @@ class Scheduler_Settings:
 				"header-tasks": "-l ppn",
 				"header-jobtime": "-l walltime",
 				"header-jobqueue": None,
+				"header-sep": "=",
 				"extra-exports": None,
 				"cmdline": "",
 				"time-format": "timestring",
@@ -65,6 +67,7 @@ class Scheduler_Settings:
 				"header-tasks": "--ntasks-per-node",
 				"header-jobtime": "--time",
 				"header-jobqueue": None,
+				"header-sep": " ",
 				"extra-exports": None,
 				"cmdline": "",
 				"time-format": "timestring",

@@ -203,11 +203,11 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
 				if scheduleParms.fetch()["header-nodes"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + " " + settings.fetch("num_geogrid_nodes") + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_geogrid_nodes") + '\n')
 				if scheduleParms.fetch()["header-tasks"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + " " + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("geogrid_mpi_ranks_per_node") + '\n')
 				if scheduleParms.fetch()["header-jobtime"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + " " + scheduleParms.convert_to_timestring(settings.fetch("geogrid_walltime")) + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + scheduleParms.fetch()["header-sep"] + scheduleParms.convert_to_timestring(settings.fetch("geogrid_walltime")) + '\n')
 				if scheduleParms.fetch()["header-jobqueue"] is not None:
 					# RF: Eventually I may change this for different schedulers, but for now this is fine.
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " debug-cache-quad")
@@ -238,11 +238,11 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
 				if scheduleParms.fetch()["header-nodes"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + " " + settings.fetch("num_prerun_nodes") + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_prerun_nodes") + '\n')
 				if scheduleParms.fetch()["header-tasks"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + " " + settings.fetch("prerun_mpi_ranks_per_node") + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("prerun_mpi_ranks_per_node") + '\n')
 				if scheduleParms.fetch()["header-jobtime"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + " " + scheduleParms.convert_to_timestring(settings.fetch("prerun_walltime")) + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + scheduleParms.fetch()["header-sep"] + scheduleParms.convert_to_timestring(settings.fetch("prerun_walltime")) + '\n')
 				if scheduleParms.fetch()["header-jobqueue"] is not None:
 					# RF: Eventually I may change this for different schedulers, but for now this is fine.
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " debug-cache-quad")
@@ -302,11 +302,11 @@ class Application():
 				if scheduleParms.fetch()["header-account"] is not None:
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-account"] + " " + settings.fetch("accountname") + '\n')					
 				if scheduleParms.fetch()["header-nodes"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + " " + settings.fetch("num_wrf_nodes") + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-nodes"] + scheduleParms.fetch()["header-sep"] + settings.fetch("num_wrf_nodes") + '\n')
 				if scheduleParms.fetch()["header-tasks"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + " " + settings.fetch("wrf_mpi_ranks_per_node") + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-tasks"] + scheduleParms.fetch()["header-sep"] + settings.fetch("wrf_mpi_ranks_per_node") + '\n')
 				if scheduleParms.fetch()["header-jobtime"] is not None:
-					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + " " + scheduleParms.convert_to_timestring(settings.fetch("wrf_walltime")) + '\n')
+					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobtime"] + scheduleParms.fetch()["header-sep"] + scheduleParms.convert_to_timestring(settings.fetch("wrf_walltime")) + '\n')
 				if scheduleParms.fetch()["header-jobqueue"] is not None:
 					# RF: Eventually I may change this for different schedulers, but for now this is fine.
 					target_file.write(scheduleParms.fetch()["header-tag"] + " " + scheduleParms.fetch()["header-jobqueue"] + " default")
