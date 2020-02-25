@@ -84,6 +84,9 @@ class Scheduler_Settings:
 	def fetch(self):
 		return self.stored_table[self.scheduler]
 		
+	def getScheduler(self):
+		return self.scheduler
+		
 	def convert_to_timestring(self, min):
 		if (self.fetch()["time-format"] == "timestring"):
 			delta = timedelta(minutes = int(min))
