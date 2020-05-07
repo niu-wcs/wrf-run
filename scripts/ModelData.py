@@ -27,6 +27,7 @@ class ModelDataParameters():
 				"HourDelta": 6,
 				"ConstantsFile": "constant_file",
 				"CanDownloadDirectly": True,
+				"MetgridLevels": 30,
 			},
 			"NARR": {
 				"VTable": ["Vtable.NARR"],
@@ -35,6 +36,7 @@ class ModelDataParameters():
 				"HourDelta": 3,
 				"ConstantsFile": "NARR.constants",
 				"CanDownloadDirectly": False,
+				"MetgridLevels": 30,
 			},
 		}	
 	

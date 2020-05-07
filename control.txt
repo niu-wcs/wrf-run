@@ -1,5 +1,5 @@
 # control.txt
-# Parameter file for the wrf-gaea-run script
+# Parameter file for the wrf-run script
 #  Information:
 #   Lines that begin with a '#' are comment lines and are ignored
 #   All other lines will store a variable under the name of the first word, with the value of the second
@@ -53,7 +53,6 @@ truelat1 38.5
 truelat2 38.5
 stand_lon -97.5
 p_top_requested 10000
-num_metgrid_levels 30
 num_metgrid_soil_levels 4
 mp_physics 8
 ra_lw_physics 1

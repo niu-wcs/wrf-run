@@ -24,7 +24,7 @@ class Application():
 	
 		logger.write("Initializing WRF Auto-Run Program")
 		#Step 1: Load program settings
-		logger.write(" 1. Loading program settings, Performing pre-run directory creations and loading ANL modules")
+		logger.write(" 1. Loading program settings, setting up directories")
 		settings = ApplicationSettings.AppSettings()
 		modelParms = ModelData.ModelDataParameters(settings.fetch("modeldata"))
 		scheduleParms = Scheduler.Scheduler_Settings(settings.fetch("jobscheduler"))
@@ -82,20 +82,21 @@ class Application():
 			settings.add_replacementKey("[io_form_metgrid]", 102)			
 		settings.add_replacementKey("[interval_seconds]", mParms["HourDelta"] * 60 * 60)
 		settings.add_replacementKey("[constants_name]", settings.fetch("constantsdir") + '/' + mParms["ConstantsFile"])
+		settings.add_replacementKey("[num_metgrid_levels]", mParms["MetgridLevels"])
 		tWrite = Template.Template_Writer(settings)
 		# RF: Additional namelist settings based on IO selections
 		if(int(settings.fetch("wrf_nio_groups")) * int(settings.fetch("wrf_nio_tasks_per_group")) == 0):
 			# We use parallel netCDF for everything
 			settings.add_replacementKey("[io_form_history]", str("11"))
-			settings.add_replacementKey("[io_form_restart]", str("11"))
-			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
+			settings.add_replacementKey("[io_form_restart]", str("2"))
+			settings.add_replacementKey("[io_form_auxinput1]", str("2"))
 			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
 			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
 			settings.add_replacementKey("[io_form_auxhist23]", str("11"))		
 		else:
 			settings.add_replacementKey("[io_form_history]", str("102"))
-			settings.add_replacementKey("[io_form_restart]", str("11"))
-			settings.add_replacementKey("[io_form_auxinput1]", str("11"))
+			settings.add_replacementKey("[io_form_restart]", str("2"))
+			settings.add_replacementKey("[io_form_auxinput1]", str("2"))
 			settings.add_replacementKey("[io_form_auxhist2]", str("11"))
 			settings.add_replacementKey("[io_form_auxhist5]", str("11"))
 			settings.add_replacementKey("[io_form_auxhist23]", str("11"))			

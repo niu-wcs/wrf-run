@@ -106,7 +106,7 @@ class AppSettings():
 		self.replacementKeys["[truelat2]"] = self.fetch("truelat2")
 		self.replacementKeys["[stand_lon]"] = self.fetch("stand_lon")
 		self.replacementKeys["[p_top_requested]"] = self.fetch("p_top_requested")
-		self.replacementKeys["[num_metgrid_levels]"] = self.fetch("num_metgrid_levels")
+		# self.replacementKeys["[num_metgrid_levels]"] = self.fetch("num_metgrid_levels")         #RF: Now handled by ModelData
 		self.replacementKeys["[num_metgrid_soil_levels]"] = self.fetch("num_metgrid_soil_levels")
 		self.replacementKeys["[mp_physics]"] = self.fetch("mp_physics")
 		self.replacementKeys["[ra_lw_physics]"] = self.fetch("ra_lw_physics")
@@ -119,7 +119,7 @@ class AppSettings():
 		self.replacementKeys["[cu_physics]"] = self.fetch("cu_physics")
 		self.replacementKeys["[cudt]"] = self.fetch("cudt")
 		self.replacementKeys["[num_soil_layers]"] = self.fetch("num_soil_layers")
-		self.replacementKeys["[num_land_cat]"] = self.fetch("num_land_cat")
+		self.replacementKeys["[num_land_cat]"] = self.fetch("num_land_cat") 
 		self.replacementKeys["[sf_urban_physics]"] = self.fetch("sf_urban_physics")
 		self.replacementKeys["[hail_opt]"] = self.fetch("hail_opt")
 		self.replacementKeys["[prec_acc_dt]"] = self.fetch("prec_acc_dt")
