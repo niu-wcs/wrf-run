@@ -71,6 +71,7 @@ Would store the value of 12 in a parameter named myvar for the file. Any line th
 
 These first parameters define program specific settings and define your WRF directories. For help installing the WRF model, please see the included TXT file on installation:
   * debugmode: Setting this variable to 1 will not run any commands, but instead print the commands to the console for debugging / testing purposes. Typically, leave this as 0.
+  * need_copy_exe: Set this to 1 if you do not use $PATH to point to your WRF executables, otherwise set this to 0 and set wrfexecutables and wpsdirectory.
   * jobscheduler: Which job scheduler your system is using, see the below section on **job schedulers** for details on adding more. (Currently available are COBALT, SLURM, and PBS)
   * accountname: Your account/project name on your HPC system.
   * sourcefile: For systems that do not use the .bashrc file, you may define a file path that contains your relevant EXPORT and module calls here
@@ -81,6 +82,7 @@ These first parameters define program specific settings and define your WRF dire
   * wrfexecutables: The path to where the WRF executables are located (/main/ folder inside the WRF folder)
   * wrfrunfiles: The path to the WRF's /run/ directory
   * wpsdirectory: The path to your WPS (WRF Preprocessing System) directory
+  * tabledir: If you have saved the WPS table files (e.g., GEOGRID.TBL) to a different location that is not in wpsdirectory/geogrid, wpsdirectory/metgrid, set this to point to where the tables are.
   * uppexecutables: The path the the unipost executables (Not required if not using Unipost)
   * postdir: The path to the /post/ directory in this package
   * condamodule: Which anaconda module you would like to load for post processing (Only used if you are using the python post-processing solution, see notes below)

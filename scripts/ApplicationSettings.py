@@ -72,8 +72,12 @@ class AppSettings():
 		self.replacementKeys["[end_day]"] = str(self.endTime.day)
 		self.replacementKeys["[end_hour]"] = str(self.endTime.hour)
 		self.replacementKeys["[geog_path]"] = self.fetch("geogdir")
-		self.replacementKeys["[geogrid_table_path]"] = self.fetch("wpsdirectory") + "/geogrid"
-		self.replacementKeys["[metgrid_table_path]"] = self.fetch("wpsdirectory") + "/metgrid"
+		try:
+			self.replacementKeys["[geogrid_table_path]"] = self.settings["tabledir"]
+			self.replacementKeys["[metgrid_table_path]"] = self.settings["tabledir"]
+		except KeyError:
+			self.replacementKeys["[geogrid_table_path]"] = self.fetch("wpsdirectory") + "/geogrid"
+			self.replacementKeys["[metgrid_table_path]"] = self.fetch("wpsdirectory") + "/metgrid"		
 		self.replacementKeys["[run_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8]
 		self.replacementKeys["[out_geogrid_path]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/output"
 		self.replacementKeys["[run_output_dir]"] = self.fetch("wrfdir") + '/' + self.fetch("starttime")[0:8] + "/output"

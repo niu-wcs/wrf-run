@@ -48,13 +48,14 @@ class JobSteps:
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/real.exe")
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/ndown.exe")
 		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/tc.exe")
-		# Now Copy the "Real" WRF .exe files
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "*.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		# Grab our WPS executables
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
+		# Copy the .exe files if needed
+		if(self.aSet.fetch("need_copy_exe") == '1'):
+			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "*.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
+			# Grab our WPS executables
+			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
+			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
+			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
+			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
 		# Finally, move the generated files to the run directory		
 		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")	
 	

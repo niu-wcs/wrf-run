@@ -73,6 +73,8 @@ class Application():
 		logger.write(" 2. Done")
 		#Step 3: Generate run files
 		logger.write(" 3. Generating job files and creating templated files")
+		if(settings.fetch("use_io_vars") == '1'):
+			Tools.popen(settings, "cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")			
 		# Check if we are using LFS / quilting
 		if(int(settings.fetch("wrf_nio_groups")) * int(settings.fetch("wrf_nio_tasks_per_group")) == 0):
 			settings.add_replacementKey("[io_form_geogrid]", 2)
@@ -133,9 +135,7 @@ class Application():
 		else:
 			logger.write("  4.a. Geogrid flag is not set, skipping step")
 		logger.write("  4.a. Done")
-		logger.write("  4.b. Running pre-processing executables")
-		if(settings.fetch("use_io_vars") == '1'):
-			Tools.popen(settings, "cp " + settings.fetch("headdir") + "io_vars/IO_VARS.txt " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/IO_VARS.txt")		
+		logger.write("  4.b. Running pre-processing executables")	
 		Tools.Process.instance().HoldUntilOpen(breakTime = 86400)
 		if(settings.fetch("run_preprocessing_jobs") == '1'):
 			if(jobs.run_preprocessing() == False):
@@ -239,7 +239,10 @@ class Application():
 				
 				target_file.write("\n")
 				settings.add_replacementKey("[total_processors]", int(settings.fetch("geogrid_mpi_ranks_per_node")) * int(settings.fetch("num_geogrid_nodes")))
-				target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./geogrid.exe" + '\n')
+				if(settings.fetch("need_copy_exe") == '1'):
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./geogrid.exe" + '\n')
+				else:
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " geogrid.exe" + '\n')
 			logger.write("  -- Done")
 			# Write prerun.job
 			logger.write("  -- writting prerun.job")
@@ -295,7 +298,10 @@ class Application():
 					if settings.fetch("jobscheduler") == "COBALT":
 						# For ungrib we reduce the node count to 1 each, this needs to be reset in the env vars here.
 						target_file.write("export n_mpi_ranks=1\nexport n_mpi_ranks_per_node=1\n")
-					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./ungrib.exe &" + '\n')
+					if(settings.fetch("need_copy_exe") == '1'):
+						target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./ungrib.exe &" + '\n')
+					else:
+						target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ungrib.exe &" + '\n')						
 					target_file.write("PID_Ungrib=$!" + '\n')
 					target_file.write("wait $PID_Ungrib" + '\n')
 					i += 1
@@ -306,13 +312,20 @@ class Application():
 				if settings.fetch("jobscheduler") == "COBALT":
 					# If we set the MPI stuff on COBALT, reset it back to what we expect here.
 					target_file.write("export n_mpi_ranks=$COBALT_JOBSIZE\n")
-					target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("prerun_mpi_ranks_per_node") + "\n")				
-				target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./metgrid.exe &" + '\n')
+					target_file.write("export n_mpi_ranks_per_node=" + settings.fetch("prerun_mpi_ranks_per_node") + "\n")	
+
+				if(settings.fetch("need_copy_exe") == '1'):
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./metgrid.exe &" + '\n')
+				else:
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " metgrid.exe &" + '\n')
 				target_file.write("PID_Metgrid=$!" + '\n')
 				target_file.write("wait $PID_Metgrid" + "\n\n")	
 				# Finally, run the real.exe process
 				target_file.write("cd " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + '/' + "output\n\n")
-				target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./real.exe &" + '\n')
+				if(settings.fetch("need_copy_exe") == '1'):
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./real.exe &" + '\n')
+				else:
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " real.exe &" + '\n')
 				target_file.write("PID_Real=$!" + '\n')
 				target_file.write("wait $PID_Real" + "\n\n")
 			logger.write("  -- Done")	
@@ -365,7 +378,10 @@ class Application():
 					target_file.write("wrfbdy*:striping_factor=" + settings.fetch("lfs_stripe_count") + ",wrfout*:striping_factor=" + settings.fetch("lfs_stripe_count") + "\"\n\n")
 				
 				settings.add_replacementKey("[total_processors]", int(settings.fetch("wrf_mpi_ranks_per_node")) * int(settings.fetch("num_wrf_nodes")))
-				target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./wrf.exe" + '\n')	
+				if(settings.fetch("need_copy_exe") == '1'):
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " ./wrf.exe" + '\n')
+				else:
+					target_file.write(scheduleParms.fetch()["runcmd"] + " " + settings.replace(scheduleParms.fetch()["subargs"]) + " wrf.exe" + '\n')
 			logger.write("  -- Done")
 		logger.write("  -> All file write operations complete")	
 		return True
