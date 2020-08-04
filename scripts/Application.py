@@ -227,7 +227,7 @@ class Application():
 				target_file.write("set i2 = 1\n")
 				target_file.write("set i3 = 1\n\n")
 				
-				target_file.write("if ( ( ${#argv} == 1) || ( ( ${#argv} == 2) && ( ${2} == "." ) ) ) then\n\n")
+				target_file.write("if ( ( ${#argv} == 1) || ( ( ${#argv} == 2) && ( ${2} == \".\" ) ) ) then\n\n")
 				target_file.write("   rm -f GRIBFILE.??? >& /dev/null\n\n")
 				target_file.write("   foreach f ( ${1}* )\n\n")
 				target_file.write("      ln -sf ${f} GRIBFILE.$alpha[$i3]$alpha[$i2]$alpha[$i1]\n")
