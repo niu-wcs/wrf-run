@@ -122,6 +122,9 @@ class Application():
 		if(self.write_job_files(settings, mParms, scheduleParms) == False):
 			logger.write(" 3. Failed to generate job files... abort")
 			sys.exit("")
+		if(self.write_helper_scripts(settings, mParms) == False):
+			logger.write(" 3. Failed to generate helper scripts... abort")
+			sys.exit("")
 		logger.write(" 3. Copying WPS/WRF run files to output directory")
 		# Copy important files to the directory
 		Tools.popen(settings, "cp " + settings.fetch("headdir") + "run_files/* " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output")
@@ -137,7 +140,7 @@ class Application():
 		if(settings.fetch("need_copy_exe") == '1'):
 			Tools.popen(settings, "cp " + settings.fetch("wrfexecutables") + "*.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output")
 			# Grab our WPS executables
-			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "link_grib.csh " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
+			# Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "link_grib.csh " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8]) # Now written by this script
 			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "geogrid.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
 			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "ungrib.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
 			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "metgrid.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
@@ -211,6 +214,67 @@ class Application():
 		logger.write("All Steps Completed.")
 		logger.write("Program execution complete.")
 		logger.close()
+		
+	def write_helper_scripts(self, settings):
+		logger = Tools.loggedPrint.instance()
+		logger.write("  -> Writing helper scripts")
+		with Tools.cd(settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8]):
+			logger.write("  -- writing link_grib.csh")
+			with open("link_grib.csh", 'w') as target_file:
+				target_file.write("#!/bin/csh -f\n\n")
+				target_file.write("set alpha = ( A B C D E F G H I J K L M N O P Q R S T U V W X Y Z )\n")
+				target_file.write("set i1 = 1\n")
+				target_file.write("set i2 = 1\n")
+				target_file.write("set i3 = 1\n\n")
+				
+				target_file.write("if ( ( ${#argv} == 1) || ( ( ${#argv} == 2) && ( ${2} == "." ) ) ) then\n\n")
+				target_file.write("   rm -f GRIBFILE.??? >& /dev/null\n\n")
+				target_file.write("   foreach f ( ${1}* )\n\n")
+				target_file.write("      ln -sf ${f} GRIBFILE.$alpha[$i3]$alpha[$i2]$alpha[$i1]\n")
+				target_file.write("      @ i1 ++\n\n")
+				target_file.write("      if ( $i1 > 26 ) then\n")
+				target_file.write("         set i1 = 1\n")
+				target_file.write("         @ i2 ++\n")
+				target_file.write("         if ( $i2 > 26 ) then\n")
+				target_file.write("            set i2 = 1\n")
+				target_file.write("            @ i3 ++\n")
+				target_file.write("            if ( $i3 > 26 ) then\n")
+				target_file.write("               echo \"RAN OUT OF GRIB FILE SUFFIXES!\"\n")
+				target_file.write("            endif\n")
+				target_file.write("         endif\n")
+				target_file.write("      endif\n\n")
+				target_file.write("   end\n")
+				target_file.write("else if ( ${#argv} > 1 ) then\n\n")
+				target_file.write("   rm -f GRIBFILE.??? >& /dev/null\n\n")
+				target_file.write("   foreach f ( $* )\n\n")
+				target_file.write("      if ( $f != \".\" ) then\n")
+				target_file.write("         ln -sf ${f} GRIBFILE.$alpha[$i3]$alpha[$i2]$alpha[$i1]\n")
+				target_file.write("         @ i1 ++\n\n")
+				target_file.write("         if ( $i1 > 26 ) then\n")
+				target_file.write("            set i1 = 1\n")
+				target_file.write("            @ i2 ++\n")
+				target_file.write("            if ( $i2 > 26 ) then\n")
+				target_file.write("               set i2 = 1\n")
+				target_file.write("               @ i3 ++\n")
+				target_file.write("               if ( $i3 > 26 ) then\n")
+				target_file.write("                  echo \"RAN OUT OF GRIB FILE SUFFIXES!\"\n")
+				target_file.write("               endif\n")
+				target_file.write("            endif\n")
+				target_file.write("         endif\n")
+				target_file.write("      endif\n\n")
+				target_file.write("   end\n")
+				target_file.write("else if ( ${#argv} == 0 ) then\n")
+				target_file.write("   echo \" \"\n")
+				target_file.write("   echo \" \"\n")
+				target_file.write("   echo \"   Please provide some GRIB data to link\"\n")
+				target_file.write("   echo \"   usage: $0 path_to_grib_data/grib_data_root\"\n")
+				target_file.write("   echo \" \"\n")
+				target_file.write("   echo \" \"\n")
+				target_file.write("endifn")
+				
+			Tools.popen(settings, "chmod +x link_grib.csh")
+		logger.write("  -> Helper scripts successfully generated")
+		return True
 		
 	def write_job_files(self, settings, mParms, scheduleParms):
 		logger = Tools.loggedPrint.instance()

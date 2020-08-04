@@ -123,7 +123,7 @@ class AppSettings():
 		self.replacementKeys["[cu_physics]"] = self.fetch("cu_physics")
 		self.replacementKeys["[cudt]"] = self.fetch("cudt")
 		self.replacementKeys["[num_soil_layers]"] = self.fetch("num_soil_layers")
-		self.replacementKeys["[num_land_cat]"] = self.fetch("num_land_cat") 
+		self.replacementKeys["[num_land_cat]"] = self.fetch("num_land_cat")   #RF: Todo: Autodetect this based on geog_data_res
 		self.replacementKeys["[sf_urban_physics]"] = self.fetch("sf_urban_physics")
 		self.replacementKeys["[hail_opt]"] = self.fetch("hail_opt")
 		self.replacementKeys["[prec_acc_dt]"] = self.fetch("prec_acc_dt")
