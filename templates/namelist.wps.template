@@ -33,7 +33,7 @@ out_format = 'WPS',
 prefix = '[ungrib_prefix]',
 /
 &metgrid
-fg_name = [fg_name],
+fg_name = '[fg_name]',
 constants_name = '[constants_name]',
 opt_metgrid_tbl_path = '[metgrid_table_path]/',
 opt_output_from_metgrid_path = '[out_geogrid_path]/',
