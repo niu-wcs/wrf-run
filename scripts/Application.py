@@ -122,6 +122,27 @@ class Application():
 		if(self.write_job_files(settings, mParms, scheduleParms) == False):
 			logger.write(" 3. Failed to generate job files... abort")
 			sys.exit("")
+		logger.write(" 3. Copying WPS/WRF run files to output directory")
+		# Copy important files to the directory
+		Tools.popen(settings, "cp " + settings.fetch("headdir") + "run_files/* " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output")
+		# Copy required WRF files
+		Tools.popen(settings, "cp " + settings.fetch("wrfrunfiles") + "* " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output")
+		# Note, we need to remove the .exe files and sample namelist and then recopy from the head dir.
+		Tools.popen(settings, "rm " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/namelist.input")
+		Tools.popen(settings, "rm " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/wrf.exe")
+		Tools.popen(settings, "rm " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/real.exe")
+		Tools.popen(settings, "rm " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/ndown.exe")
+		Tools.popen(settings, "rm " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output/tc.exe")
+		# Copy the .exe files if needed
+		if(settings.fetch("need_copy_exe") == '1'):
+			Tools.popen(settings, "cp " + settings.fetch("wrfexecutables") + "*.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output")
+			# Grab our WPS executables
+			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "link_grib.csh " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
+			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "geogrid.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
+			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "ungrib.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
+			Tools.popen(settings, "cp " + settings.fetch("wpsdirectory") + "metgrid.exe " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8])
+		# Finally, move the generated files to the run directory		
+		Tools.popen(settings, "mv namelist.input " + settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8] + "/output")		
 		logger.write(" 3. Done")
 		#Step 4: Run the WRF steps
 		logger.write(" 4. Run WRF Steps")

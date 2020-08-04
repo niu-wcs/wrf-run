@@ -37,27 +37,7 @@ class JobSteps:
 		self.scheduleParms = scheduleParms
 		self.dataDir = settings.fetch("datadir") + '/' + settings.fetch("modeldata")
 		self.wrfDir = settings.fetch("wrfdir")
-		self.startTime = settings.fetch("starttime")
-		# Copy important files to the directory
-		Tools.popen(self.aSet, "cp " + settings.fetch("headdir") + "run_files/* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		# Copy required WRF files
-		Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfrunfiles") + "* " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-		# Note, we need to remove the .exe files and sample namelist and then recopy from the head dir.
-		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/namelist.input")
-		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/wrf.exe")
-		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/real.exe")
-		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/ndown.exe")
-		Tools.popen(self.aSet, "rm " + self.wrfDir + '/' + self.startTime[0:8] + "/output/tc.exe")
-		# Copy the .exe files if needed
-		if(self.aSet.fetch("need_copy_exe") == '1'):
-			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wrfexecutables") + "*.exe " + self.wrfDir + '/' + self.startTime[0:8] + "/output")
-			# Grab our WPS executables
-			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "link_grib.csh " + self.wrfDir + '/' + self.startTime[0:8])
-			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "geogrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
-			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "ungrib.exe " + self.wrfDir + '/' + self.startTime[0:8])
-			Tools.popen(self.aSet, "cp " + self.aSet.fetch("wpsdirectory") + "metgrid.exe " + self.wrfDir + '/' + self.startTime[0:8])
-		# Finally, move the generated files to the run directory		
-		Tools.popen(self.aSet, "mv namelist.input " + self.wrfDir + '/' + self.startTime[0:8] + "/output")	
+		self.startTime = settings.fetch("starttime")	
 	
 	def run_geogrid(self):
 		Tools.Process.instance().Lock()
