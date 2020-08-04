@@ -270,7 +270,7 @@ class Application():
 				target_file.write("   echo \"   usage: $0 path_to_grib_data/grib_data_root\"\n")
 				target_file.write("   echo \" \"\n")
 				target_file.write("   echo \" \"\n")
-				target_file.write("endifn")
+				target_file.write("endif\n")
 				
 			Tools.popen(settings, "chmod +x link_grib.csh")
 		logger.write("  -> Helper scripts successfully generated")
