@@ -122,7 +122,7 @@ class Application():
 		if(self.write_job_files(settings, mParms, scheduleParms) == False):
 			logger.write(" 3. Failed to generate job files... abort")
 			sys.exit("")
-		if(self.write_helper_scripts(settings, mParms) == False):
+		if(self.write_helper_scripts(settings, mParms, scheduleParms) == False):
 			logger.write(" 3. Failed to generate helper scripts... abort")
 			sys.exit("")
 		logger.write(" 3. Copying WPS/WRF run files to output directory")
@@ -215,7 +215,7 @@ class Application():
 		logger.write("Program execution complete.")
 		logger.close()
 		
-	def write_helper_scripts(self, settings):
+	def write_helper_scripts(self, settings, mParms, scheduleParms):
 		logger = Tools.loggedPrint.instance()
 		logger.write("  -> Writing helper scripts")
 		with Tools.cd(settings.fetch("wrfdir") + '/' + settings.fetch("starttime")[0:8]):
